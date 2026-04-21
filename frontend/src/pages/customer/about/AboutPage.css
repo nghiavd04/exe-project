@@ -1,0 +1,469 @@
+/* ═══════════════════════════════════════
+   DOPALESS – AboutPage.css
+   ═══════════════════════════════════════ */
+
+/* ── HERO ── */
+.about-hero {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 160px 20px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* radial glow matching HomePage */
+.about-hero::before {
+    content: "";
+    position: absolute;
+    top: -10%;
+    left: -5%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(13, 122, 110, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.about-hero::after {
+    content: "";
+    position: absolute;
+    bottom: -10%;
+    right: 10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.about-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+    letter-spacing: 0.5px;
+}
+
+.about-hero h1 span {
+    color: var(--teal);
+}
+
+.about-hero p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+/* ── Hero Badge ── */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--teal-pale);
+    border: 1px solid rgba(13, 122, 110, 0.2);
+    color: var(--teal);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.3px;
+}
+
+.hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.7;
+    }
+}
+
+/* ── Mission & Vision ── */
+.mission-vision-section {
+    padding: 100px 3%;
+    background: var(--teal-dark);
+    position: relative;
+    overflow: hidden;
+}
+
+.mission-vision-section::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+}
+
+.mv-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.mv-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 3.5rem 2.5rem;
+    backdrop-filter: blur(8px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
+}
+
+.mv-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.mv-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: var(--teal-light);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: rotate(-3deg);
+    transition: transform 0.3s;
+}
+
+.mv-card:hover .mv-icon-wrapper {
+    transform: rotate(5deg) scale(1.1);
+}
+
+.mv-icon-wrapper.accent {
+    background: var(--accent);
+}
+
+.mv-card h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.mv-card p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
+}
+
+.mv-card p strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ── Steps Grid (Why Choose Us) ── */
+.why-us-section {
+    padding: 110px 3%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.8rem;
+}
+
+.step-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 20px rgba(13, 122, 110, 0.07);
+    border: 1px solid rgba(13, 122, 110, 0.08);
+}
+
+.step-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.step-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+
+.step-card:hover::before {
+    opacity: 1;
+}
+
+.step-num {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Outfit", sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 18px rgba(13, 122, 110, 0.3);
+    transition: transform 0.3s;
+}
+
+.step-card:hover .step-num {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.step-card h3 {
+    font-family: "Outfit", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+}
+
+.step-card p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    font-weight: 300;
+}
+
+/* ── Team Section ── */
+.team-section {
+    padding: 100px 3%;
+    background: linear-gradient(135deg, #f0faf9 0%, #fef7f0 100%);
+    text-align: center;
+}
+
+.team-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.team-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(13, 122, 110, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.member-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding: 5px;
+    transition: transform 0.4s;
+    background: linear-gradient(135deg, var(--teal), var(--accent));
+}
+
+.member-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--white);
+    border: 3px solid #fff;
+}
+
+.team-member h4 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+}
+
+.team-member p {
+    font-size: 0.85rem;
+    color: var(--teal);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── CTA SECTION ── */
+.about-cta-banner {
+    background: linear-gradient(135deg, #fff7ed, #fff);
+    border-top: 3px solid var(--accent);
+    padding: 4rem 3%;
+    text-align: center;
+}
+
+.about-cta-banner .section-label {
+    margin-bottom: 0.8rem;
+}
+
+.about-cta-banner .section-title {
+    margin-bottom: 1rem;
+}
+
+.about-cta-banner .section-sub {
+    margin: 0 auto 2rem;
+}
+
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.about-banner-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 1rem 2.2rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform 0.25s, box-shadow 0.25s;
+    box-shadow: 0 6px 24px rgba(249, 115, 22, 0.35);
+}
+
+.about-banner-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(249, 115, 22, 0.45);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .mv-container {
+        grid-template-columns: 1fr;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .about-hero {
+        padding: 100px 5% 40px;
+        min-height: auto;
+    }
+
+    .about-hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .about-hero p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .mission-vision-section {
+        padding: 60px 5%;
+    }
+
+    .mv-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .mv-card h2 {
+        font-size: 1.3rem;
+    }
+
+    .why-us-section {
+        padding: 60px 5%;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .step-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .team-section {
+        padding: 60px 5%;
+    }
+
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .team-member {
+        padding: 2rem 1rem;
+    }
+
+    .about-cta-banner {
+        padding: 3rem 5%;
+    }
+
+    .about-banner-cta {
+        width: 100%;
+        justify-content: center;
+    }
+}

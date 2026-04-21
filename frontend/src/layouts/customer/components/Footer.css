@@ -1,0 +1,317 @@
+/* ── FOOTER ── */
+footer {
+    background: var(--teal-dark);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 70px 3% 30px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.footer-logo-wrapper:hover {
+    transform: translateY(-2px);
+}
+
+.footer-logo-img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.footer-brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -1px;
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+}
+
+.footer-brand-name span {
+    color: var(--accent);
+    /* Different color from logo to avoid "trùng màu" */
+    font-size: 1.8rem;
+}
+
+.footer-brand p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 300;
+    margin-bottom: 0.9rem;
+}
+
+.footer-disclaimer {
+    font-size: 0.8rem !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    line-height: 1.6 !important;
+    margin-bottom: 1rem !important;
+}
+
+.footer-social {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 1.4rem;
+}
+
+.social-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, color 0.2s;
+}
+
+.social-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-3px);
+}
+
+/* ── Footer Columns ── */
+.footer-col h4,
+.footer-newsletter h4 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 1.2rem;
+}
+
+.footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-col ul a {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    font-weight: 300;
+    transition: color 0.2s, padding-left 0.2s;
+    display: block;
+}
+
+.footer-col ul a:hover {
+    color: #fff;
+    padding-left: 4px;
+}
+
+/* ── Newsletter ── */
+.footer-newsletter h4 {
+    margin-bottom: 0.5rem;
+}
+
+.footer-newsletter p {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.newsletter-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.newsletter-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.newsletter-input:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.newsletter-btn:hover {
+    background: #ea6a0a;
+    transform: translateY(-1px);
+}
+
+.newsletter-note {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 0.7rem;
+}
+
+/* ── Footer Bottom ── */
+.footer-bottom {
+    max-width: 1400px;
+    margin: 0 auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.35);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-bottom-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-bottom a {
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: none;
+}
+
+.footer-bottom a:hover {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    footer {
+        padding: 50px 5% 30px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        text-align: center;
+    }
+
+    .footer-logo-wrapper {
+        justify-content: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .footer-brand p {
+        font-size: 0.9rem;
+        max-width: 300px;
+        margin: 0 auto 1.2rem;
+    }
+
+    .footer-social {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .footer-col h4,
+    .footer-newsletter h4 {
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    /* Add a subtle underline for titles on mobile */
+    .footer-col h4::after,
+    .quiz-header h3::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 25%;
+        right: 25%;
+        height: 2px;
+        background: var(--accent);
+        opacity: 0.5;
+    }
+
+    .footer-col ul {
+        gap: 0.8rem;
+    }
+
+    .footer-col ul a {
+        font-size: 0.95rem; /* Larger touch targets */
+        padding: 4px 0;
+    }
+
+    .footer-newsletter {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 2rem 1rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .newsletter-btn {
+        width: 100%;
+        padding: 0.8rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 2rem;
+        gap: 1.2rem;
+    }
+
+    .footer-bottom-links {
+        justify-content: center;
+        width: 100%;
+        font-size: 0.75rem;
+        gap: 1rem;
+    }
+}

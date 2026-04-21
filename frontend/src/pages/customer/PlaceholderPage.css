@@ -1,0 +1,55 @@
+.placeholder-page {
+    min-height: calc(100vh - 68px);
+    margin-top: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 5%;
+    background: var(--bg);
+}
+
+.placeholder-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.placeholder-emoji {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    line-height: 1;
+}
+
+.placeholder-content h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.placeholder-content p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.placeholder-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--teal);
+    color: #fff;
+    padding: 0.8rem 1.8rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.placeholder-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(13, 122, 110, 0.35);
+}
