@@ -35,6 +35,12 @@ public class Quiz {
     @Column(name = "overall_assessment", columnDefinition = "TEXT")
     private String overallAssessment;
 
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
+    @Column(name = "image_public_id", length = 255)
+    private String imagePublicId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

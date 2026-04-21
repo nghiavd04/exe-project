@@ -1,11 +1,11 @@
 package com.product.exe.backend.entity;
 
+import com.product.exe.backend.enums.QuizAttemptStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "quiz_attempts")
@@ -37,6 +37,11 @@ public class QuizAttempt {
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private QuizAttemptStatus status = QuizAttemptStatus.IN_PROGRESS;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

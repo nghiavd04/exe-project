@@ -26,6 +26,9 @@ public class Customer {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(name = "avatar_public_id", length = 255)
+    private String avatarPublicId;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

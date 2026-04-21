@@ -122,7 +122,9 @@ export default function LoginPage() {
             disabled={loading}
           >
             {loading ? (
-              <span className="loading-spinner" />
+              <span className="loading-dots">
+                <span></span><span></span><span></span>
+              </span>
             ) : (
               'Đăng nhập'
             )}

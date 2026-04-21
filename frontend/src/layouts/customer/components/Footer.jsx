@@ -3,7 +3,7 @@ import './Footer.css';
 
 const resourceLinks = [
     { label: 'Nghiên cứu khoa học', to: '#' },
-    { label: 'Blog & Bài viết', to: '#' },
+    { label: 'Blog & Bài viết', to: '/articles' },
     { label: 'Hướng dẫn kỹ thuật số', to: '#' },
     { label: 'Podcast Dopaless', to: '#' },
     { label: '7-Day Reset Guide PDF', to: '#' },
@@ -37,7 +37,7 @@ export default function Footer() {
                 {/* Brand column */}
                 <div className="footer-brand">
                     <Link to="/" className="footer-logo-wrapper" style={{ textDecoration: 'none' }}>
-                        <span className="footer-brand-name" style={{ fontSize: '2rem', fontFamily: '"Outfit", sans-serif', fontWeight: '800', color: 'var(--teal-white)' }}>DOPA<span style={{ color: 'var(--accent)' }}>MINE</span></span>
+                        <span className="footer-brand-name" style={{ fontSize: '2rem', fontFamily: '"Outfit", sans-serif', fontWeight: '800', color: 'var(--white)' }}>DOPA<span style={{ color: 'var(--accent)' }}>MINE</span></span>
                     </Link>
                     <p>
                         Sứ mệnh của chúng tôi: giúp người trẻ Việt Nam hiểu rõ tác động

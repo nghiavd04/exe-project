@@ -10,11 +10,17 @@ import DashboardPage from '../pages/admin/dashboard/DashboardPage';
 import CustomerLayout from '../layouts/customer/CustomerLayout';
 import HomePage from '../pages/customer/home/HomePage';
 import AboutPage from '../pages/customer/about/AboutPage';
-import TestPage from '../pages/customer/testpage/TestPage';
-import NewsPage from '../pages/customer/news/NewsPage';
-import NewsDetailPage from '../pages/customer/news/NewsDetailPage';
 import ContactPage from '../pages/customer/contact/ContactPage';
 import PlaceholderPage from '../pages/customer/PlaceholderPage';
+import ArticleListPage from '../pages/customer/articles/ArticleListPage';
+import ArticleDetailPage from '../pages/customer/articles/ArticleDetailPage';
+import QuizListPage from '../pages/customer/quizzes/QuizListPage';
+import QuizRunnerPage from '../pages/customer/quizzes/QuizRunnerPage';
+
+import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
+import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
+import CreateArticlePage from '../pages/admin/articles/CreateArticlePage';
+import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
 
 export const router = createBrowserRouter([
   {
@@ -35,9 +41,10 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <HomePage /> },
       { path: 'gioi-thieu', element: <AboutPage /> },
-      { path: 'bai-test', element: <TestPage /> },
-      { path: 'tin-tuc', element: <NewsPage /> },
-      { path: 'tin-tuc/:id', element: <NewsDetailPage /> },
+      { path: 'articles', element: <ArticleListPage /> },
+      { path: 'articles/:slug', element: <ArticleDetailPage /> },
+      { path: 'quizzes', element: <QuizListPage /> },
+      { path: 'quizzes/:id/start', element: <QuizRunnerPage /> },
       { path: 'lien-he', element: <ContactPage /> },
       { 
         path: '*', 
@@ -57,7 +64,13 @@ export const router = createBrowserRouter([
         path: '',
         element: <AdminLayout />,
         children: [
-          { path: '', element: <DashboardPage /> }
+          { path: '', element: <DashboardPage /> },
+          { path: 'quizzes', element: <AdminQuizListPage /> },
+          { path: 'quizzes/create', element: <CreateQuizPage /> },
+          { path: 'articles', element: <AdminArticleListPage /> },
+          { path: 'articles/create', element: <CreateArticlePage /> },
+          { path: 'users', element: <PlaceholderPage title="Quản lý người dùng" emoji="👥" description="Tính năng đang được phát triển." /> },
+          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." /> },
         ]
       }
     ]

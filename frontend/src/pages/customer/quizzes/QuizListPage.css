@@ -1,0 +1,109 @@
+.quiz-list-page {
+    width: 100%;
+    min-height: 100vh;
+}
+
+.quiz-hero {
+    padding: 8rem 1.5rem 4rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--white), var(--teal-pale));
+}
+
+.quiz-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.quiz-hero-content h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+}
+
+.quiz-hero-content h1 span {
+    color: var(--teal);
+}
+
+.quiz-grid-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+}
+
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.quiz-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(13, 122, 110, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--teal);
+}
+
+.quiz-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.quiz-icon {
+    font-size: 2.5rem;
+}
+
+.quiz-card-body {
+    flex-grow: 1;
+}
+
+.quiz-card-body h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    color: var(--text);
+}
+
+.quiz-card-body p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.btn-start {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: var(--teal);
+    color: var(--white);
+    padding: 0.8rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-start:hover {
+    background: var(--teal-dark);
+    box-shadow: 0 4px 12px rgba(13, 122, 110, 0.3);
+}
+
+.no-quizzes {
+    text-align: center;
+    padding: 5rem;
+    color: var(--muted);
+}
