@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../apis/authApi';
+import toast from 'react-hot-toast';
 import './auth.css';
 
 export default function RegisterPage() {
@@ -36,7 +37,9 @@ export default function RegisterPage() {
       await authApi.register(form.email, form.password, form.fullName);
       navigate('/login?registered=true');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const errorMsg = err.response?.data?.message || 'Registration failed. Please try again.';
+      setServerError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

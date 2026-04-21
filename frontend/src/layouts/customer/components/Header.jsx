@@ -5,8 +5,8 @@ import './Header.css';
 const navLinks = [
     { to: '/', label: 'Trang Chủ' },
     { to: '/gioi-thieu', label: 'Giới Thiệu' },
-    { to: '/bai-test', label: 'Bài Test' },
-    { to: '/tin-tuc', label: 'Tin Tức' },
+    { to: '/quizzes', label: 'Bài Test' },
+    { to: '/articles', label: 'Tin Tức' },
     { to: '/lien-he', label: 'Liên Hệ' },
 ];
 
@@ -49,7 +49,7 @@ export default function Header() {
     return (
         <nav id="navbar" className={isScrolled ? 'scrolled' : ''}>
             <Link to="/" className="nav-logo">
-                <span className="logo-text" style={{ fontSize: '1.8rem', fontWeight: '800', fontFamily: '"Outfit", sans-serif', color: 'var(--teal-dark)', letterSpacing: '-0.5px' }}>DOPA<span style={{ color: 'var(--accent)' }}>MINE</span></span>
+                <span className="logo-text" style={{ fontSize: '1.8rem', fontWeight: '800', fontFamily: '"Outfit", sans-serif', color: 'var(--teal-dark)', letterSpacing: '-0.5px' }}>DOPA<span style={{ color: 'var(--accent)' }}>LESS</span></span>
             </Link>
 
             <ul className={`nav-links ${menuOpen ? 'nav-links--open' : ''}`}>

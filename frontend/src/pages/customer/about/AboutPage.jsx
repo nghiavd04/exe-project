@@ -155,7 +155,7 @@ export default function AboutPage() {
                 <h2 className="section-title">Sẵn sàng để làm chủ sự tập trung?</h2>
                 <p className="section-sub">Bắt đầu hành trình của bạn ngay hôm nay với bài kiểm tra mức độ phụ thuộc Dopamine hoàn toàn miễn phí.</p>
                 <div className="cta-buttons">
-                    <Link to="/bai-test" className="about-banner-cta">Làm bài test ngay — miễn phí →</Link>
+                    <Link to="/quizzes" className="about-banner-cta">Làm bài test ngay — miễn phí →</Link>
                 </div>
             </section>
         </main>

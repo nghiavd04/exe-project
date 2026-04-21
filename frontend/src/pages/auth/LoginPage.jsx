@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../apis/authApi';
+import toast from 'react-hot-toast';
 import './auth.css';
 
 export default function LoginPage() {
@@ -9,6 +10,13 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered')) {
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
+    }
+  }, []);
 
   const validate = () => {
     const errs = {};
@@ -40,8 +48,11 @@ export default function LoginPage() {
       } else {
         navigate('/');
       }
+      toast.success('Đăng nhập thành công!');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Login failed. Please try again.');
+      const errorMsg = err.response?.data?.message || 'Login failed. Please try again.';
+      setServerError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -122,7 +133,9 @@ export default function LoginPage() {
             disabled={loading}
           >
             {loading ? (
-              <span className="loading-spinner" />
+              <span className="loading-dots">
+                <span></span><span></span><span></span>
+              </span>
             ) : (
               'Đăng nhập'
             )}

@@ -2,5 +2,5 @@ package com.product.exe.backend.enums;
 
 public enum QuestionType {
     SINGLE_CHOICE,
-    NUMERIC_INPUT
+    MULTIPLE_CHOICE
 }

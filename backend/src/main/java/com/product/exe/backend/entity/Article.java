@@ -24,7 +24,7 @@ public class Article {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @JoinColumn(name = "admin_id", nullable = true)
     private Admin admin;
 
     @Enumerated(EnumType.STRING)
@@ -43,9 +43,12 @@ public class Article {
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl;
 
+    @Column(name = "thumbnail_public_id", length = 255)
+    private String thumbnailPublicId;
+
     @Column(name = "is_premium")
     @Builder.Default
-    private Boolean isPremium = false;
+    private Boolean premium = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -66,4 +69,8 @@ public class Article {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    @Column(name = "view_count")
+    @Builder.Default
+    private Long viewCount = 0L;
 }

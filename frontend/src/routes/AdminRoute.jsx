@@ -11,7 +11,6 @@ export default function AdminRoute() {
   try {
     const user = JSON.parse(userStr);
     if (user.role !== 'ADMIN') {
-      // Not an admin, send them to customer home
       return <Navigate to="/" replace />;
     }
   } catch (error) {

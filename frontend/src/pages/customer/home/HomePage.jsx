@@ -470,7 +470,7 @@ export default function HomePage() {
                             <strong> 5 phút</strong> và được xây dựng dựa trên nghiên cứu tâm
                             lý học hành vi.
                         </p>
-                        <Link to="/bai-test" className="btn-white">
+                        <Link to="/quizzes" className="btn-white">
                             Bắt đầu kiểm tra ngay →
                         </Link>
                     </div>

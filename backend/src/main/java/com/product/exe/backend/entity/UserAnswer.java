@@ -3,7 +3,6 @@ package com.product.exe.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -30,9 +29,6 @@ public class UserAnswer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "answer_id")
     private Answer answer;
-
-    @Column(name = "numeric_value")
-    private BigDecimal numericValue;
 
     @Column(name = "feedback_shown", columnDefinition = "TEXT")
     private String feedbackShown;
