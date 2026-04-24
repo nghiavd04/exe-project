@@ -41,7 +41,7 @@ export default function AdminLayout() {
         flexDirection: 'column',
         boxShadow: '4px 0 15px rgba(0,0,0,0.05)'
       }}>
-        <div style={{ marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
+        <Link to="/admin" style={{ textDecoration: 'none', marginBottom: '2.5rem', display: 'block', paddingLeft: '0.5rem' }}>
           <h2 style={{ 
             color: '#fff', 
             margin: 0, 
@@ -55,7 +55,7 @@ export default function AdminLayout() {
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Management Portal
           </p>
-        </div>
+        </Link>
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           {navItems.map((item) => {

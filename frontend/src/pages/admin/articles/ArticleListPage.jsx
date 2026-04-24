@@ -180,6 +180,11 @@ export default function ArticleListPage() {
 
   return (
     <div className="admin-page">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
+        <Link to="/admin" style={{ color: 'inherit', textDecoration: 'none' }}>ADMIN</Link>
+        <ChevronRight size={14} style={{ opacity: 0.5 }} />
+        <span style={{ color: 'var(--teal-dark)' }}>QUẢN LÝ BÀI VIẾT</span>
+      </div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700', color: 'var(--teal-dark)' }}>Quản lý Bài viết</h1>
@@ -314,7 +319,13 @@ export default function ArticleListPage() {
                       title={article.title}
                       style={{ 
                         fontWeight: '600', color: 'var(--teal-dark)', 
-                        maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' 
+                        maxWidth: '350px', 
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        whiteSpace: 'pre-wrap',
+                        overflowWrap: 'break-word'
                       }}
                     >
                       {article.title}
@@ -356,12 +367,22 @@ export default function ArticleListPage() {
                 <td style={{ padding: '1.25rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
                     {/* Edit Button */}
-                    <button 
-                      title="Chỉnh sửa"
-                      style={{ padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-                    >
-                      <Edit2 size={18} />
-                    </button>
+                    {article.status !== 'PUBLISHED' ? (
+                      <Link 
+                        to={`/admin/articles/edit/${article.id}`}
+                        title="Chỉnh sửa"
+                        style={{ padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+                      >
+                        <Edit2 size={18} />
+                      </Link>
+                    ) : (
+                      <div 
+                        title="Không thể sửa bài đã xuất bản. Hãy lưu trữ để sửa."
+                        style={{ padding: '0.5rem', color: '#cbd5e0', cursor: 'not-allowed', display: 'flex' }}
+                      >
+                        <Edit2 size={18} />
+                      </div>
+                    )}
 
                     {/* Delete Button */}
                     <button 

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     List<Answer> findAllByQuestionIdAndIsActiveTrueOrderByOrderIndexAsc(Long questionId);
+    void deleteAllByQuestionId(Long questionId);
 }

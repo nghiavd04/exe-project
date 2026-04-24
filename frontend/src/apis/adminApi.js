@@ -5,7 +5,10 @@ export const adminApi = {
   
   // Future methods
   getQuizzes: (params) => apiClient.get('/v1/admin/quizzes', { params }),
+  getQuizDetail: (id) => apiClient.get(`/v1/admin/quizzes/${id}`),
   getQuizStats: () => apiClient.get('/v1/admin/quizzes/stats'),
+  createQuiz: (data) => apiClient.post('/v1/admin/quizzes', data),
+  updateQuiz: (id, data) => apiClient.put(`/v1/admin/quizzes/${id}`, data),
   publishQuiz: (id) => apiClient.patch(`/v1/admin/quizzes/${id}/publish`),
   archiveQuiz: (id) => apiClient.patch(`/v1/admin/quizzes/${id}/archive`),
   unarchiveQuiz: (id) => apiClient.patch(`/v1/admin/quizzes/${id}/unarchive`),
@@ -13,9 +16,16 @@ export const adminApi = {
 
   // Articles
   getArticles: (params) => apiClient.get('/v1/admin/articles', { params }),
+  getArticleDetail: (id) => apiClient.get(`/v1/admin/articles/${id}`),
   getArticleStats: () => apiClient.get('/v1/admin/articles/stats'),
+  createArticle: (data) => apiClient.post('/v1/admin/articles', data),
+  updateArticle: (id, data) => apiClient.put(`/v1/admin/articles/${id}`, data),
   publishArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/publish`),
   archiveArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/archive`),
   unarchiveArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/unarchive`),
   deleteArticle: (id) => apiClient.delete(`/v1/admin/articles/${id}`),
+
+  uploadImage: (formData) => apiClient.post('/v1/images/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };

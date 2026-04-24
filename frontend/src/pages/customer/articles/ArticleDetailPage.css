@@ -34,6 +34,9 @@
     line-height: 1.2;
     margin-bottom: 1.5rem;
     letter-spacing: -1px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .article-meta {
@@ -81,6 +84,9 @@
     font-size: 1.15rem;
     line-height: 1.8;
     color: var(--text);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .article-content h2, .article-content h3 {
