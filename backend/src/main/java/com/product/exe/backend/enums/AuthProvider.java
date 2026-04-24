@@ -1,6 +1,15 @@
 package com.product.exe.backend.enums;
 
-public enum AuthProvider {
-    LOCAL,
-    GOOGLE
+import lombok.Getter;
+
+@Getter
+public enum AuthProvider implements DbValueEnum {
+    LOCAL("LOCAL"),
+    GOOGLE("GOOGLE");
+
+    private final String dbValue;
+
+    AuthProvider(String dbValue) {
+        this.dbValue = dbValue;
+    }
 }

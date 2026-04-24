@@ -6,7 +6,8 @@ import {
   Users, 
   Settings, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  CreditCard
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -23,6 +24,7 @@ export default function AdminLayout() {
     { name: 'Tổng quan', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Quản lý Quizzes', path: '/admin/quizzes', icon: <ClipboardList size={20} /> },
     { name: 'Quản lý Bài viết', path: '/admin/articles', icon: <BookOpen size={20} /> },
+    { name: 'Gói dịch vụ', path: '/admin/subscriptions', icon: <CreditCard size={20} /> },
     { name: 'Người dùng', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Cài đặt', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
@@ -41,7 +43,7 @@ export default function AdminLayout() {
         flexDirection: 'column',
         boxShadow: '4px 0 15px rgba(0,0,0,0.05)'
       }}>
-        <div style={{ marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
+        <Link to="/admin" style={{ textDecoration: 'none', marginBottom: '2.5rem', display: 'block', paddingLeft: '0.5rem' }}>
           <h2 style={{ 
             color: '#fff', 
             margin: 0, 
@@ -55,7 +57,7 @@ export default function AdminLayout() {
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Management Portal
           </p>
-        </div>
+        </Link>
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
           {navItems.map((item) => {

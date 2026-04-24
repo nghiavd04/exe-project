@@ -22,6 +22,8 @@ import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
 import CreateArticlePage from '../pages/admin/articles/CreateArticlePage';
 import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
+import AdminManagerAccountPage from '../pages/admin/accounts/AdminManagerAccountPage';
+import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptionPage';
 
 export const router = createBrowserRouter([
   {
@@ -75,10 +77,13 @@ export const router = createBrowserRouter([
           { path: '', element: <DashboardPage /> },
           { path: 'quizzes', element: <AdminQuizListPage /> },
           { path: 'quizzes/create', element: <CreateQuizPage /> },
+          { path: 'quizzes/edit/:id', element: <CreateQuizPage /> },
           { path: 'articles', element: <AdminArticleListPage /> },
           { path: 'articles/create', element: <CreateArticlePage /> },
-          { path: 'users', element: <PlaceholderPage title="Quản lý người dùng" emoji="👥" description="Tính năng đang được phát triển." /> },
-          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." /> },
+          { path: 'articles/edit/:id', element: <CreateArticlePage /> },
+          { path: 'users', element: <AdminManagerAccountPage /> },
+          { path: 'subscriptions', element: <AdminSubscriptionPage /> },
+          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
         ]
       }
     ]

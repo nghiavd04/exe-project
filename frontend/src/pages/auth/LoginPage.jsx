@@ -51,8 +51,7 @@ export default function LoginPage() {
       toast.success('Đăng nhập thành công!');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Login failed. Please try again.';
-      setServerError(errorMsg);
-      toast.error(errorMsg);
+      setErrors({ email: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -84,14 +83,7 @@ export default function LoginPage() {
 
 
 
-        {serverError && (
-          <div className="auth-error-banner">
-            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            {serverError}
-          </div>
-        )}
+
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">

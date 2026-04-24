@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -43,4 +44,8 @@ public class Question {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Answer> answers;
 }

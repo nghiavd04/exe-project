@@ -1,12 +1,17 @@
 package com.product.exe.backend.service.impl;
 
-import com.product.exe.backend.dto.response.AdminQuizResponse;
-import com.product.exe.backend.dto.response.AdminQuizStatsResponse;
+import com.product.exe.backend.dto.request.AnswerCreateRequest;
+import com.product.exe.backend.dto.request.QuestionCreateRequest;
+import com.product.exe.backend.dto.request.QuizCreateRequest;
+import com.product.exe.backend.dto.response.*;
+import com.product.exe.backend.entity.Admin;
+import com.product.exe.backend.entity.Answer;
+import com.product.exe.backend.entity.Question;
 import com.product.exe.backend.entity.Quiz;
 import com.product.exe.backend.enums.QuizStatus;
 import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
-import com.product.exe.backend.repository.QuizRepository;
+import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.AdminQuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,13 +20,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AdminQuizServiceImpl implements AdminQuizService {
 
     private final QuizRepository quizRepository;
-    private final com.product.exe.backend.repository.QuizAttemptRepository quizAttemptRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final AdminRepository adminRepository;
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
     @Override
     public Page<AdminQuizResponse> getQuizzesForAdmin(QuizStatus status, String search, Pageable pageable) {
@@ -115,6 +125,132 @@ public class AdminQuizServiceImpl implements AdminQuizService {
             throw new IllegalStateException("Only DRAFT quizzes can be deleted. Please archive others instead.");
         }
         
+        // Manual delete of questions and answers to avoid FK issues if cascade is not set
+        List<Question> questions = questionRepository.findAllByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(id);
+        for (Question q : questions) {
+            answerRepository.deleteAllByQuestionId(q.getId());
+        }
+        questionRepository.deleteAllByQuizId(id);
+        
         quizRepository.delete(quiz);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AdminQuizDetailResponse getQuizDetail(Long id) {
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+
+        List<AdminQuestionResponse> questionDtos = List.of();
+        if (quiz.getQuestions() != null) {
+            questionDtos = quiz.getQuestions().stream()
+                .map(q -> {
+                    List<AdminAnswerResponse> answerDtos = List.of();
+                    if (q.getAnswers() != null) {
+                        answerDtos = q.getAnswers().stream()
+                            .map(a -> AdminAnswerResponse.builder()
+                                .id(a.getId())
+                                .content(a.getContent())
+                                .value(a.getValue())
+                                .feedbackText(a.getFeedbackText())
+                                .orderIndex(a.getOrderIndex())
+                                .build())
+                            .collect(Collectors.toList());
+                    }
+                    return AdminQuestionResponse.builder()
+                        .id(q.getId())
+                        .content(q.getContent())
+                        .type(q.getType())
+                        .orderIndex(q.getOrderIndex())
+                        .answers(answerDtos)
+                        .build();
+                })
+                .collect(Collectors.toList());
+        }
+
+        return AdminQuizDetailResponse.builder()
+                .id(quiz.getId())
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
+                .overallAssessment(quiz.getOverallAssessment())
+                .imageUrl(quiz.getImageUrl())
+                .imagePublicId(quiz.getImagePublicId())
+                .status(quiz.getStatus())
+                .questions(questionDtos)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void createQuiz(QuizCreateRequest request, Long userId) {
+        Admin admin = adminRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin profile not found"));
+
+        Quiz quiz = Quiz.builder()
+                .admin(admin)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .overallAssessment(request.getOverallAssessment())
+                .imageUrl(request.getImageUrl())
+                .imagePublicId(request.getImagePublicId())
+                .status(QuizStatus.DRAFT)
+                .build();
+
+        quiz = quizRepository.save(quiz);
+
+        saveQuestionsAndAnswers(quiz, request.getQuestions());
+    }
+
+    @Override
+    @Transactional
+    public void updateQuiz(Long id, QuizCreateRequest request) {
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+
+        if (quiz.getStatus() == QuizStatus.PUBLISHED) {
+            throw new BadRequestException("Cannot edit a published quiz. Please archive it first.");
+        }
+
+        quiz.setTitle(request.getTitle());
+        quiz.setDescription(request.getDescription());
+        quiz.setOverallAssessment(request.getOverallAssessment());
+        quiz.setImageUrl(request.getImageUrl());
+        quiz.setImagePublicId(request.getImagePublicId());
+        quizRepository.save(quiz);
+
+        // Delete old questions and answers
+        List<Question> oldQuestions = questionRepository.findAllByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(id);
+        for (Question q : oldQuestions) {
+            answerRepository.deleteAllByQuestionId(q.getId());
+        }
+        questionRepository.deleteAllByQuizId(id);
+
+        // Save new ones
+        saveQuestionsAndAnswers(quiz, request.getQuestions());
+    }
+
+    private void saveQuestionsAndAnswers(Quiz quiz, List<QuestionCreateRequest> questionRequests) {
+        for (QuestionCreateRequest qReq : questionRequests) {
+            Question question = Question.builder()
+                    .quiz(quiz)
+                    .content(qReq.getContent())
+                    .type(qReq.getType())
+                    .orderIndex(qReq.getOrderIndex())
+                    .build();
+            
+            question = questionRepository.save(question);
+
+            for (AnswerCreateRequest aReq : qReq.getAnswers()) {
+                Answer answer = Answer.builder()
+                        .question(question)
+                        .content(aReq.getContent())
+                        .value(aReq.getValue())
+                        .feedbackText(aReq.getFeedbackText())
+                        .orderIndex(aReq.getOrderIndex())
+                        .build();
+                answerRepository.save(answer);
+            }
+        }
+    }
 }
+

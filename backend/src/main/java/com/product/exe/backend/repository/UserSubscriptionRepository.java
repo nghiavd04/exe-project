@@ -24,6 +24,8 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             @Param("status") SubscriptionStatus status,
             @Param("now") LocalDateTime now);
 
+    long countByPlanIdAndStatus(Long planId, SubscriptionStatus status);
+
     default Optional<UserSubscription> findActiveSubscriptionByUserId(Long userId) {
         return findFirstByUserIdAndStatusAndEndDateAfter(userId, SubscriptionStatus.ACTIVE, LocalDateTime.now());
     }

@@ -1,9 +1,18 @@
 package com.product.exe.backend.enums;
 
-public enum ArticleCategory {
-    HEALTH,
-    PSYCHOLOGY,
-    LIFESTYLE,
-    EDUCATION,
-    SCIENCE
+import lombok.Getter;
+
+@Getter
+public enum ArticleCategory implements DbValueEnum {
+    HEALTH("HEALTH"),
+    PSYCHOLOGY("PSYCHOLOGY"),
+    LIFESTYLE("LIFESTYLE"),
+    EDUCATION("EDUCATION"),
+    SCIENCE("SCIENCE");
+
+    private final String dbValue;
+
+    ArticleCategory(String dbValue) {
+        this.dbValue = dbValue;
+    }
 }

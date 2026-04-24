@@ -1,7 +1,16 @@
 package com.product.exe.backend.enums;
 
-public enum QuizStatus {
-    DRAFT,
-    PUBLISHED,
-    ARCHIVED
+import lombok.Getter;
+
+@Getter
+public enum QuizStatus implements DbValueEnum {
+    DRAFT("DRAFT"),
+    PUBLISHED("PUBLISHED"),
+    ARCHIVED("ARCHIVED");
+
+    private final String dbValue;
+
+    QuizStatus(String dbValue) {
+        this.dbValue = dbValue;
+    }
 }
