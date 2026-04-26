@@ -5,6 +5,7 @@ import com.product.exe.backend.dto.response.ArticleSummaryResponse;
 import com.product.exe.backend.entity.Article;
 import com.product.exe.backend.enums.ArticleCategory;
 import com.product.exe.backend.enums.ArticleStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import com.product.exe.backend.exception.ResourceNotFoundException;
 import com.product.exe.backend.exception.SubscriptionRequiredException;
 import com.product.exe.backend.repository.ArticleRepository;
@@ -37,8 +38,9 @@ public class ArticleServiceImpl implements ArticleService {
         Article article = articleRepository.findBySlugAndStatus(slug, ArticleStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found with slug: " + slug));
 
-        if (article.getPremium() && !subscriptionService.isUserPremium(currentUserId)) {
-            throw new SubscriptionRequiredException("This article requires a premium subscription.");
+        SubscriptionTier userTier = subscriptionService.getUserHighestTier(currentUserId);
+        if (userTier.getWeight() < article.getRequiredTier().getWeight()) {
+            throw new SubscriptionRequiredException("This article requires a " + article.getRequiredTier().getDisplayName() + " subscription.");
         }
 
         return mapToDetail(article);
@@ -62,7 +64,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .slug(article.getSlug())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .category(article.getCategory())
-                .isPremium(article.getPremium())
+                .requiredTier(article.getRequiredTier())
                 .publishedAt(article.getPublishedAt())
                 .build();
     }
@@ -75,7 +77,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .content(article.getContent())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .category(article.getCategory())
-                .isPremium(article.getPremium())
+                .requiredTier(article.getRequiredTier())
                 .publishedAt(article.getPublishedAt())
                 .authorName(article.getAdmin() != null ? article.getAdmin().getFullName() : "Admin")
                 .build();

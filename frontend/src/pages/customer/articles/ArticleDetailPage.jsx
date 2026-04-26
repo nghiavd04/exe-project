@@ -52,7 +52,7 @@ const ArticleDetailPage = () => {
         if (!isLoggedIn) {
           navigate('/login');
         } else {
-          setError('PREMIUM_REQUIRED');
+          setError('SUBSCRIPTION_REQUIRED');
         }
       } else if (err.response && err.response.status === 401) {
         navigate('/login');
@@ -66,15 +66,15 @@ const ArticleDetailPage = () => {
 
   if (loading) return <div className="article-detail-loading">Đang tải nội dung...</div>;
 
-  if (error === 'PREMIUM_REQUIRED') {
+  if (error === 'SUBSCRIPTION_REQUIRED') {
     return (
       <div className="premium-blocker-page">
         <div className="blocker-container">
           <div className="blocker-icon">👑</div>
-          <h1>Nội dung dành cho Hội viên Premium</h1>
-          <p>Bài viết này chứa đựng những kiến thức chuyên sâu dành riêng cho gói đăng ký Premium của chúng tôi.</p>
+          <h1>Nội dung dành cho Hội viên</h1>
+          <p>Bài viết này yêu cầu gói đăng ký thành viên để truy cập. Hãy nâng cấp tài khoản của bạn để xem nội dung này.</p>
           <div className="blocker-actions">
-            <Link to="/subscription" className="btn-upgrade">Nâng cấp ngay</Link>
+            <Link to="/subscription" className="btn-upgrade">Xem các gói đăng ký</Link>
             <Link to="/articles" className="btn-back">Quay lại danh sách</Link>
           </div>
         </div>

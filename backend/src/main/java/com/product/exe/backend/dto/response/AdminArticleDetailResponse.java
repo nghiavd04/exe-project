@@ -2,6 +2,7 @@ package com.product.exe.backend.dto.response;
 
 import com.product.exe.backend.enums.ArticleCategory;
 import com.product.exe.backend.enums.ArticleStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class AdminArticleDetailResponse {
     private ArticleStatus status;
     private String thumbnailUrl;
     private String thumbnailPublicId;
-    private Boolean isPremium;
+    private SubscriptionTier requiredTier;
     private Long viewCount;
     private String authorName;
     private LocalDateTime createdAt;

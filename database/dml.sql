@@ -17,20 +17,22 @@ INSERT INTO customers (user_id, full_name, is_active) VALUES
 -- --------------------------------------------------------
 -- 2. Subscription Plans
 -- --------------------------------------------------------
-INSERT INTO subscription_plans (name, price, duration_days, description, is_active, created_at) VALUES
-('Gói Khám Phá 1 Tháng', 49000, 30, 'Truy cập đầy đủ các bài viết nghiên cứu tâm lý và thần kinh học trong 1 tháng.', TRUE, NOW()),
-('Gói Chuyên Sâu 6 Tháng', 249000, 180, 'Truy cập đầy đủ bài viết trong 6 tháng. Tặng kèm ebook 7-Day Reset.', TRUE, NOW()),
-('Gói Đột Phá 1 Năm', 399000, 365, 'Lựa chọn tốt nhất. Quyền truy cập trọn đời vào thư viện tài liệu của Dopaless.', TRUE, NOW());
+INSERT INTO subscription_plans (name, price, duration_days, description, is_active, tier, created_at) VALUES
+('Gói Miễn Phí', 0, 3650, 'Truy cập các nội dung cơ bản của Dopaless.', TRUE, 'FREE', NOW()),
+('Gói Thành Viên VIP', 49000, 30, 'Mở khóa các bài viết chuyên sâu cấp độ VIP.', TRUE, 'VIP', NOW()),
+('Gói Hội Viên Premium', 99000, 30, 'Toàn quyền truy cập mọi nội dung cao cấp nhất và tài liệu đặc biệt.', TRUE, 'PREMIUM', NOW());
 
 -- --------------------------------------------------------
 -- 3. Articles (Tin tức & Kiến thức)
 -- --------------------------------------------------------
-INSERT INTO articles (admin_id, category, title, slug, content, thumbnail_url, is_premium, status, published_at, is_active, created_at, updated_at) VALUES
-(1, 'SCIENCE', 'Dopamine là gì và tại sao bộ não lại luôn thèm muốn nó?', 'dopamine-la-gi', '<p>Dopamine thường bị hiểu lầm là "hormone hạnh phúc". Thực chất, nó là chất dẫn truyền thần kinh của sự mong đợi (anticipation) và thèm khát (craving).</p><p>Khi bạn nhìn thấy thông báo trên điện thoại, dopamine tăng vọt để thôi thúc bạn nhấn vào xem. Ngay khi bạn thỏa mãn trí tò mò, mức dopamine tụt xuống, khiến bạn lại muốn tìm kiếm kích thích mới.</p>', 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80', FALSE, 'PUBLISHED', NOW(), TRUE, NOW(), NOW()),
+INSERT INTO articles (admin_id, category, title, slug, content, thumbnail_url, required_tier, status, published_at, is_active, created_at, updated_at) VALUES
+(1, 'SCIENCE', 'Dopamine là gì và tại sao bộ não lại luôn thèm muốn nó?', 'dopamine-la-gi', '<p>Dopamine thường bị hiểu lầm là "hormone hạnh phúc". Thực chất, nó là chất dẫn truyền thần kinh của sự mong đợi (anticipation) và thèm khát (craving).</p><p>Khi bạn nhìn thấy thông báo trên điện thoại, dopamine tăng vọt để thôi thúc bạn nhấn vào xem. Ngay khi bạn thỏa mãn trí tò mò, mức dopamine tụt xuống, khiến bạn lại muốn tìm kiếm kích thích mới.</p>', 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80', 'FREE', 'PUBLISHED', NOW(), TRUE, NOW(), NOW()),
 
-(1, 'HEALTH', 'Vòng lặp Dopamine: Cơ chế "máy đánh bạc" khiến bạn nghiện mạng xã hội', 'vong-lap-dopamine-may-danh-bac', '<p>Bạn có bao giờ tự hỏi tại sao thao tác "vuốt xuống để làm mới" (pull-to-refresh) lại phổ biến đến vậy?</p><p>Đó là vì nó mô phỏng chính xác hành động kéo cần gạt của máy đánh bạc trong casino. Sự bất định về những gì bạn sắp nhìn thấy (một tin nhắn vui, một bức ảnh đẹp, hay không có gì cả) chính là mồi lửa thổi bùng dopamine trong não bộ.</p>', 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80', TRUE, 'PUBLISHED', NOW(), TRUE, NOW(), NOW()),
+(1, 'PSYCHOLOGY', 'Cơ chế phần thưởng biến thiên: Bí mật sau cơn nghiện TikTok', 'phan-thuong-bien-thien-nghien-tiktok', '<p>Tại sao bạn có thể lướt TikTok hàng giờ mà không chán? Câu trả lời nằm ở "Variable Reward" (Phần thưởng biến thiên).</p><p>Không giống như việc biết trước kết quả, sự bất định khiến não bộ tiết ra nhiều dopamine hơn. Mỗi lần vuốt là một lần "thử vận may", khiến bạn luôn ở trong trạng thái hưng phấn chờ đợi video tiếp theo.</p>', 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80', 'VIP', 'PUBLISHED', NOW(), TRUE, NOW(), NOW()),
 
-(1, 'LIFESTYLE', 'Cách thực hiện Dopamine Detox (Giải độc Dopamine) trong 7 ngày', 'dopamine-detox-7-ngay', '<p>Dopamine Detox không phải là từ bỏ hoàn toàn niềm vui. Nó là việc loại bỏ các "niềm vui rẻ tiền" (lướt TikTok, ăn đồ ngọt, chơi game vô độ) để nhường chỗ cho những phần thưởng đến từ sự nỗ lực.</p><h3>Lộ trình 7 ngày</h3><ol><li>Ngày 1-2: Không màn hình trước khi ngủ 2 tiếng.</li><li>Ngày 3-4: Xóa các ứng dụng gây xao nhãng khỏi màn hình chính.</li><li>Ngày 5-7: Áp dụng chế độ "Không màu sắc" (Grayscale) trên điện thoại.</li></ol>', 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80', TRUE, 'PUBLISHED', NOW(), TRUE, NOW(), NOW());
+(1, 'HEALTH', 'Dopamine Fasting 2.0: Hướng dẫn chuyên sâu cho người làm việc trí óc', 'dopamine-fasting-2-0', '<p>Đây là tài liệu chuyên sâu dành cho hội viên Premium về cách quản lý baseline dopamine để tối ưu hóa năng suất làm việc.</p><h3>Tại sao phương pháp thông thường thất bại?</h3><p>Hầu hết mọi người cố gắng nhịn dopamine hoàn toàn, dẫn đến tình trạng mất cân bằng. Phương pháp 2.0 tập trung vào việc "thay thế" thay vì "loại bỏ".</p>', 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80', 'PREMIUM', 'PUBLISHED', NOW(), TRUE, NOW(), NOW()),
+
+(1, 'EDUCATION', 'Làm sao để biến việc học thành một thói quen gây nghiện?', 'bien-viec-hoc-thanh-nghien', '<p>Học tập thường bị coi là khô khan vì phần thưởng của nó đến quá muộn. Để nghiện học, bạn cần thiết lập hệ thống "phản hồi tức thì".</p><p>Sử dụng Gamification và chia nhỏ mục tiêu là cách hiệu quả nhất để đánh lừa hệ thống dopamine của bạn.</p>', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80', 'FREE', 'PUBLISHED', NOW(), TRUE, NOW(), NOW());
 
 -- --------------------------------------------------------
 -- 4. Quizzes

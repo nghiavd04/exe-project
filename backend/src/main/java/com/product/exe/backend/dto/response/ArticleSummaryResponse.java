@@ -1,6 +1,7 @@
 package com.product.exe.backend.dto.response;
 
 import com.product.exe.backend.enums.ArticleCategory;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,6 @@ public class ArticleSummaryResponse {
     private String slug;
     private String thumbnailUrl;
     private ArticleCategory category;
-    private Boolean isPremium;
+    private SubscriptionTier requiredTier;
     private LocalDateTime publishedAt;
 }

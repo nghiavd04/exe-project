@@ -1,6 +1,7 @@
 package com.product.exe.backend.dto.request;
 
 import com.product.exe.backend.enums.ArticleCategory;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,5 @@ public class ArticleCreateRequest {
     private ArticleCategory category;
     private String thumbnailUrl;
     private String thumbnailPublicId;
-    private Boolean premium;
+    private SubscriptionTier requiredTier;
 }

@@ -102,9 +102,15 @@ export default function CreateArticlePage() {
     category: 'EDUCATION',
     thumbnailUrl: '',
     thumbnailPublicId: '',
-    premium: false,
+    requiredTier: 'FREE',
     status: 'DRAFT'
   });
+
+  const tiers = [
+    { value: 'FREE', label: 'Miễn phí' },
+    { value: 'VIP', label: 'Thành viên VIP' },
+    { value: 'PREMIUM', label: 'Thành viên Premium' }
+  ];
 
   const categories = [
     { value: 'EDUCATION', label: 'Giáo dục' },
@@ -182,7 +188,7 @@ export default function CreateArticlePage() {
           category: article.category,
           thumbnailUrl: article.thumbnailUrl,
           thumbnailPublicId: article.thumbnailPublicId,
-          premium: article.isPremium,
+          requiredTier: article.requiredTier || 'FREE',
           status: article.status
         });
         setTimeout(() => setInitialLoaded(true), 500); // Allow Quill to initialize
@@ -257,7 +263,7 @@ export default function CreateArticlePage() {
         category: articleData.category,
         thumbnailUrl: articleData.thumbnailUrl,
         thumbnailPublicId: articleData.thumbnailPublicId,
-        premium: articleData.premium
+        requiredTier: articleData.requiredTier
       };
 
       if (isEdit) {
@@ -466,36 +472,32 @@ export default function CreateArticlePage() {
                 </div>
               </div>
 
-              {/* Premium Toggle */}
-              <div 
-                onClick={() => handleFieldChange('premium', !articleData.premium)}
-                style={{ 
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                  padding: '1rem', borderRadius: '16px', 
-                  background: articleData.premium ? '#fff9db' : '#f8fafc',
-                  border: articleData.premium ? '1px solid #fcc419' : '1px solid #edf2f7',
-                  cursor: 'pointer', transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{ background: articleData.premium ? '#fcc419' : '#e2e8f0', color: 'white', padding: '0.4rem', borderRadius: '8px' }}>
-                    <Star size={16} fill={articleData.premium ? "white" : "none"} />
-                  </div>
-                  <div>
-                    <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: '800', color: '#1a1a4b' }}>Nội dung Premium</p>
-                    <p style={{ margin: 0, fontSize: '0.7rem', color: '#718096' }}>Chỉ dành cho hội viên</p>
-                  </div>
+              {/* Subscription Tier Selection */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: '#4a5568', marginBottom: '0.5rem' }}>Gói truy cập</label>
+                <div style={{ position: 'relative' }}>
+                  <select 
+                    value={articleData.requiredTier}
+                    onChange={(e) => handleFieldChange('requiredTier', e.target.value)}
+                    style={{ 
+                      width: '100%', padding: '0.85rem 1.25rem', borderRadius: '12px', 
+                      border: '1px solid #edf2f7', outline: 'none', 
+                      background: articleData.requiredTier === 'FREE' ? '#f8fafc' : (articleData.requiredTier === 'VIP' ? '#f0f9ff' : '#fff9db'),
+                      appearance: 'none', fontWeight: '600', color: '#1a1a4b', cursor: 'pointer',
+                      borderLeft: articleData.requiredTier === 'FREE' ? '1px solid #edf2f7' : (articleData.requiredTier === 'VIP' ? '4px solid #0ea5e9' : '4px solid #fcc419')
+                    }}
+                  >
+                    {tiers.map(tier => (
+                      <option key={tier.value} value={tier.value}>{tier.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }} />
                 </div>
-                <div style={{ 
-                  width: '40px', height: '22px', background: articleData.premium ? '#1a1a4b' : '#cbd5e0', 
-                  borderRadius: '11px', position: 'relative', transition: '0.3s'
-                }}>
-                  <div style={{ 
-                    width: '16px', height: '16px', background: 'white', borderRadius: '50%', 
-                    position: 'absolute', top: '3px', left: articleData.premium ? '21px' : '3px',
-                    transition: '0.3s'
-                  }}></div>
-                </div>
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: '#718096' }}>
+                  {articleData.requiredTier === 'FREE' && "Mọi người đều có thể xem bài viết này."}
+                  {articleData.requiredTier === 'VIP' && "Chỉ thành viên gói VIP hoặc Premium mới có thể xem."}
+                  {articleData.requiredTier === 'PREMIUM' && "Chỉ thành viên gói Premium mới có thể xem."}
+                </p>
               </div>
             </div>
           </div>

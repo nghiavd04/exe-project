@@ -2,6 +2,7 @@ package com.product.exe.backend.dto.response;
 
 import com.product.exe.backend.enums.ArticleCategory;
 import com.product.exe.backend.enums.ArticleStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class AdminArticleResponse {
     private ArticleStatus status;
     private Long viewCount;
     private String authorName; // Tên của Admin viết bài
-    private Boolean isPremium;
+    private SubscriptionTier requiredTier;
     private LocalDateTime createdAt;
     private LocalDateTime publishedAt;
 }

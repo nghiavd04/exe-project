@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../apis/authApi';
 import toast from 'react-hot-toast';
 import './auth.css';
+import { useAuth } from '../../hooks/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -10,13 +11,19 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const { login } = useAuth();
 
+  const hasShownToast = useRef(false);
   useEffect(() => {
+    if (hasShownToast.current) return;
+    
     const params = new URLSearchParams(window.location.search);
     if (params.get('registered')) {
       toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
+      hasShownToast.current = true;
+      navigate('/login', { replace: true });
     }
-  }, []);
+  }, [navigate]);
 
   const validate = () => {
     const errs = {};
@@ -41,8 +48,9 @@ export default function LoginPage() {
     try {
       const res = await authApi.login(form.email, form.password);
       const data = res.data.data;
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({ email: data.email, role: data.role, fullName: data.fullName }));
+      
+      // Use the login function from AuthContext to set state globally
+      login(data, data.token);
       if (data.role === 'ADMIN') {
         navigate('/admin');
       } else {

@@ -2,9 +2,11 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/index';
 import { Toaster } from 'react-hot-toast';
 
+import { AuthProvider } from './hooks/AuthContext';
+
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Toaster 
         position="top-right" 
         reverseOrder={false}
@@ -19,7 +21,7 @@ function App() {
         }} 
       />
       <RouterProvider router={router} />
-    </>
+    </AuthProvider>
   );
 }
 

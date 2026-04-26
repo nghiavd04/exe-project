@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, MoreVertical, 
   ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  FileText, Eye, Calendar, Archive, RotateCcw, Crown
+  FileText, Eye, Calendar, Archive, RotateCcw, Crown, Star
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
@@ -277,7 +277,7 @@ export default function ArticleListPage() {
             <tr style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
               <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', width: '60px' }}>STT</th>
               <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', minWidth: '300px' }}>Tiêu đề bài viết</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Premium</th>
+              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Gói truy cập</th>
               <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Trạng thái</th>
               <th 
                 style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
@@ -333,16 +333,24 @@ export default function ArticleListPage() {
                     <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chuyên mục: {article.category}</div>
                 </td>
                 <td style={{ padding: '1.25rem' }}>
-                  {(article.isPremium || article.premium) ? (
+                  {article.requiredTier === 'PREMIUM' ? (
                     <span style={{ 
                       display: 'flex', alignItems: 'center', gap: '0.25rem',
                       padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
-                      background: '#fff5f5', color: '#e53e3e', border: '1px solid #feb2b2'
+                      background: '#fff9db', color: '#f59e0b', border: '1px solid #fcc419'
                     }}>
-                      <Crown size={12} /> CÓ
+                      <Crown size={12} /> PREMIUM
+                    </span>
+                  ) : article.requiredTier === 'VIP' ? (
+                    <span style={{ 
+                      display: 'flex', alignItems: 'center', gap: '0.25rem',
+                      padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
+                      background: '#f0f9ff', color: '#0ea5e9', border: '1px solid #7dd3fc'
+                    }}>
+                      <Star size={12} fill="#0ea5e9" /> VIP
                     </span>
                   ) : (
-                    <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Không</span>
+                    <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Miễn phí</span>
                   )}
                 </td>
                 <td style={{ padding: '1.25rem' }}>

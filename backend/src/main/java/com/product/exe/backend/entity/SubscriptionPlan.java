@@ -1,5 +1,6 @@
 package com.product.exe.backend.entity;
 
+import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -36,6 +37,11 @@ public class SubscriptionPlan {
     @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier", nullable = false)
+    @Builder.Default
+    private SubscriptionTier tier = SubscriptionTier.FREE;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

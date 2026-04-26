@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState(false);
+  const [userTier, setUserTier] = useState('FREE');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -16,8 +16,11 @@ export const AuthProvider = ({ children }) => {
       const savedUser = JSON.parse(localStorage.getItem('user'));
       if (savedUser) {
         setUser(savedUser);
-        // Logic to determine premium status
-        // This should ideally come from backend
+        if (savedUser.subscriptionTier) {
+          setUserTier(savedUser.subscriptionTier);
+        } else {
+          setUserTier('FREE');
+        }
       }
     }
     setLoading(false);
@@ -27,18 +30,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
-    // Set isPremium if userData has subscription info
+    if (userData.subscriptionTier) {
+      setUserTier(userData.subscriptionTier);
+    } else {
+      setUserTier('FREE');
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    setIsPremium(false);
+    setUserTier('FREE');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isPremium, setIsPremium, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, userTier, setUserTier, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,6 +7,7 @@ import com.product.exe.backend.dto.response.AdminArticleStatsResponse;
 import com.product.exe.backend.entity.Admin;
 import com.product.exe.backend.entity.Article;
 import com.product.exe.backend.enums.ArticleStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
 import com.product.exe.backend.repository.AdminRepository;
@@ -68,7 +69,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .category(request.getCategory())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .thumbnailPublicId(request.getThumbnailPublicId())
-                .premium(request.getPremium() != null ? request.getPremium() : false)
+                .requiredTier(request.getRequiredTier() != null ? request.getRequiredTier() : SubscriptionTier.FREE)
                 .slug(SlugUtil.toSlug(request.getTitle()) + "-" + System.currentTimeMillis())
                 .status(ArticleStatus.DRAFT)
                 .admin(admin)
@@ -92,7 +93,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         article.setCategory(request.getCategory());
         article.setThumbnailUrl(request.getThumbnailUrl());
         article.setThumbnailPublicId(request.getThumbnailPublicId());
-        article.setPremium(request.getPremium() != null ? request.getPremium() : false);
+        article.setRequiredTier(request.getRequiredTier() != null ? request.getRequiredTier() : SubscriptionTier.FREE);
         
         // Optionally update slug if title changes significantly
         // article.setSlug(SlugUtil.toSlug(request.getTitle()) + "-" + article.getId());
@@ -167,7 +168,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .status(article.getStatus())
                 .viewCount(article.getViewCount() != null ? article.getViewCount() : 0L)
                 .authorName(authorName)
-                .isPremium(article.getPremium())
+                .requiredTier(article.getRequiredTier())
                 .createdAt(article.getCreatedAt())
                 .publishedAt(article.getPublishedAt())
                 .build();
@@ -188,7 +189,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .status(article.getStatus())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .thumbnailPublicId(article.getThumbnailPublicId())
-                .isPremium(article.getPremium())
+                .requiredTier(article.getRequiredTier())
                 .viewCount(article.getViewCount() != null ? article.getViewCount() : 0L)
                 .authorName(authorName)
                 .createdAt(article.getCreatedAt())

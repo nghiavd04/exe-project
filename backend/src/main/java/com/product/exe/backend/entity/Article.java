@@ -2,6 +2,7 @@ package com.product.exe.backend.entity;
 
 import com.product.exe.backend.enums.ArticleCategory;
 import com.product.exe.backend.enums.ArticleStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -46,9 +47,10 @@ public class Article {
     @Column(name = "thumbnail_public_id", length = 255)
     private String thumbnailPublicId;
 
-    @Column(name = "is_premium")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "required_tier", nullable = false)
     @Builder.Default
-    private Boolean premium = false;
+    private SubscriptionTier requiredTier = SubscriptionTier.FREE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
