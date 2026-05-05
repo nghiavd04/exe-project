@@ -22,6 +22,7 @@ import { Link, useNavigate, useParams, useBlocker } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
+import QuizRenderer from '../../../components/QuizRenderer/QuizRenderer';
 
 export default function CreateQuizPage() {
   const { id } = useParams();
@@ -35,6 +36,7 @@ export default function CreateQuizPage() {
   const [initialLoaded, setInitialLoaded] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Quiz State
   const [quizData, setQuizData] = useState({
@@ -386,7 +388,7 @@ export default function CreateQuizPage() {
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 
-            onClick={() => toast('Tính năng xem trước đang phát triển')}
+            onClick={() => setShowPreviewModal(true)}
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -738,6 +740,92 @@ export default function CreateQuizPage() {
         onClose={() => setShowSaveModal(false)}
         onConfirm={executeSubmit}
       />
+
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div 
+          onClick={() => setShowPreviewModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.85)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '2rem',
+            backdropFilter: 'blur(8px)',
+            cursor: 'zoom-out'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '1200px',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              cursor: 'default'
+            }}
+          >
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>Xem trước bài test</h2>
+                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>Chế độ xem trước nội dung và phản hồi</p>
+              </div>
+              <button 
+                onClick={() => setShowPreviewModal(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  color: 'white',
+                  width: '45px',
+                  height: '45px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div style={{
+              width: '100%',
+              background: 'white',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              flex: 1,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <QuizRenderer quiz={quizData} isPreview={true} />
+            </div>
+            
+            <p style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textAlign: 'center' }}>
+              Nhấn ra ngoài hoặc nút [X] để quay lại chỉnh sửa
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

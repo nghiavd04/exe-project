@@ -8,6 +8,7 @@ import com.product.exe.backend.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,7 @@ public class CustomerQuizController {
     @GetMapping("/quizzes")
     public ResponseEntity<ApiResponse<Page<QuizSummaryResponse>>> getQuizzes(
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 9) Pageable pageable) {
+            @PageableDefault(size = 9, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
             Page<QuizSummaryResponse> quizzes = quizService.getQuizzes(search, pageable);
             return ResponseEntity.ok(ApiResponse.success(quizzes));

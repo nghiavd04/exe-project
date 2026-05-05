@@ -8,4 +8,9 @@ import com.product.exe.backend.dto.response.RegisterResponse;
 public interface AuthService {
     LoginResponse login(LoginRequest loginRequest);
     RegisterResponse register(RegisterRequest registerRequest);
+    void sendVerificationCode(String email);
+    void verifyCode(String email, String code);
+    void forgotPassword(String email);
+    void resetPassword(String email, String code, String newPassword);
 }
+

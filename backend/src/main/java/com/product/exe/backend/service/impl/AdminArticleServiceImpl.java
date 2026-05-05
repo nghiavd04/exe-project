@@ -60,7 +60,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Override
     @Transactional
     public void createArticle(ArticleCreateRequest request, Long userId) {
-        Admin admin = adminRepository.findById(userId)
+        Admin admin = adminRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin user not found"));
 
         Article article = Article.builder()

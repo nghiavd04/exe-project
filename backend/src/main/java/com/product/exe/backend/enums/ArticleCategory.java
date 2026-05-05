@@ -8,7 +8,8 @@ public enum ArticleCategory implements DbValueEnum {
     PSYCHOLOGY("PSYCHOLOGY"),
     LIFESTYLE("LIFESTYLE"),
     EDUCATION("EDUCATION"),
-    SCIENCE("SCIENCE");
+    SCIENCE("SCIENCE"),
+    TECHNOLOGY("TECHNOLOGY");
 
     private final String dbValue;
 

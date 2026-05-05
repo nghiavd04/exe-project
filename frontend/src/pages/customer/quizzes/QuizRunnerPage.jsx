@@ -11,12 +11,12 @@ const QuizRunnerPage = () => {
   const [quiz, setQuiz] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(-1); // -1: Intro, >=0: Questions, -2: Result
+  const [currentIndex, setCurrentIndex] = useState(-1); 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [overallResult, setOverallResult] = useState(null);
-  const [answers, setAnswers] = useState({}); // {questionId: value}
+  const [answers, setAnswers] = useState({});
 
   useEffect(() => {
     fetchQuizDetail();
@@ -75,7 +75,7 @@ const QuizRunnerPage = () => {
     const value = answers[currentQuestion.id];
 
     if (value === undefined || value === '') {
-      alert('Vui lòng chọn hoặc nhập câu trả lời.');
+      toast.error('Vui lòng chọn hoặc nhập câu trả lời.');
       return;
     }
 
@@ -188,7 +188,9 @@ const QuizRunnerPage = () => {
       </header>
 
       <main className="question-container">
-        <h2 className="question-text">{currentQuestion.content}</h2>
+        <div className="question-header-info">
+          <h2 className="question-text">{currentQuestion.content}</h2>
+        </div>
 
         <div className="options-container">
           {currentQuestion.type === 'SINGLE_CHOICE' ? (
@@ -201,6 +203,7 @@ const QuizRunnerPage = () => {
                   checked={answers[currentQuestion.id] === answer.id}
                   onChange={() => handleAnswerSelect(currentQuestion.id, answer.id, 'SINGLE_CHOICE')}
                 />
+                <div className="custom-indicator radio"></div>
                 <span className="option-text">{answer.content}</span>
               </label>
             ))
@@ -214,6 +217,7 @@ const QuizRunnerPage = () => {
                   checked={(answers[currentQuestion.id] || []).includes(answer.id)}
                   onChange={() => handleAnswerSelect(currentQuestion.id, answer.id, 'MULTIPLE_CHOICE')}
                 />
+                <div className="custom-indicator checkbox"></div>
                 <span className="option-text">{answer.content}</span>
               </label>
             ))

@@ -4,14 +4,28 @@ import { authApi } from '../../apis/authApi';
 import toast from 'react-hot-toast';
 import './auth.css';
 import { useAuth } from '../../hooks/AuthContext';
+import { Eye, EyeOff, X, Mail, Lock, ShieldCheck, KeyRound } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
   const { login } = useAuth();
+
+  // Forgot Password States
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotOtp, setForgotOtp] = useState(['', '', '', '', '', '']);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [forgotTimer, setForgotTimer] = useState(0);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  
+  const otpInputs = useRef([]);
 
   const hasShownToast = useRef(false);
   useEffect(() => {
@@ -25,10 +39,24 @@ export default function LoginPage() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    let interval;
+    if (forgotTimer > 0) {
+      interval = setInterval(() => setForgotTimer(prev => prev - 1), 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [forgotTimer]);
+
+
   const validate = () => {
     const errs = {};
     if (!form.email) errs.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email format';
+    else {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(form.email)) errs.email = 'Invalid email format';
+    }
     if (!form.password) errs.password = 'Password is required';
     return errs;
   };
@@ -58,8 +86,8 @@ export default function LoginPage() {
       }
       toast.success('Đăng nhập thành công!');
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Login failed. Please try again.';
-      setErrors({ email: errorMsg });
+      const errorMsg = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+      setServerError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -68,6 +96,93 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     authApi.googleLogin();
   };
+
+  // Forgot Password Handlers
+  const handleSendForgotCode = async () => {
+    if (!forgotEmail) {
+      toast.error('Vui lòng nhập email');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.forgotPassword(forgotEmail);
+      toast.success('Mã xác thực đã được gửi đến email của bạn');
+      setForgotStep(2);
+      setForgotTimer(60);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Lỗi khi gửi mã xác thực');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyForgotOtp = () => {
+    const code = forgotOtp.join('');
+    if (code.length !== 6) {
+      toast.error('Vui lòng nhập đủ 6 số');
+      return;
+    }
+    setForgotStep(3);
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword !== confirmNewPassword) {
+      toast.error('Mật khẩu xác nhận không khớp');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('Mật khẩu phải từ 6 ký tự');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.resetPassword({
+        email: forgotEmail,
+        code: forgotOtp.join(''),
+        newPassword
+      });
+      toast.success('Đặt lại mật khẩu thành công! Hãy đăng nhập lại.');
+      setShowForgotModal(false);
+      setForgotStep(1);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Lỗi khi đặt lại mật khẩu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (isNaN(value)) return;
+    const newOtp = [...forgotOtp];
+    newOtp[index] = value.substring(value.length - 1);
+    setForgotOtp(newOtp);
+
+    if (value && index < 5) {
+      otpInputs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const data = e.clipboardData.getData('text').trim();
+    if (!/^\d+$/.test(data)) return;
+
+    const pasteData = data.substring(0, 6).split('');
+    const newOtp = [...forgotOtp];
+    pasteData.forEach((char, index) => {
+      if (index < 6) newOtp[index] = char;
+    });
+    setForgotOtp(newOtp);
+    const nextIndex = Math.min(pasteData.length, 5);
+    otpInputs.current[nextIndex].focus();
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !forgotOtp[index] && index > 0) {
+      otpInputs.current[index - 1].focus();
+    }
+  };
+
 
   return (
     <div className="auth-page">
@@ -89,9 +204,14 @@ export default function LoginPage() {
         <h1 className="auth-title">Chào mừng trở lại</h1>
         <p className="auth-subtitle">Đăng nhập vào tài khoản của bạn</p>
 
-
-
-
+        {serverError && (
+          <div className="auth-error-banner">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {serverError}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
@@ -113,18 +233,43 @@ export default function LoginPage() {
             <label htmlFor="password" className="form-label">
               Mật khẩu
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className={`form-input ${errors.password ? 'input-error' : ''}`}
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              autoComplete="current-password"
-            />
+            <div className="password-input-wrapper">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                className={`form-input ${errors.password ? 'input-error' : ''}`}
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {errors.password && <span className="field-error">{errors.password}</span>}
+            <div style={{ textAlign: 'right', marginTop: '8px' }}>
+              <button 
+                type="button" 
+                className="auth-link" 
+                style={{ fontSize: '0.85rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                onClick={() => {
+                  setShowForgotModal(true);
+                  setForgotStep(1);
+                  setForgotOtp(['','','','','','']);
+                }}
+              >
+                Quên mật khẩu?
+              </button>
+            </div>
           </div>
+
 
           <button
             id="login-submit-btn"
@@ -167,6 +312,138 @@ export default function LoginPage() {
           <Link id="go-to-register" to="/register" className="auth-link">Đăng ký ngay</Link>
         </p>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-slide-up" style={{ maxWidth: '420px' }}>
+            <button className="modal-close" onClick={() => setShowForgotModal(false)}>
+              <X size={24} />
+            </button>
+            
+            <div className="modal-header">
+              <div className="modal-icon-circle">
+                <KeyRound size={24} />
+              </div>
+              <h2>Quên mật khẩu?</h2>
+              <p>
+                {forgotStep === 1 && 'Nhập email của bạn để nhận mã xác thực'}
+                {forgotStep === 2 && 'Nhập mã xác thực đã gửi đến email của bạn'}
+                {forgotStep === 3 && 'Tạo mật khẩu mới cho tài khoản của bạn'}
+              </p>
+            </div>
+
+            <div className="modal-body">
+              {forgotStep === 1 && (
+                <div className="forgot-step-1">
+                  <div className="form-group">
+                    <label>Địa chỉ Email</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="email"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="form-input"
+                        style={{ paddingLeft: '40px' }}
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    className="auth-btn" 
+                    onClick={handleSendForgotCode}
+                    disabled={loading}
+                    style={{ marginTop: '10px' }}
+                  >
+                    {loading ? 'Đang gửi...' : 'Tiếp tục'}
+                  </button>
+                </div>
+              )}
+
+              {forgotStep === 2 && (
+                <div className="forgot-step-2">
+                  <div className="otp-container" style={{ justifyContent: 'center', gap: '10px' }}>
+                    {forgotOtp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputs.current[index] = el)}
+                        type="text"
+                        maxLength="1"
+                        className="otp-modal-field"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        onPaste={handleOtpPaste}
+                        onFocus={(e) => e.target.select()}
+                        style={{ width: '45px', height: '55px', fontSize: '1.2rem', textAlign: 'center' }}
+                      />
+                    ))}
+                  </div>
+                  
+                  <div className="resend-section" style={{ textAlign: 'center', marginTop: '15px' }}>
+                    {forgotTimer > 0 ? (
+                      <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Gửi lại mã sau <b>{forgotTimer}s</b></span>
+                    ) : (
+                      <button className="auth-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleSendForgotCode}>
+                        Gửi lại mã xác nhận
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="modal-actions-row" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                    <button className="btn-modal-secondary" style={{ flex: 1 }} onClick={() => setForgotStep(1)}>Quay lại</button>
+                    <button className="auth-btn" style={{ flex: 2 }} onClick={handleVerifyForgotOtp}>Tiếp tục</button>
+                  </div>
+                </div>
+              )}
+
+              {forgotStep === 3 && (
+                <div className="forgot-step-3">
+                  <div className="form-group">
+                    <label>Mật khẩu mới</label>
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="form-input"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle-btn"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        tabIndex="-1"
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Xác nhận mật khẩu mới</label>
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="form-input"
+                    />
+                  </div>
+                  <button 
+                    className="auth-btn" 
+                    onClick={handleResetPassword}
+                    disabled={loading}
+                  >
+                    {loading ? 'Đang lưu...' : 'Đặt lại mật khẩu'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

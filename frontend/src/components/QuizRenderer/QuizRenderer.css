@@ -1,0 +1,224 @@
+.quiz-renderer {
+    background-color: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 4rem;
+}
+
+.quiz-renderer.is-preview {
+    min-height: auto;
+    border-radius: 20px;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.quiz-header {
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border-bottom: 1px solid #edf2f7;
+}
+
+.quiz-banner img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.quiz-renderer.is-preview .quiz-banner img {
+    height: 200px;
+}
+
+.quiz-info {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    text-align: left;
+}
+
+.quiz-info h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #1a1a4b;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.quiz-info .description {
+    font-size: 1.1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    white-space: pre-wrap;
+}
+
+.quiz-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #718096;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.quiz-body {
+    max-width: 900px;
+    margin: 3rem auto 0;
+    padding: 0 1.5rem;
+    text-align: left;
+}
+
+.section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1a1a4b;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    border: 1px solid #edf2f7;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.q-index {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #4361ee;
+    text-transform: uppercase;
+    background: #f0f4ff;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+}
+
+.q-type {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #718096;
+    text-transform: uppercase;
+}
+
+.q-content {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a1a4b;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+}
+
+.answers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.answer-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid #edf2f7;
+    transition: all 0.2s ease;
+}
+
+.answer-item:hover {
+    border-color: #cbd5e0;
+    background: #f1f5f9;
+}
+
+.answer-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.answer-content .text {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.custom-indicator {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    flex-shrink: 0;
+    background: white;
+}
+
+.custom-indicator.radio {
+    border-radius: 50%;
+}
+
+.custom-indicator.checkbox {
+    border-radius: 4px;
+}
+
+.answer-feedback {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #cbd5e0;
+    display: flex;
+    gap: 0.75rem;
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.feedback-icon {
+    color: #319795;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.assessment-section {
+    background: #1a1a4b;
+    border-radius: 24px;
+    padding: 2.5rem;
+    color: white;
+    box-shadow: 0 15px 35px rgba(26, 26, 75, 0.2);
+}
+
+.assessment-section .section-title {
+    color: #4361ee;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 0.75rem;
+}
+
+.assessment-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    opacity: 0.9;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+    .quiz-info h1 { font-size: 1.75rem; }
+    .q-content { font-size: 1.15rem; }
+}

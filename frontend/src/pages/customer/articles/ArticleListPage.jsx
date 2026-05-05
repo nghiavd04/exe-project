@@ -27,9 +27,11 @@ const ArticleListPage = () => {
 
   const categoryLabels = {
     'HEALTH': 'Sức khỏe',
-    'PSYCHOLOGY': 'Tâm lý',
+    'PSYCHOLOGY': 'Tâm lý học',
     'LIFESTYLE': 'Lối sống',
-    'EDUCATION': 'Giáo dục'
+    'EDUCATION': 'Giáo dục',
+    'SCIENCE': 'Khoa học',
+    'TECHNOLOGY': 'Công nghệ'
   };
 
   useEffect(() => {

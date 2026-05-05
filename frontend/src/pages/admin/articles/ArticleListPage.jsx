@@ -2,24 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, MoreVertical, 
   ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  FileText, Eye, Calendar, Archive, RotateCcw, Crown, Star
+  FileText, Eye, Calendar, Archive, RotateCcw, Crown, Star, X, Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
+import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
 
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
   const [stats, setStats] = useState({ totalArticles: 0, viewsThisMonth: 0 });
-  const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('id');
   const [sortOrder, setSortOrder] = useState('desc');
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -43,27 +49,30 @@ export default function ArticleListPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, [page, status, sortOrder]);
+  }, [page, status, sortBy, sortOrder]);
 
   const fetchStats = async () => {
     try {
+      setStatsLoading(true);
       const response = await adminApi.getArticleStats();
       if (response.data.success) {
         setStats(response.data.data);
       }
     } catch (err) {
       console.error('Error fetching article stats:', err);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
   const fetchArticles = async () => {
     try {
-      setLoading(true);
+      setListLoading(true);
       const params = {
         page,
         status: status || undefined,
         search: search || undefined,
-        sort: `viewCount,${sortOrder}`
+        sort: `${sortBy},${sortOrder}`
       };
       const response = await adminApi.getArticles(params);
       if (response.data.success) {
@@ -74,7 +83,7 @@ export default function ArticleListPage() {
     } catch (err) {
       console.error('Error fetching articles:', err);
     } finally {
-      setLoading(false);
+      setListLoading(false);
     }
   };
 
@@ -142,8 +151,33 @@ export default function ArticleListPage() {
     });
   };
 
-  const toggleSort = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  const handleViewDetail = async (article) => {
+    try {
+      setShowDetailModal(true);
+      setDetailLoading(true);
+      setActiveMenuId(null);
+      
+      const response = await adminApi.getArticleDetail(article.id);
+      if (response.data.success) {
+        setSelectedArticle(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching article detail:', err);
+      toast.error('Không thể tải chi tiết bài viết');
+      setShowDetailModal(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleSort = (key) => {
+    if (sortBy === key) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(key);
+      setSortOrder('desc');
+    }
+    setPage(0);
   };
 
   const handleDelete = async (article) => {
@@ -178,6 +212,15 @@ export default function ArticleListPage() {
     { label: 'Đã lưu trữ', value: 'ARCHIVED' },
   ];
 
+  const CATEGORY_LABELS = {
+    HEALTH: 'Sức khỏe',
+    PSYCHOLOGY: 'Tâm lý học',
+    LIFESTYLE: 'Lối sống',
+    EDUCATION: 'Giáo dục',
+    SCIENCE: 'Khoa học',
+    TECHNOLOGY: 'Công nghệ'
+  };
+
   return (
     <div className="admin-page">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
@@ -207,7 +250,7 @@ export default function ArticleListPage() {
           <div style={{ background: '#e6fffa', color: '#319795', padding: '0.75rem', borderRadius: '12px' }}><FileText size={24} /></div>
           <div>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Tổng số bài viết</p>
-            {loading ? (
+            {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '60px', marginTop: '0.25rem' }}></div>
             ) : (
               <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{stats.totalArticles}</h3>
@@ -218,7 +261,7 @@ export default function ArticleListPage() {
           <div style={{ background: '#ebf8ff', color: '#3182ce', padding: '0.75rem', borderRadius: '12px' }}><Eye size={24} /></div>
           <div>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Tổng lượt xem</p>
-            {loading ? (
+            {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '80px', marginTop: '0.25rem' }}></div>
             ) : (
               <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{(stats?.viewsThisMonth || 0).toLocaleString()}</h3>
@@ -281,19 +324,27 @@ export default function ArticleListPage() {
               <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Trạng thái</th>
               <th 
                 style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
-                onClick={toggleSort}
+                onClick={() => handleSort('viewCount')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   Lượt xem
-                  {sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                  {sortBy === 'viewCount' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
                 </div>
               </th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Ngày tạo</th>
+              <th 
+                style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
+                onClick={() => handleSort('id')}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  Ngày tạo
+                  {sortBy === 'id' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
+                </div>
+              </th>
               <th style={{ padding: '1.25rem', textAlign: 'right', color: 'var(--muted)', fontWeight: '600' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {listLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={`sk-${i}`} style={{ borderBottom: '1px solid #edf2f7' }}>
                   <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '20px' }}></div></td>
@@ -330,7 +381,7 @@ export default function ArticleListPage() {
                     >
                       {article.title}
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chuyên mục: {article.category}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chuyên mục: {CATEGORY_LABELS[article.category] || article.category}</div>
                 </td>
                 <td style={{ padding: '1.25rem' }}>
                   {article.requiredTier === 'PREMIUM' ? (
@@ -462,6 +513,7 @@ export default function ArticleListPage() {
                           )}
                           <div style={{ height: '1px', background: '#edf2f7' }}></div>
                           <button 
+                            onClick={() => handleViewDetail(article)}
                             style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'left' }}
                           >
                             <Search size={16} /> Xem chi tiết
@@ -557,6 +609,99 @@ export default function ArticleListPage() {
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
         onConfirm={modalConfig.onConfirm}
       />
+
+      {/* View Detail Modal */}
+      {showDetailModal && selectedArticle && (
+        <div 
+          onClick={() => setShowDetailModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.85)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '2rem',
+            backdropFilter: 'blur(8px)',
+            cursor: 'zoom-out'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '1200px',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              cursor: 'default'
+            }}
+          >
+            <div style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              color: 'white'
+            }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>Chi tiết bài viết</h2>
+                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>Chế độ xem nhanh - Bản chính thức</p>
+              </div>
+              <button 
+                onClick={() => setShowDetailModal(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  color: 'white',
+                  width: '45px',
+                  height: '45px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div style={{
+              width: '100%',
+              background: 'white',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              flex: 1,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {detailLoading ? (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+                  <Loader2 className="animate-spin" size={40} color="#1a1a4b" />
+                  <p style={{ color: 'var(--muted)', fontWeight: '600' }}>Đang tải nội dung...</p>
+                </div>
+              ) : (
+                <ArticleRenderer article={selectedArticle} isPreview={true} />
+              )}
+            </div>
+            
+            <p style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textAlign: 'center' }}>
+              Nhấn ra ngoài hoặc nút [X] để đóng
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

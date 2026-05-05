@@ -23,6 +23,8 @@ export const adminApi = {
   publishArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/publish`),
   archiveArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/archive`),
   unarchiveArticle: (id) => apiClient.patch(`/v1/admin/articles/${id}/unarchive`),
+  getArticleCategories: () => apiClient.get('/v1/customer/articles/categories'),
+  getArticleTiers: () => apiClient.get('/v1/customer/articles/tiers'),
   deleteArticle: (id) => apiClient.delete(`/v1/admin/articles/${id}`),
 
   uploadImage: (formData) => apiClient.post('/v1/images/upload', formData, {

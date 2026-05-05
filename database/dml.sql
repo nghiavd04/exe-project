@@ -13,7 +13,6 @@ INSERT INTO admins (user_id, full_name, is_active) VALUES
 
 INSERT INTO customers (user_id, full_name, is_active) VALUES 
 (2, 'Người dùng thử nghiệm', TRUE);
-
 -- --------------------------------------------------------
 -- 2. Subscription Plans
 -- --------------------------------------------------------

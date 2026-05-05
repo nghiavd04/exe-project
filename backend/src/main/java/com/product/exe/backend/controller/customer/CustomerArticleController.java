@@ -5,11 +5,13 @@ import com.product.exe.backend.dto.response.ArticleDetailResponse;
 import com.product.exe.backend.dto.response.ArticleSummaryResponse;
 import com.product.exe.backend.entity.User;
 import com.product.exe.backend.enums.ArticleCategory;
+import com.product.exe.backend.enums.SubscriptionTier;
 import com.product.exe.backend.repository.UserRepository;
 import com.product.exe.backend.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,7 +30,7 @@ public class CustomerArticleController {
     public ResponseEntity<ApiResponse<Page<ArticleSummaryResponse>>> getArticles(
             @RequestParam(required = false) ArticleCategory category,
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 9) Pageable pageable) {
+            @PageableDefault(size = 9, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
             Page<ArticleSummaryResponse> articles = articleService.getArticles(category, search, pageable);
             return ResponseEntity.ok(ApiResponse.success(articles));
@@ -41,6 +43,11 @@ public class CustomerArticleController {
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<ArticleCategory[]>> getCategories() {
         return ResponseEntity.ok(ApiResponse.success(ArticleCategory.values()));
+    }
+
+    @GetMapping("/tiers")
+    public ResponseEntity<ApiResponse<SubscriptionTier[]>> getTiers() {
+        return ResponseEntity.ok(ApiResponse.success(SubscriptionTier.values()));
     }
 
     @GetMapping("/{slug}")

@@ -12,7 +12,10 @@ import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.repository.CustomerRepository;
 import com.product.exe.backend.repository.UserRepository;
 import com.product.exe.backend.security.JwtTokenProvider;
+import com.product.exe.backend.repository.EmailVerificationRepository;
 import com.product.exe.backend.service.AuthService;
+import com.product.exe.backend.service.EmailService;
+import com.product.exe.backend.entity.EmailVerification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +26,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -32,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final EmailVerificationRepository verificationRepository;
+    private final EmailService emailService;
 
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
@@ -48,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
         String jwt = tokenProvider.generateToken(user);
         String fullName = user.getCustomer() != null ? user.getCustomer().getFullName() : user.getEmail();
+        String avatarUrl = user.getCustomer() != null ? user.getCustomer().getAvatarUrl() : "";
 
         return LoginResponse.builder()
                 .token(jwt)
@@ -55,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .fullName(fullName)
+                .avatarUrl(avatarUrl)
                 .build();
     }
 
@@ -63,6 +73,14 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new BadRequestException("Email already exists!");
+        }
+
+        // Check if email is verified
+        EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(registerRequest.getEmail())
+                .orElseThrow(() -> new BadRequestException("Email not verified! Please request a code first."));
+        
+        if (!verification.isVerified()) {
+            throw new BadRequestException("Email not verified! Please enter the code received.");
         }
 
         User user = User.builder()
@@ -81,6 +99,9 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         customerRepository.save(customer);
 
+        // Delete verification record after successful registration
+        verificationRepository.delete(verification);
+
         return RegisterResponse.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
@@ -89,4 +110,85 @@ public class AuthServiceImpl implements AuthService {
                 .message("Registration successful! Please login to continue.")
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void sendVerificationCode(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new BadRequestException("Email already exists!");
+        }
+
+        String code = String.format("%06d", new Random().nextInt(999999));
+        
+        EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(email)
+                .orElse(EmailVerification.builder().email(email).build());
+        
+        verification.setCode(code);
+        verification.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+        verification.setVerified(false);
+        
+        verificationRepository.save(verification);
+        emailService.sendVerificationCode(email, code);
+    }
+
+    @Override
+    @Transactional
+    public void verifyCode(String email, String code) {
+        EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(email)
+                .orElseThrow(() -> new BadRequestException("Verification code not found! Please request a new one."));
+        
+        if (verification.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Verification code expired!");
+        }
+        
+        if (!verification.getCode().equals(code)) {
+            throw new BadRequestException("Invalid verification code!");
+        }
+        
+        verification.setVerified(true);
+        verificationRepository.save(verification);
+    }
+    @Override
+    @Transactional
+    public void forgotPassword(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new BadRequestException("Email không tồn tại trong hệ thống!");
+        }
+
+        String code = String.format("%06d", new Random().nextInt(999999));
+        
+        EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(email)
+                .orElse(EmailVerification.builder().email(email).build());
+        
+        verification.setCode(code);
+        verification.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+        verification.setVerified(false);
+        
+        verificationRepository.save(verification);
+        emailService.sendVerificationCode(email, code);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword) {
+        EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(email)
+                .orElseThrow(() -> new BadRequestException("Mã xác thực không tồn tại!"));
+        
+        if (!verification.getCode().equals(code)) {
+            throw new BadRequestException("Mã xác thực không chính xác!");
+        }
+        
+        if (verification.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Mã xác thực đã hết hạn!");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Người dùng không tồn tại!"));
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        verificationRepository.delete(verification);
+    }
 }
+

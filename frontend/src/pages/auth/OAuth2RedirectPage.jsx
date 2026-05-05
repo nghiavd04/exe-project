@@ -1,21 +1,46 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../hooks/AuthContext';
+import { toast } from 'react-hot-toast';
 
 export default function OAuth2RedirectPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { login } = useAuth();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Guard against React StrictMode running effects twice in development
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     const token = searchParams.get('token');
     const error = searchParams.get('error');
 
     if (token) {
-      localStorage.setItem('token', token);
-      navigate('/');
+      const fetchProfile = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/v1/customer/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const userData = response.data.data;
+
+          login(userData, token);
+          toast.success('Đăng nhập Google thành công!');
+          navigate('/');
+        } catch (err) {
+          console.error('Lỗi khi lấy thông tin người dùng:', err);
+          toast.error('Không thể hoàn tất đăng nhập Google.');
+          navigate('/login');
+        }
+      };
+
+      fetchProfile();
     } else {
       navigate('/login?error=' + (error || 'oauth2_failed'));
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, login]);
 
   return (
     <div style={{

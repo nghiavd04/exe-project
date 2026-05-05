@@ -1,0 +1,174 @@
+.article-renderer {
+    background-color: #ffffff;
+    min-height: 100vh;
+    text-align: left;
+}
+
+.article-renderer.is-preview {
+    min-height: auto;
+    border-radius: 20px;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.article-renderer .article-header {
+    padding: 6rem 1.5rem 3rem;
+    background: linear-gradient(to bottom, #f0f4ff, #ffffff);
+}
+
+.article-renderer.is-preview .article-header {
+    padding: 3rem 1.5rem 2rem;
+}
+
+.article-renderer .header-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.article-renderer .back-link-mock {
+    display: inline-block;
+    color: #0d7a6e;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.article-renderer h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #1a1a4b;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.article-renderer .article-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #718096;
+    font-size: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(13, 122, 110, 0.1);
+}
+
+.article-renderer .article-category-label {
+    background: #e6fffa;
+    color: #319795;
+    padding: 0.4rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.article-renderer .article-banner {
+    max-width: 1000px;
+    margin: 0 auto 4rem;
+    padding: 0 1.5rem;
+}
+
+.article-renderer .article-banner img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.article-renderer.is-preview .article-banner img {
+    height: 350px;
+}
+
+.article-renderer .article-body-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+}
+
+.article-renderer .article-content {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #2d3748;
+}
+
+/* Copying Rich Text Styles from ArticleDetailPage.css */
+.article-renderer .article-content h2, 
+.article-renderer .article-content h3 {
+    font-family: 'Outfit', sans-serif;
+    margin: 2.5rem 0 1.5rem;
+    color: #1a1a4b;
+    line-height: 1.3;
+}
+
+.article-renderer .article-content h2 { font-size: 1.85rem; font-weight: 800; border-bottom: 2px solid #f0f4ff; padding-bottom: 0.5rem; }
+.article-renderer .article-content h3 { font-size: 1.5rem; font-weight: 700; }
+
+.article-renderer .article-content p {
+    margin-bottom: 1.8rem;
+}
+
+.article-renderer .article-content img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin: 2.5rem auto 0.5rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.article-renderer .article-content blockquote {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-left: 4px solid #4361ee;
+    border-radius: 0 16px 16px 0;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: #2d3748;
+}
+
+.article-renderer .article-content ul, 
+.article-renderer .article-content ol {
+    margin: 2rem 0 2rem 1.5rem;
+}
+
+.article-renderer .article-content li {
+    margin-bottom: 1rem;
+}
+
+/* Quill alignment support */
+.article-renderer .article-content .ql-align-center { text-align: center; }
+.article-renderer .article-content .ql-align-right { text-align: right; }
+.article-renderer .article-content .ql-align-justify { text-align: justify; }
+
+.article-renderer .article-content img + p.ql-align-center {
+    margin-top: 0.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.article-renderer .article-content p.ql-align-center em,
+.article-renderer .article-content p.ql-align-center i {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: #718096;
+    font-style: italic;
+    padding: 0 1rem 0.3rem;
+    border-bottom: 1px dashed rgba(13, 122, 110, 0.2);
+}
+
+@media (max-width: 768px) {
+    .article-renderer .article-banner img {
+        height: 300px;
+    }
+}

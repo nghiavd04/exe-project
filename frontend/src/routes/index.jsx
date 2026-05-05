@@ -17,6 +17,7 @@ import ArticleListPage from '../pages/customer/articles/ArticleListPage';
 import ArticleDetailPage from '../pages/customer/articles/ArticleDetailPage';
 import QuizListPage from '../pages/customer/quizzes/QuizListPage';
 import QuizRunnerPage from '../pages/customer/quizzes/QuizRunnerPage';
+import ProfilePage from '../pages/customer/profile/ProfilePage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -56,6 +57,14 @@ export const router = createBrowserRouter([
         ) 
       },
       { path: 'lien-he', element: <ContactPage /> },
+      { 
+        path: 'profile', 
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ) 
+      },
       { 
         path: '*', 
         element: <PlaceholderPage 

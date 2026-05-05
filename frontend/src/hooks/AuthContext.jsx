@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (userData, token) => {
+  const login = React.useCallback((userData, token) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
@@ -35,17 +35,25 @@ export const AuthProvider = ({ children }) => {
     } else {
       setUserTier('FREE');
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const updateUser = React.useCallback((userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    if (userData.subscriptionTier) {
+      setUserTier(userData.subscriptionTier);
+    }
+  }, []);
+
+  const logout = React.useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     setUserTier('FREE');
-  };
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userTier, setUserTier, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, userTier, setUserTier, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

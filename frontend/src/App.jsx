@@ -6,7 +6,7 @@ import { AuthProvider } from './hooks/AuthContext';
 
 function App() {
   return (
-    <AuthProvider>
+    <>
       <Toaster 
         position="top-right" 
         reverseOrder={false}
@@ -20,8 +20,10 @@ function App() {
           },
         }} 
       />
-      <RouterProvider router={router} />
-    </AuthProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </>
   );
 }
 

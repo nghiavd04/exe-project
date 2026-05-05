@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../hooks/AuthContext';
 import { 
   Users, 
   CheckCircle, 
@@ -12,19 +13,12 @@ import {
 import { adminApi } from '../../../apis/adminApi';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [period, setPeriod] = useState('7d');
   const [activeBar, setActiveBar] = useState(null);
-
-  useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      setUser(JSON.parse(userStr));
-    }
-  }, []);
 
   useEffect(() => {
     fetchDashboardStats();

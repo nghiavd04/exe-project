@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import './Footer.css';
 
 const resourceLinks = [
@@ -28,7 +29,7 @@ export default function Footer() {
     const handleNewsletterSubmit = (e) => {
         e.preventDefault();
         // TODO: Kết nối với API
-        alert('Cảm ơn bạn đã đăng ký!');
+        toast.success('Cảm ơn bạn đã đăng ký!');
     };
 
     return (

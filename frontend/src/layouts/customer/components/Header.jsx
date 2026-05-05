@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/AuthContext';
 import './Header.css';
 
 const navLinks = [
@@ -13,7 +14,7 @@ const navLinks = [
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [user, setUser] = useState(null);
+    const { user, logout } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -26,19 +27,8 @@ export default function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    useEffect(() => {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            setUser(JSON.parse(userStr));
-        } else {
-            setUser(null);
-        }
-    }, [location]);
-
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
+        logout();
         setDropdownOpen(false);
         navigate('/');
     };
@@ -75,7 +65,11 @@ export default function Header() {
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
                             <div className="nav-avatar">
-                                {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                                {user.avatarUrl ? (
+                                    <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                ) : (
+                                    user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'
+                                )}
                             </div>
                             <span className="nav-user-name" style={{ display: 'none' }}>{user.fullName}</span>
                             <span className="nav-user-name-desktop">{user.fullName}</span>
@@ -85,7 +79,7 @@ export default function Header() {
                         </div>
                         {dropdownOpen && (
                             <div className="nav-dropdown-menu">
-                                <Link to="#" className="nav-dropdown-item" onClick={() => setDropdownOpen(false)}>Hồ sơ cá nhân</Link>
+                                <Link to="/profile" className="nav-dropdown-item" onClick={() => setDropdownOpen(false)}>Hồ sơ cá nhân</Link>
                                 <button className="nav-dropdown-item nav-logout" onClick={handleLogout}>Đăng xuất</button>
                             </div>
                         )}

@@ -105,11 +105,26 @@
 }
 
 .article-content img {
+    display: block;
     max-width: 100%;
     height: auto;
     border-radius: 16px;
-    margin: 2.5rem 0;
+    margin: 2.5rem auto 0; /* Reduced bottom margin to bring caption closer */
     box-shadow: var(--shadow-md);
+}
+
+.article-content a {
+    color: #4361ee;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.article-content a:hover {
+    color: #3046ba;
+    background-color: rgba(67, 97, 238, 0.08);
+    border-radius: 4px;
 }
 
 .article-content figure {
@@ -122,6 +137,44 @@
     color: var(--muted);
     margin-top: 0.8rem;
     font-style: italic;
+}
+
+/* Quill alignment support */
+.article-content .ql-align-center {
+    text-align: center;
+}
+
+.article-content .ql-align-right {
+    text-align: right;
+}
+
+.article-content .ql-align-justify {
+    text-align: justify;
+}
+
+.article-content p:has(img) {
+    margin-bottom: 0;
+}
+
+.article-content p:has(img) + p.ql-align-center {
+    margin-top: 0.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.article-content img + p.ql-align-center {
+    margin-top: 0.2rem;
+    margin-bottom: 2.5rem;
+}
+
+
+.article-content p.ql-align-center em,
+.article-content p.ql-align-center i {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-style: italic;
+    padding: 0 1rem 0.3rem;
+    border-bottom: 1px dashed rgba(13, 122, 110, 0.2);
 }
 
 .article-content blockquote {

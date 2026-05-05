@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { articleApi } from '../../../apis/customerApi';
+import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
 import './ArticleDetailPage.css';
-
-const categoryLabels = {
-  'HEALTH': 'Sức khỏe',
-  'PSYCHOLOGY': 'Tâm lý',
-  'LIFESTYLE': 'Lối sống',
-  'EDUCATION': 'Giáo dục'
-};
 
 const ArticleDetailPage = () => {
   const { slug } = useParams();
@@ -86,37 +80,7 @@ const ArticleDetailPage = () => {
     return <div className="article-not-found">Không tìm thấy bài viết yêu cầu. <Link to="/articles">Quay lại</Link></div>;
   }
 
-  return (
-    <article className="article-detail">
-      <header className="article-header">
-        <div className="header-container">
-          <Link to="/articles" className="back-link">&larr; Quay lại danh sách</Link>
-          <h1>{article.title}</h1>
-          <div className="article-meta">
-            <span className="date">Ngày tạo: {new Date(article.publishedAt).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-            <span className="article-category-label">{categoryLabels[article.category] || article.category}</span>
-          </div>
-        </div>
-      </header>
-
-      <div className="article-banner">
-        <img src={article.thumbnailUrl || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=1200'} alt={article.title} />
-      </div>
-
-      <div className="article-body-container">
-        <div className="article-content" dangerouslySetInnerHTML={{ __html: article.content }}></div>
-        
-        <footer className="article-footer">
-          <div className="share-section">
-            <span>Chia sẻ bài viết:</span>
-            <div className="share-icons">
-              {/* Add social icons here */}
-            </div>
-          </div>
-        </footer>
-      </div>
-    </article>
-  );
+  return <ArticleRenderer article={article} />;
 };
 
 export default ArticleDetailPage;
