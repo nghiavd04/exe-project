@@ -123,12 +123,20 @@
     font-weight: 700;
     color: var(--teal-dark);
     margin: 10px 0 5px;
+    max-width: 260px; /* Sidebar width is ~320px minus padding */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-email {
     color: #64748b;
     font-size: 0.95rem;
     margin-bottom: 15px;
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-badge {
@@ -353,6 +361,10 @@
     font-size: 1rem;
     font-weight: 500;
     color: var(--teal-dark);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .badge-role {

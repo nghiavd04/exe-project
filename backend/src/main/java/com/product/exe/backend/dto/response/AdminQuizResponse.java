@@ -16,6 +16,7 @@ public class AdminQuizResponse {
     private Long id;
     private String title;
     private QuizStatus status;
+    private String statusDisplayName;
     private Long attemptCount;
     private LocalDateTime createdAt;
 }

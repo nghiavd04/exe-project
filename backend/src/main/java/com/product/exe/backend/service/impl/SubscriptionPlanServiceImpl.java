@@ -40,6 +40,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
                 .name(request.getName())
                 .price(request.getPrice())
                 .durationDays(request.getDurationDays())
+                .tier(request.getTier())
                 .description(request.getDescription())
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
@@ -59,6 +60,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
         plan.setName(request.getName());
         plan.setPrice(request.getPrice());
         plan.setDurationDays(request.getDurationDays());
+        plan.setTier(request.getTier());
         plan.setDescription(request.getDescription());
         if (request.getIsActive() != null) {
             plan.setIsActive(request.getIsActive());
@@ -98,6 +100,8 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
                 .name(plan.getName())
                 .price(plan.getPrice())
                 .durationDays(plan.getDurationDays())
+                .tier(plan.getTier())
+                .tierDisplayName(plan.getTier() != null ? plan.getTier().getDisplayName() : null)
                 .description(plan.getDescription())
                 .isActive(plan.getIsActive())
                 .subscriberCount(subscriberCount)

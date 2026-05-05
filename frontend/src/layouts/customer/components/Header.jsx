@@ -36,6 +36,13 @@ export default function Header() {
     // Close mobile menu on route change
     const handleNavClick = () => setMenuOpen(false);
 
+    // Get the call name (last word of the full name)
+    const getCallName = (name) => {
+        if (!name) return 'User';
+        const parts = name.trim().split(' ');
+        return parts[parts.length - 1];
+    };
+
     return (
         <nav id="navbar" className={isScrolled ? 'scrolled' : ''}>
             <Link to="/" className="nav-logo">
@@ -72,7 +79,9 @@ export default function Header() {
                                 )}
                             </div>
                             <span className="nav-user-name" style={{ display: 'none' }}>{user.fullName}</span>
-                            <span className="nav-user-name-desktop">{user.fullName}</span>
+                            <span className="nav-user-name-desktop" title={user.fullName}>
+                                {getCallName(user.fullName)}
+                            </span>
                             <svg className={`nav-dropdown-icon ${dropdownOpen ? 'rotated' : ''}`} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M6 9l6 6 6-6" />
                             </svg>

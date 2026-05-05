@@ -118,6 +118,15 @@
     margin-bottom: 1.8rem;
 }
 
+.article-renderer .article-content p:has(img) {
+    margin-bottom: 0;
+}
+
+.article-renderer .article-content p:has(img) + p.ql-align-center {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
 .article-renderer .article-content img {
     display: block;
     max-width: 100%;
@@ -152,10 +161,6 @@
 .article-renderer .article-content .ql-align-right { text-align: right; }
 .article-renderer .article-content .ql-align-justify { text-align: justify; }
 
-.article-renderer .article-content img + p.ql-align-center {
-    margin-top: 0.2rem;
-    margin-bottom: 2.5rem;
-}
 
 .article-renderer .article-content p.ql-align-center em,
 .article-renderer .article-content p.ql-align-center i {

@@ -2,10 +2,6 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './PlaceholderPage.css';
 
-/**
- * Generic placeholder for pages under construction.
- * Replace with actual content as each page is developed.
- */
 export default function PlaceholderPage({ title, emoji, description, backLink = '/' }) {
     useEffect(() => {
         document.title = `${title} – Dopaless`;

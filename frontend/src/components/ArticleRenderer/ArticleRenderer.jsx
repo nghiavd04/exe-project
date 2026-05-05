@@ -1,14 +1,6 @@
 import React from 'react';
 import './ArticleRenderer.css';
 
-const categoryLabels = {
-  'HEALTH': 'Sức khỏe',
-  'PSYCHOLOGY': 'Tâm lý học',
-  'LIFESTYLE': 'Lối sống',
-  'EDUCATION': 'Giáo dục',
-  'SCIENCE': 'Khoa học',
-  'TECHNOLOGY': 'Công nghệ'
-};
 
 const ArticleRenderer = ({ article, isPreview = false }) => {
   if (!article) return null;
@@ -32,7 +24,7 @@ const ArticleRenderer = ({ article, isPreview = false }) => {
               Ngày tạo: {publishedDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
             <span className="article-category-label">
-              {categoryLabels[article.category] || article.category}
+              {article.categoryDisplayName || article.category}
             </span>
           </div>
         </div>

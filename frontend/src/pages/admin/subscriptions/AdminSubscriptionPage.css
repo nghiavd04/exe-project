@@ -1,0 +1,245 @@
+.subscription-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.subscription-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.subscription-breadcrumb span {
+  color: var(--teal-dark);
+}
+
+.subscription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.subscription-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--teal-dark);
+}
+
+.subscription-header p {
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.btn-create-subscription {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--teal-dark);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
+  transition: all 0.2s;
+}
+
+.btn-create-subscription:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(45, 106, 79, 0.3);
+}
+
+.subscription-filters-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-subscription-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-subscription-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.search-subscription-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.search-subscription-input:focus {
+  border-color: var(--teal-dark);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+}
+
+.subscription-table-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  overflow: visible;
+}
+
+.plan-name-cell {
+  font-weight: 700;
+  color: var(--teal-dark);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-price-text {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.plan-duration-flex, 
+.plan-subscribers-flex {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.plan-subscribers-flex {
+  color: var(--teal-dark);
+  font-weight: 600;
+}
+
+.status-pill-badge {
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-pill-badge.active {
+  background: #e6fffa;
+  color: #319795;
+}
+
+.status-pill-badge.inactive {
+  background: #f7fafc;
+  color: #718096;
+}
+
+.actions-relative {
+  position: relative;
+}
+
+.btn-more-actions {
+  padding: 0.5rem;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.btn-more-actions:hover {
+  background: #f1f5f9;
+}
+
+.actions-dropdown-menu {
+  position: absolute;
+  right: 0;
+  z-index: 100;
+  width: 180px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 1px solid #edf2f7;
+  overflow: hidden;
+}
+
+.action-menu-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.action-menu-item:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.action-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-menu-item.danger {
+  color: #e53e3e;
+}
+
+.pagination-subscription-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination-btn-sub {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-dark);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.pagination-btn-sub:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e0;
+}
+
+.pagination-btn-sub:disabled {
+  color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.pagination-btn-sub.active {
+  background: var(--teal-dark);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
+}

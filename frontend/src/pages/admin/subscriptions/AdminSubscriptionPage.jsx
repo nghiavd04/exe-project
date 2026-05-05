@@ -8,6 +8,7 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import SubscriptionPlanModal from './SubscriptionPlanModal';
+import './AdminSubscriptionPage.css';
 
 export default function AdminSubscriptionPage() {
   const [plans, setPlans] = useState([]);
@@ -95,158 +96,141 @@ export default function AdminSubscriptionPage() {
     setActiveMenuId(null);
   };
 
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
   return (
     <div className="admin-page">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
-        <Link to="/admin" style={{ color: 'inherit', textDecoration: 'none' }}>ADMIN</Link>
+      <div className="subscription-breadcrumb">
+        <Link to="/admin">ADMIN</Link>
         <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span style={{ color: 'var(--teal-dark)' }}>QUẢN LÝ GÓI DỊCH VỤ</span>
+        <span>QUẢN LÝ GÓI DỊCH VỤ</span>
       </div>
 
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <header className="subscription-header">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700', color: 'var(--teal-dark)' }}>Gói Dịch Vụ</h1>
-          <p style={{ color: 'var(--muted)', marginTop: '0.25rem' }}>Quản lý các gói đăng ký premium của hệ thống.</p>
+          <h1>Gói Dịch Vụ</h1>
+          <p>Quản lý các gói đăng ký premium của hệ thống.</p>
         </div>
         <button 
           onClick={handleCreate}
-          style={{
-            padding: '0.75rem 1.5rem', borderRadius: '12px', border: 'none',
-            background: 'var(--teal-dark)', color: 'white', fontWeight: '700',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-            boxShadow: '0 4px 12px rgba(45, 106, 79, 0.2)'
-          }}
+          className="btn-create-subscription"
         >
           <Plus size={20} /> Tạo gói mới
         </button>
       </header>
 
       {/* Filters & Search */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '300px' }}>
-          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+      <div className="subscription-filters-row">
+        <div className="search-subscription-wrapper">
+          <Search className="search-subscription-icon" size={18} />
           <input 
             type="text" 
             placeholder="Tìm kiếm gói dịch vụ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && setPage(0)}
-            style={{ 
-              width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '12px', 
-              border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.95rem',
-              transition: 'all 0.2s'
-            }}
+            className="search-subscription-input"
           />
         </div>
-
       </div>
 
-      <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', overflow: 'visible' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="subscription-table-card">
+        <table className="admin-table">
           <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', width: '60px' }}>ID</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Tên gói</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Giá</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Thời hạn</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Người đăng ký</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Trạng thái</th>
-              <th style={{ padding: '1.25rem', textAlign: 'right', color: 'var(--muted)', fontWeight: '600' }}>Thao tác</th>
+            <tr>
+              <th style={{ width: '60px' }}>ID</th>
+              <th>Tên gói</th>
+              <th>Cấp độ</th>
+              <th>Giá</th>
+              <th>Thời hạn</th>
+              <th>Người đăng ký</th>
+              <th>Trạng thái</th>
+              <th style={{ textAlign: 'right' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #edf2f7' }}>
-                  <td colSpan="6" style={{ padding: '1.25rem' }}>
+                <tr key={i}>
+                  <td colSpan="8" style={{ padding: '1.25rem' }}>
                     <div className="skeleton" style={{ height: '40px', width: '100%', borderRadius: '8px' }}></div>
                   </td>
                 </tr>
               ))
             ) : (!plans || plans.length === 0) ? (
               <tr>
-                <td colSpan="6" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
+                <td colSpan="8" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
                   <CreditCard size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
                   <p>Chưa có gói dịch vụ nào được tạo.</p>
                 </td>
               </tr>
             ) : plans.map((plan, index) => (
-              <tr key={plan.id} style={{ borderBottom: '1px solid #edf2f7', transition: 'background 0.2s' }}>
-                <td style={{ padding: '1.25rem', color: 'var(--muted)' }}>#{plan.id}</td>
-                <td style={{ padding: '1.25rem' }}>
-                  <div 
-                    style={{ 
-                      fontWeight: '700', color: 'var(--teal-dark)',
-                      maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                    }} 
-                    title={plan.name}
-                  >
-                    {plan.name}
+              <tr key={plan.id}>
+                <td style={{ color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
+                <td className="plan-name-cell" title={plan.name}>
+                  {plan.name}
+                </td>
+                <td>
+                  <div style={{ 
+                    fontWeight: '800',
+                    fontSize: '0.85rem',
+                    color: plan.tier === 'VIP' ? '#0ea5e9' : (plan.tier === 'PREMIUM' ? '#f59e0b' : '#64748b'),
+                    letterSpacing: '0.02em'
+                  }}>
+                    {plan.tierDisplayName || plan.tier}
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem', fontWeight: '700', color: 'var(--accent)' }}>
+                <td className="plan-price-text">
                   {formatPrice(plan.price)}
                 </td>
-                <td style={{ padding: '1.25rem', color: 'var(--muted)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <td>
+                  <div className="plan-duration-flex">
                     <Calendar size={14} /> {plan.durationDays} ngày
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--teal-dark)', fontWeight: '600' }}>
+                <td>
+                  <div className="plan-subscribers-flex">
                     <Users size={14} /> {plan.subscriberCount || 0}
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                  <span style={{ 
-                    padding: '0.35rem 0.85rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700',
-                    background: plan.isActive ? '#e6fffa' : '#f7fafc',
-                    color: plan.isActive ? '#319795' : '#718096',
-                    display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
-                  }}>
+                <td>
+                  <span className={`status-pill-badge ${plan.isActive ? 'active' : 'inactive'}`}>
                     {plan.isActive ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
                     {plan.isActive ? 'Đang kích hoạt' : 'Ngừng hoạt động'}
                   </span>
                 </td>
-                <td style={{ padding: '1.25rem', textAlign: 'right' }}>
-                  <div style={{ position: 'relative' }}>
+                <td style={{ textAlign: 'right' }}>
+                  <div className="actions-relative">
                     <button 
                       onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === plan.id ? null : plan.id); }}
-                      style={{ padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                      className="btn-more-actions"
                     >
                       <MoreVertical size={20} />
                     </button>
 
                     {activeMenuId === plan.id && (
-                      <div style={{
-                        position: 'absolute', right: 0, 
-                        [plans && plans.length - index <= 2 && plans.length > 3 ? 'bottom' : 'top']: '100%',
-                        zIndex: 100, width: '180px', background: 'white', borderRadius: '12px', 
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)', border: '1px solid #edf2f7', overflow: 'hidden'
+                      <div className="actions-dropdown-menu" style={{
+                        [plans && plans.length - index <= 2 && plans.length > 3 ? 'bottom' : 'top']: '100%'
                       }}>
                         <button 
                           onClick={() => !plan.isActive && handleEdit(plan)} 
-                          style={{ ...menuItemStyle, opacity: plan.isActive ? 0.5 : 1, cursor: plan.isActive ? 'not-allowed' : 'pointer' }}
+                          disabled={plan.isActive}
+                          className="action-menu-item"
                           title={plan.isActive ? "Cần ngừng kích hoạt để chỉnh sửa" : ""}
                         >
                           <Edit2 size={16} /> Chỉnh sửa
                         </button>
-                        <button onClick={() => handleToggleStatus(plan)} style={menuItemStyle}>
+                        <button onClick={() => handleToggleStatus(plan)} className="action-menu-item">
                           {plan.isActive ? <XCircle size={16} /> : <CheckCircle2 size={16} />}
                           {plan.isActive ? 'Ngừng kích hoạt' : 'Kích hoạt'}
                         </button>
                         <button 
                           onClick={() => !plan.isActive && handleDelete(plan)} 
-                          style={{ 
-                            ...menuItemStyle, 
-                            color: '#e53e3e', 
-                            opacity: plan.isActive ? 0.5 : 1, 
-                            cursor: plan.isActive ? 'not-allowed' : 'pointer' 
-                          }}
+                          disabled={plan.isActive}
+                          className="action-menu-item danger"
                           title={plan.isActive ? "Cần ngừng kích hoạt để xóa" : ""}
                         >
                           <Trash2 size={16} /> Xóa gói
@@ -279,11 +263,11 @@ export default function AdminSubscriptionPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '2rem' }}>
+        <div className="pagination-subscription-container">
           <button 
             disabled={page === 0 || loading}
             onClick={() => setPage(p => p - 1)}
-            style={{ ...paginationButtonStyle(false, page === 0 || loading) }}
+            className="pagination-btn-sub"
           >
             <ChevronLeft size={20} />
           </button>
@@ -300,7 +284,7 @@ export default function AdminSubscriptionPage() {
 
             if (start > 0) {
               pages.push(
-                <button key={0} onClick={() => setPage(0)} style={paginationButtonStyle(page === 0)}>1</button>
+                <button key={0} onClick={() => setPage(0)} className={`pagination-btn-sub ${page === 0 ? 'active' : ''}`}>1</button>
               );
               if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
             }
@@ -310,7 +294,7 @@ export default function AdminSubscriptionPage() {
                 <button 
                   key={i} 
                   onClick={() => setPage(i)}
-                  style={paginationButtonStyle(page === i)}
+                  className={`pagination-btn-sub ${page === i ? 'active' : ''}`}
                 >
                   {i + 1}
                 </button>
@@ -320,7 +304,7 @@ export default function AdminSubscriptionPage() {
             if (end < totalPages - 1) {
               if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
               pages.push(
-                <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} style={paginationButtonStyle(page === totalPages - 1)}>
+                <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className={`pagination-btn-sub ${page === totalPages - 1 ? 'active' : ''}`}>
                   {totalPages}
                 </button>
               );
@@ -332,7 +316,7 @@ export default function AdminSubscriptionPage() {
           <button 
             disabled={page >= totalPages - 1 || loading}
             onClick={() => setPage(p => p + 1)}
-            style={{ ...paginationButtonStyle(false, page >= totalPages - 1 || loading) }}
+            className="pagination-btn-sub"
           >
             <ChevronRight size={20} />
           </button>
@@ -341,15 +325,3 @@ export default function AdminSubscriptionPage() {
     </div>
   );
 }
-
-const paginationButtonStyle = (isActive, disabled) => ({
-  minWidth: '40px', height: '40px', borderRadius: '10px', background: isActive ? 'var(--teal-dark)' : 'white',
-  border: isActive ? 'none' : '1px solid #edf2f7', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  color: isActive ? 'white' : disabled ? '#cbd5e0' : 'var(--teal-dark)', cursor: disabled ? 'not-allowed' : 'pointer', 
-  transition: 'all 0.2s', fontWeight: '700', boxShadow: isActive ? '0 4px 12px rgba(45, 106, 79, 0.2)' : 'none'
-});
-
-const menuItemStyle = {
-  width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', 
-  border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'left'
-};

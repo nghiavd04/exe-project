@@ -15,10 +15,13 @@ public class AdminArticleResponse {
     private String title;
     private String slug;
     private ArticleCategory category;
+    private String categoryDisplayName;
     private ArticleStatus status;
+    private String statusDisplayName;
     private Long viewCount;
     private String authorName; // Tên của Admin viết bài
     private SubscriptionTier requiredTier;
+    private String requiredTierDisplayName;
     private LocalDateTime createdAt;
     private LocalDateTime publishedAt;
 }

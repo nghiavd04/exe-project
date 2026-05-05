@@ -25,14 +25,6 @@ const ArticleListPage = () => {
     return (TIER_WEIGHTS[userTier] || 0) >= (TIER_WEIGHTS[requiredTier] || 0);
   };
 
-  const categoryLabels = {
-    'HEALTH': 'Sức khỏe',
-    'PSYCHOLOGY': 'Tâm lý học',
-    'LIFESTYLE': 'Lối sống',
-    'EDUCATION': 'Giáo dục',
-    'SCIENCE': 'Khoa học',
-    'TECHNOLOGY': 'Công nghệ'
-  };
 
   useEffect(() => {
     fetchCategories();
@@ -51,7 +43,7 @@ const ArticleListPage = () => {
 
   const displayCategories = [
     { id: 'ALL', label: 'Tất cả' },
-    ...apiCategories.map(cat => ({ id: cat, label: categoryLabels[cat] || cat }))
+    ...apiCategories.map(cat => ({ id: cat.value, label: cat.label }))
   ];
 
   useEffect(() => {
@@ -148,13 +140,13 @@ const ArticleListPage = () => {
                 >
                   <div className="article-img-wrapper">
                     <img src={article.thumbnailUrl || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=600'} alt={article.title} />
-                    {article.category && <span className="article-category-badge">{categoryLabels[article.category] || article.category}</span>}
+                    {article.categoryDisplayName && <span className="article-category-badge">{article.categoryDisplayName}</span>}
                     {article.requiredTier && article.requiredTier !== 'FREE' && (
                       <div className={`premium-badge ${article.requiredTier.toLowerCase()}-tier`}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                         </svg>
-                        {article.requiredTier}
+                        {article.requiredTierDisplayName || article.requiredTier}
                       </div>
                     )}
                   </div>

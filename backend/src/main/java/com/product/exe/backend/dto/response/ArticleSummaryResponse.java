@@ -19,6 +19,8 @@ public class ArticleSummaryResponse {
     private String slug;
     private String thumbnailUrl;
     private ArticleCategory category;
+    private String categoryDisplayName;
     private SubscriptionTier requiredTier;
+    private String requiredTierDisplayName;
     private LocalDateTime publishedAt;
 }

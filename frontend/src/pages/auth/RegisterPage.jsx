@@ -31,6 +31,23 @@ export default function RegisterPage() {
     return () => clearInterval(interval);
   }, [step, timer]);
 
+  // Auto-hide errors after 5 seconds
+  useEffect(() => {
+    if (serverError || Object.keys(errors).length > 0) {
+      const timer = setTimeout(() => {
+        setServerError('');
+        setErrors({});
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [serverError, errors]);
+
+  // Clear errors when switching steps
+  useEffect(() => {
+    setServerError('');
+    setErrors({});
+  }, [step]);
+
   const validateEmail = () => {
     if (!form.email) return 'Email is required';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

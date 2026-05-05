@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, MoreVertical, 
   ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  FileText, Eye, Calendar, Archive, RotateCcw, Crown, Star, X, Loader2
+  FileText, Eye, Archive, RotateCcw, Crown, Star, X, Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
+import './ArticleListPage.css';
 
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
@@ -223,221 +224,167 @@ export default function ArticleListPage() {
 
   return (
     <div className="admin-page">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
-        <Link to="/admin" style={{ color: 'inherit', textDecoration: 'none' }}>ADMIN</Link>
+      <div className="admin-breadcrumb">
+        <Link to="/admin">ADMIN</Link>
         <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span style={{ color: 'var(--teal-dark)' }}>QUẢN LÝ BÀI VIẾT</span>
+        <span>QUẢN LÝ BÀI VIẾT</span>
       </div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <header className="admin-header">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700', color: 'var(--teal-dark)' }}>Quản lý Bài viết</h1>
-          <p style={{ color: 'var(--muted)', marginTop: '0.25rem' }}>Xem và quản lý tất cả nội dung bài viết trong hệ thống.</p>
+          <h1>Quản lý Bài viết</h1>
+          <p>Xem và quản lý tất cả nội dung bài viết trong hệ thống.</p>
         </div>
-        <Link to="/admin/articles/create" style={{ textDecoration: 'none' }}>
-          <button style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--teal-dark)', 
-            color: 'white', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '10px', 
-            fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(45, 106, 79, 0.2)'
-          }}>
-            <Plus size={20} /> Viết Bài Mới
-          </button>
+        <Link to="/admin/articles/create" className="btn-create-new">
+          <Plus size={20} /> Viết Bài Mới
         </Link>
       </header>
 
       {/* Stats Widgets */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: '#e6fffa', color: '#319795', padding: '0.75rem', borderRadius: '12px' }}><FileText size={24} /></div>
+      <div className="article-stats-grid">
+        <div className="stat-widget-card">
+          <div className="stat-icon-box teal"><FileText size={24} /></div>
           <div>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Tổng số bài viết</p>
+            <p className="stat-info-p">Tổng số bài viết</p>
             {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '60px', marginTop: '0.25rem' }}></div>
             ) : (
-              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{stats.totalArticles}</h3>
+              <h3 className="stat-info-h3">{stats.totalArticles}</h3>
             )}
           </div>
         </div>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: '#ebf8ff', color: '#3182ce', padding: '0.75rem', borderRadius: '12px' }}><Eye size={24} /></div>
+        <div className="stat-widget-card">
+          <div className="stat-icon-box blue"><Eye size={24} /></div>
           <div>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Tổng lượt xem</p>
+            <p className="stat-info-p">Tổng lượt xem</p>
             {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '80px', marginTop: '0.25rem' }}></div>
             ) : (
-              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{(stats?.viewsThisMonth || 0).toLocaleString()}</h3>
+              <h3 className="stat-info-h3">{(stats?.viewsThisMonth || 0).toLocaleString()}</h3>
             )}
           </div>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div style={{ 
-        background: 'white', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', 
-        boxShadow: 'var(--shadow-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem'
-      }}>
-        <div style={{ display: 'flex', gap: '0.5rem', background: '#f1f5f9', padding: '0.4rem', borderRadius: '12px' }}>
+      <div className="filters-bar">
+        <div className="status-tabs">
           {statusTabs.map((tab) => (
             <button
               key={tab.value}
               onClick={() => { setStatus(tab.value); setPage(0); }}
-              style={{
-                padding: '0.6rem 1.25rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: status === tab.value ? 'white' : 'transparent',
-                color: status === tab.value ? 'var(--teal-dark)' : 'var(--muted)',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                boxShadow: status === tab.value ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                transition: 'all 0.2s'
-              }}
+              className={`status-tab-btn ${status === tab.value ? 'active' : ''}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-        <div style={{ position: 'relative', width: '300px' }}>
-          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+        <div className="search-box-wrapper">
+          <Search className="search-icon" size={18} />
           <input 
             type="text" 
             placeholder="Tìm kiếm bài viết..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearch}
-            style={{ 
-              width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', 
-              border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.95rem'
-            }} 
+            className="search-input"
           />
         </div>
       </div>
 
       {/* Article Table */}
-      <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', overflow: 'visible' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="article-table-container">
+        <table className="admin-table">
           <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', width: '60px' }}>STT</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', minWidth: '300px' }}>Tiêu đề bài viết</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Gói truy cập</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Trạng thái</th>
-              <th 
-                style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
-                onClick={() => handleSort('viewCount')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <tr>
+              <th style={{ width: '60px' }}>STT</th>
+              <th style={{ minWidth: '300px' }}>Tiêu đề bài viết</th>
+              <th>Gói truy cập</th>
+              <th>Trạng thái</th>
+              <th onClick={() => handleSort('viewCount')}>
+                <div className="sortable-header">
                   Lượt xem
                   {sortBy === 'viewCount' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
                 </div>
               </th>
-              <th 
-                style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
-                onClick={() => handleSort('id')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <th onClick={() => handleSort('id')}>
+                <div className="sortable-header">
                   Ngày tạo
                   {sortBy === 'id' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
                 </div>
               </th>
-              <th style={{ padding: '1.25rem', textAlign: 'right', color: 'var(--muted)', fontWeight: '600' }}>Thao tác</th>
+              <th style={{ textAlign: 'right' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {listLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={`sk-${i}`} style={{ borderBottom: '1px solid #edf2f7' }}>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '20px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}>
+                <tr key={`sk-${i}`}>
+                  <td><div className="skeleton" style={{ height: '20px', width: '20px' }}></div></td>
+                  <td>
                     <div className="skeleton" style={{ height: '20px', width: '250px', marginBottom: '0.5rem' }}></div>
                     <div className="skeleton" style={{ height: '14px', width: '150px' }}></div>
                   </td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '24px', width: '80px', borderRadius: '6px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '24px', width: '100px', borderRadius: '20px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '32px', width: '120px', marginLeft: 'auto' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '24px', width: '80px', borderRadius: '6px' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '24px', width: '100px', borderRadius: '20px' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>
+                  <td style={{ textAlign: 'right' }}><div className="skeleton" style={{ height: '32px', width: '120px', marginLeft: 'auto' }}></div></td>
                 </tr>
               ))
             ) : articles.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)' }}>Không tìm thấy bài viết nào.</td>
+                <td colSpan="7" style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)' }}>Không tìm thấy bài viết nào.</td>
               </tr>
             ) : articles.map((article, index) => (
-              <tr key={article.id} style={{ borderBottom: '1px solid #edf2f7' }}>
-                <td style={{ padding: '1.25rem', color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
-                <td style={{ padding: '1.25rem' }}>
-                    <div 
-                      title={article.title}
-                      style={{ 
-                        fontWeight: '600', color: 'var(--teal-dark)', 
-                        maxWidth: '350px', 
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        whiteSpace: 'pre-wrap',
-                        overflowWrap: 'break-word'
-                      }}
-                    >
+              <tr key={article.id}>
+                <td style={{ color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
+                <td>
+                    <div className="article-title-cell" title={article.title}>
                       {article.title}
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chuyên mục: {CATEGORY_LABELS[article.category] || article.category}</div>
+                    <div className="article-category-hint">Chuyên mục: {CATEGORY_LABELS[article.category] || article.category}</div>
                 </td>
-                <td style={{ padding: '1.25rem' }}>
+                <td>
                   {article.requiredTier === 'PREMIUM' ? (
-                    <span style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.25rem',
-                      padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
-                      background: '#fff9db', color: '#f59e0b', border: '1px solid #fcc419'
-                    }}>
+                    <span className="tier-badge premium">
                       <Crown size={12} /> PREMIUM
                     </span>
                   ) : article.requiredTier === 'VIP' ? (
-                    <span style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.25rem',
-                      padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
-                      background: '#f0f9ff', color: '#0ea5e9', border: '1px solid #7dd3fc'
-                    }}>
+                    <span className="tier-badge vip">
                       <Star size={12} fill="#0ea5e9" /> VIP
                     </span>
                   ) : (
                     <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Miễn phí</span>
                   )}
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                  <span style={{ 
-                    padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600',
-                    background: article.status === 'PUBLISHED' ? '#e6fffa' : article.status === 'ARCHIVED' ? '#f1f5f9' : '#fffaf0',
-                    color: article.status === 'PUBLISHED' ? '#319795' : article.status === 'ARCHIVED' ? '#718096' : '#d69e2e',
-                    border: '1px solid transparent'
-                  }}>
+                <td>
+                  <span className={`status-badge ${article.status === 'PUBLISHED' ? 'published' : article.status === 'ARCHIVED' ? 'archived' : 'draft'}`}>
                     {article.status === 'PUBLISHED' ? 'Đã xuất bản' : article.status === 'ARCHIVED' ? 'Đã lưu trữ' : 'Bản nháp'}
                   </span>
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <td>
+                   <div className="view-count-cell">
                       <Eye size={14} color="var(--muted)" />
                       {(article.viewCount || 0).toLocaleString()}
                    </div>
                 </td>
-                <td style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--muted)' }}>
+                <td style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
                   {new Date(article.createdAt).toLocaleDateString('vi-VN')}
                 </td>
-                <td style={{ padding: '1.25rem', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
+                <td>
+                  <div className="actions-cell-wrapper">
                     {/* Edit Button */}
                     {article.status !== 'PUBLISHED' ? (
                       <Link 
                         to={`/admin/articles/edit/${article.id}`}
                         title="Chỉnh sửa"
-                        style={{ padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+                        className="btn-action-icon"
                       >
                         <Edit2 size={18} />
                       </Link>
                     ) : (
                       <div 
                         title="Không thể sửa bài đã xuất bản. Hãy lưu trữ để sửa."
-                        style={{ padding: '0.5rem', color: '#cbd5e0', cursor: 'not-allowed', display: 'flex' }}
+                        className="btn-action-icon disabled"
                       >
                         <Edit2 size={18} />
                       </div>
@@ -447,11 +394,7 @@ export default function ArticleListPage() {
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDelete(article); }}
                       title={article.status === 'DRAFT' ? "Xóa" : "Không thể xóa bài đã xuất bản/lưu trữ"}
-                      style={{ 
-                        padding: '0.5rem', 
-                        color: article.status === 'DRAFT' ? '#e53e3e' : '#cbd5e0', 
-                        background: 'none', border: 'none', cursor: article.status === 'DRAFT' ? 'pointer' : 'not-allowed' 
-                      }}
+                      className={`btn-action-icon ${article.status === 'DRAFT' ? 'delete' : 'disabled'}`}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -461,61 +404,35 @@ export default function ArticleListPage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === article.id ? null : article.id); }}
                         title="Tùy chọn trạng thái"
-                        style={{ 
-                          padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', 
-                          cursor: 'pointer', borderRadius: '8px',
-                          backgroundColor: activeMenuId === article.id ? '#f1f5f9' : 'transparent'
-                        }}
+                        className={`menu-trigger-btn ${activeMenuId === article.id ? 'active' : ''}`}
                       >
                         <MoreVertical size={20} />
                       </button>
 
                       {activeMenuId === article.id && (
-                        <div style={{
-                          position: 'absolute', 
-                          right: 0, 
+                        <div className="dropdown-menu-container" style={{
                           ...(index >= articles.length - 3 && articles.length > 3 
                             ? { bottom: '100%', marginBottom: '0.5rem' } 
                             : { top: '100%', marginTop: '0.5rem' }
-                          ),
-                          background: 'white', 
-                          borderRadius: '12px', 
-                          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                          border: '1px solid #edf2f7', 
-                          zIndex: 100, 
-                          width: '190px', 
-                          overflow: 'hidden',
-                          animation: 'fadeIn 0.15s ease-out'
+                          )
                         }}>
                           {article.status === 'DRAFT' && (
-                            <button 
-                              onClick={() => handlePublish(article.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--teal-dark)', fontSize: '0.9rem', textAlign: 'left' }}
-                            >
+                            <button onClick={() => handlePublish(article.id)} className="dropdown-menu-item" style={{ color: 'var(--teal-dark)' }}>
                               <Plus size={16} /> Xuất bản bài viết
                             </button>
                           )}
                           {article.status === 'PUBLISHED' && (
-                            <button 
-                              onClick={() => handleArchive(article.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: '#d69e2e', fontSize: '0.9rem', textAlign: 'left' }}
-                            >
+                            <button onClick={() => handleArchive(article.id)} className="dropdown-menu-item" style={{ color: '#d69e2e' }}>
                               <Archive size={16} /> Lưu trữ bài viết
                             </button>
                           )}
                           {article.status === 'ARCHIVED' && (
-                            <button 
-                              onClick={() => handleUnarchive(article.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: '#3182ce', fontSize: '0.9rem', textAlign: 'left' }}
-                            >
+                            <button onClick={() => handleUnarchive(article.id)} className="dropdown-menu-item" style={{ color: '#3182ce' }}>
                               <RotateCcw size={16} /> Khôi phục bài viết
                             </button>
                           )}
-                          <div style={{ height: '1px', background: '#edf2f7' }}></div>
-                          <button 
-                            onClick={() => handleViewDetail(article)}
-                            style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'left' }}
-                          >
+                          <div className="dropdown-divider"></div>
+                          <button onClick={() => handleViewDetail(article)} className="dropdown-menu-item" style={{ color: 'var(--muted)' }}>
                             <Search size={16} /> Xem chi tiết
                           </button>
                         </div>
@@ -530,17 +447,11 @@ export default function ArticleListPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div style={{ 
-            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '2rem', paddingBottom: '2rem'
-          }}>
+          <div className="pagination-container">
             <button 
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
-              style={{ 
-                padding: '0.6rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white',
-                cursor: page === 0 ? 'not-allowed' : 'pointer', color: page === 0 ? '#cbd5e0' : 'var(--teal-dark)',
-                display: 'flex', alignItems: 'center', transition: 'all 0.2s'
-              }}
+              className="pagination-arrow"
             >
               <ChevronLeft size={20} />
             </button>
@@ -557,7 +468,7 @@ export default function ArticleListPage() {
 
               if (start > 0) {
                 pages.push(
-                  <button key={0} onClick={() => setPage(0)} style={paginationBtnStyle(page === 0)}>1</button>
+                  <button key={0} onClick={() => setPage(0)} className="pagination-btn">1</button>
                 );
                 if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
               }
@@ -567,7 +478,7 @@ export default function ArticleListPage() {
                   <button 
                     key={i} 
                     onClick={() => setPage(i)}
-                    style={paginationBtnStyle(page === i)}
+                    className={`pagination-btn ${page === i ? 'active' : ''}`}
                   >
                     {i + 1}
                   </button>
@@ -577,7 +488,7 @@ export default function ArticleListPage() {
               if (end < totalPages - 1) {
                 if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
                 pages.push(
-                  <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} style={paginationBtnStyle(page === totalPages - 1)}>
+                  <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className="pagination-btn">
                     {totalPages}
                   </button>
                 );
@@ -589,11 +500,7 @@ export default function ArticleListPage() {
             <button 
               disabled={page === totalPages - 1}
               onClick={() => setPage(page + 1)}
-              style={{ 
-                padding: '0.6rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white',
-                cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer', color: page === totalPages - 1 ? '#cbd5e0' : 'var(--teal-dark)',
-                display: 'flex', alignItems: 'center', transition: 'all 0.2s'
-              }}
+              className="pagination-arrow"
             >
               <ChevronRight size={20} />
             </button>
@@ -612,91 +519,30 @@ export default function ArticleListPage() {
 
       {/* View Detail Modal */}
       {showDetailModal && selectedArticle && (
-        <div 
-          onClick={() => setShowDetailModal(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.85)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '2rem',
-            backdropFilter: 'blur(8px)',
-            cursor: 'zoom-out'
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: '1200px',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              cursor: 'default'
-            }}
-          >
-            <div style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem',
-              color: 'white'
-            }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>Chi tiết bài viết</h2>
-                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>Chế độ xem nhanh - Bản chính thức</p>
+        <div className="detail-modal-overlay" onClick={() => setShowDetailModal(false)}>
+          <div className="detail-modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
+            <div className="detail-modal-header">
+              <div className="detail-modal-header-info">
+                <h2>Chi tiết bài viết</h2>
+                <p>Chế độ xem nhanh - Bản chính thức</p>
               </div>
-              <button 
-                onClick={() => setShowDetailModal(false)}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  width: '45px',
-                  height: '45px',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              >
+              <button className="detail-modal-close-btn" onClick={() => setShowDetailModal(false)}>
                 <X size={24} />
               </button>
             </div>
             
-            <div style={{
-              width: '100%',
-              background: 'white',
-              borderRadius: '24px',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-              flex: 1,
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
+            <div className="detail-modal-main-card">
               {detailLoading ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
+                <div className="detail-modal-loading">
                   <Loader2 className="animate-spin" size={40} color="#1a1a4b" />
-                  <p style={{ color: 'var(--muted)', fontWeight: '600' }}>Đang tải nội dung...</p>
+                  <p>Đang tải nội dung...</p>
                 </div>
               ) : (
                 <ArticleRenderer article={selectedArticle} isPreview={true} />
               )}
             </div>
             
-            <p style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textAlign: 'center' }}>
+            <p className="detail-modal-footer-hint">
               Nhấn ra ngoài hoặc nút [X] để đóng
             </p>
           </div>
@@ -705,22 +551,3 @@ export default function ArticleListPage() {
     </div>
   );
 }
-
-// Helper style for pagination buttons
-const paginationBtnStyle = (isActive) => ({
-  minWidth: '40px',
-  height: '40px',
-  padding: '0 0.5rem',
-  borderRadius: '10px',
-  border: isActive ? 'none' : '1px solid #e2e8f0',
-  background: isActive ? 'var(--teal-dark)' : 'white',
-  color: isActive ? 'white' : 'var(--teal-dark)',
-  fontWeight: '700',
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  transition: 'all 0.2s',
-  boxShadow: isActive ? '0 4px 12px rgba(45, 106, 79, 0.2)' : 'none',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center'
-});

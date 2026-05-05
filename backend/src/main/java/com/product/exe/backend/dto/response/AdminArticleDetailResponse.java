@@ -20,10 +20,13 @@ public class AdminArticleDetailResponse {
     private String slug;
     private String content;
     private ArticleCategory category;
+    private String categoryDisplayName;
     private ArticleStatus status;
+    private String statusDisplayName;
     private String thumbnailUrl;
     private String thumbnailPublicId;
     private SubscriptionTier requiredTier;
+    private String requiredTierDisplayName;
     private Long viewCount;
     private String authorName;
     private LocalDateTime createdAt;

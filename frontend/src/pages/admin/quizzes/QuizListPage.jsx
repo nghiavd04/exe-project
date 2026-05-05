@@ -10,6 +10,7 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import QuizRenderer from '../../../components/QuizRenderer/QuizRenderer';
+import './QuizListPage.css';
 
 export default function QuizListPage() {
   const [quizzes, setQuizzes] = useState([]);
@@ -215,137 +216,110 @@ export default function QuizListPage() {
 
   return (
     <div className="admin-page">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
-        <Link to="/admin" style={{ color: 'inherit', textDecoration: 'none' }}>ADMIN</Link>
+      <div className="quiz-breadcrumb">
+        <Link to="/admin">ADMIN</Link>
         <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span style={{ color: 'var(--teal-dark)' }}>QUẢN LÝ QUIZZES</span>
+        <span>QUẢN LÝ QUIZZES</span>
       </div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <header className="quiz-header">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '700', color: 'var(--teal-dark)' }}>Quản lý Quizzes</h1>
-          <p style={{ color: 'var(--muted)', marginTop: '0.25rem' }}>Xem và quản lý tất cả các bài kiểm tra trong hệ thống.</p>
+          <h1>Quản lý Quizzes</h1>
+          <p>Xem và quản lý tất cả các bài kiểm tra trong hệ thống.</p>
         </div>
         <Link to="/admin/quizzes/create" style={{ textDecoration: 'none' }}>
-          <button style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--accent)', 
-            color: 'white', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '10px', 
-            fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(246, 173, 85, 0.3)'
-          }}>
+          <button className="btn-create-quiz">
             <Plus size={20} /> Tạo Quiz Mới
           </button>
         </Link>
       </header>
 
       {/* Stats Widgets */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: '#e6fffa', color: '#319795', padding: '0.75rem', borderRadius: '12px' }}><HelpCircle size={24} /></div>
-          <div>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Tổng số Quizzes</p>
+      <div className="quiz-stats-grid">
+        <div className="quiz-stat-card">
+          <div className="stat-icon-box teal"><HelpCircle size={24} /></div>
+          <div className="stat-info">
+            <p>Tổng số Quizzes</p>
             {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '60px', marginTop: '0.25rem' }}></div>
             ) : (
-              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{stats.totalQuizzes}</h3>
+              <h3>{stats.totalQuizzes}</h3>
             )}
           </div>
         </div>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: '#ebf8ff', color: '#3182ce', padding: '0.75rem', borderRadius: '12px' }}><BarChart3 size={24} /></div>
-          <div>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>Lượt làm tháng này</p>
+        <div className="quiz-stat-card">
+          <div className="stat-icon-box blue"><BarChart3 size={24} /></div>
+          <div className="stat-info">
+            <p>Lượt làm tháng này</p>
             {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '80px', marginTop: '0.25rem' }}></div>
             ) : (
-              <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: 'var(--teal-dark)' }}>{stats.attemptsThisMonth}</h3>
+              <h3>{stats.attemptsThisMonth}</h3>
             )}
           </div>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div style={{ 
-        background: 'white', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', 
-        boxShadow: 'var(--shadow-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem'
-      }}>
-        <div style={{ display: 'flex', gap: '0.5rem', background: '#f1f5f9', padding: '0.4rem', borderRadius: '12px' }}>
+      <div className="quiz-filters-bar">
+        <div className="status-tabs-wrapper">
           {statusTabs.map((tab) => (
             <button
               key={tab.value}
               onClick={() => { setStatus(tab.value); setPage(0); }}
-              style={{
-                padding: '0.6rem 1.25rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: status === tab.value ? 'white' : 'transparent',
-                color: status === tab.value ? 'var(--teal-dark)' : 'var(--muted)',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                boxShadow: status === tab.value ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                transition: 'all 0.2s'
-              }}
+              className={`status-tab-btn ${status === tab.value ? 'active' : ''}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-        <div style={{ position: 'relative', width: '300px' }}>
-          <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+        <div className="search-box-relative">
+          <Search className="search-icon-quiz" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
           <input 
             type="text" 
             placeholder="Tìm kiếm..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearch}
-            style={{ 
-              width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', 
-              border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.95rem'
-            }} 
+            className="search-input-quiz"
           />
         </div>
       </div>
 
       {/* Quiz Table */}
-      <div style={{ background: 'white', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', overflow: 'visible' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="quiz-table-container">
+        <table className="admin-table">
           <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', width: '60px' }}>STT</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Tên bài test</th>
-              <th style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600' }}>Trạng thái</th>
-              <th 
-                style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
-                onClick={() => handleSort('attemptCount')}
-              >
+            <tr>
+              <th style={{ width: '60px' }}>STT</th>
+              <th>Tên bài test</th>
+              <th>Trạng thái</th>
+              <th onClick={() => handleSort('attemptCount')} style={{ cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   Lượt làm
                   {sortBy === 'attemptCount' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
                 </div>
               </th>
-              <th 
-                style={{ padding: '1.25rem', color: 'var(--muted)', fontWeight: '600', cursor: 'pointer' }}
-                onClick={() => handleSort('id')}
-              >
+              <th onClick={() => handleSort('id')} style={{ cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   Ngày tạo
                   {sortBy === 'id' && (sortOrder === 'desc' ? <ChevronDown size={16} /> : <ChevronUp size={16} />)}
                 </div>
               </th>
-              <th style={{ padding: '1.25rem', textAlign: 'right', color: 'var(--muted)', fontWeight: '600' }}>Thao tác</th>
+              <th style={{ textAlign: 'right' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {listLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={`sk-${i}`} style={{ borderBottom: '1px solid #edf2f7' }}>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '20px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}>
+                <tr key={`sk-${i}`}>
+                  <td><div className="skeleton" style={{ height: '20px', width: '20px' }}></div></td>
+                  <td>
                     <div className="skeleton" style={{ height: '20px', width: '250px', marginBottom: '0.5rem' }}></div>
                   </td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '24px', width: '100px', borderRadius: '20px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '80px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>
-                  <td style={{ padding: '1.25rem' }}><div className="skeleton" style={{ height: '32px', width: '120px', marginLeft: 'auto' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '24px', width: '100px', borderRadius: '20px' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '20px', width: '80px' }}></div></td>
+                  <td><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>
+                  <td style={{ textAlign: 'right' }}><div className="skeleton" style={{ height: '32px', width: '120px', marginLeft: 'auto' }}></div></td>
                 </tr>
               ))
             ) : quizzes.length === 0 ? (
@@ -353,54 +327,40 @@ export default function QuizListPage() {
                 <td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)' }}>Không tìm thấy bài test nào.</td>
               </tr>
             ) : quizzes.map((quiz, index) => (
-              <tr key={quiz.id} style={{ borderBottom: '1px solid #edf2f7' }}>
-                <td style={{ padding: '1.25rem', color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
-                <td style={{ 
-                  padding: '1.25rem', fontWeight: '600', color: 'var(--teal-dark)',
-                  maxWidth: '350px', 
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word'
-                }} title={quiz.title}>
+              <tr key={quiz.id}>
+                <td style={{ color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
+                <td className="quiz-title-cell" title={quiz.title}>
                   {quiz.title}
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                  <span style={{ 
-                    padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600',
-                    background: quiz.status === 'PUBLISHED' ? '#e6fffa' : quiz.status === 'ARCHIVED' ? '#f1f5f9' : '#fffaf0',
-                    color: quiz.status === 'PUBLISHED' ? '#319795' : quiz.status === 'ARCHIVED' ? '#718096' : '#d69e2e',
-                    border: '1px solid transparent'
-                  }}>
-                    {quiz.status === 'PUBLISHED' ? 'Đã xuất bản' : quiz.status === 'ARCHIVED' ? 'Đã lưu trữ' : 'Bản nháp'}
+                <td>
+                  <span className={`status-label-badge ${quiz.status === 'PUBLISHED' ? 'published' : quiz.status === 'ARCHIVED' ? 'archived' : 'draft'}`}>
+                    {quiz.statusDisplayName || quiz.status}
                   </span>
                 </td>
-                <td style={{ padding: '1.25rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <td>
+                   <div className="attempt-count-flex">
                       <BarChart3 size={14} color="var(--muted)" />
                       {quiz.attemptCount.toLocaleString()}
                    </div>
                 </td>
-                <td style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--muted)' }}>
+                <td style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
                   {new Date(quiz.createdAt).toLocaleDateString('vi-VN')}
                 </td>
-                <td style={{ padding: '1.25rem', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
+                <td style={{ textAlign: 'right' }}>
+                  <div className="actions-cell-flex">
                     {/* Edit Button */}
                     {quiz.status !== 'PUBLISHED' ? (
                       <Link 
                         to={`/admin/quizzes/edit/${quiz.id}`}
                         title="Chỉnh sửa"
-                        style={{ padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+                        className="btn-icon-action"
                       >
                         <Edit2 size={18} />
                       </Link>
                     ) : (
                       <div 
                         title="Không thể sửa bài đã xuất bản. Hãy lưu trữ để sửa."
-                        style={{ padding: '0.5rem', color: '#cbd5e0', cursor: 'not-allowed', display: 'flex' }}
+                        className="btn-icon-action disabled"
                       >
                         <Edit2 size={18} />
                       </div>
@@ -410,11 +370,7 @@ export default function QuizListPage() {
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDelete(quiz); }}
                       title={quiz.status === 'DRAFT' ? "Xóa" : "Không thể xóa bài đã xuất bản/lưu trữ"}
-                      style={{ 
-                        padding: '0.5rem', 
-                        color: quiz.status === 'DRAFT' ? '#e53e3e' : '#cbd5e0', 
-                        background: 'none', border: 'none', cursor: quiz.status === 'DRAFT' ? 'pointer' : 'not-allowed' 
-                      }}
+                      className={`btn-icon-action ${quiz.status === 'DRAFT' ? 'delete' : 'disabled'}`}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -424,37 +380,22 @@ export default function QuizListPage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === quiz.id ? null : quiz.id); }}
                         title="Tùy chọn trạng thái"
-                        style={{ 
-                          padding: '0.5rem', color: 'var(--muted)', background: 'none', border: 'none', 
-                          cursor: 'pointer', borderRadius: '8px',
-                          backgroundColor: activeMenuId === quiz.id ? '#f1f5f9' : 'transparent'
-                        }}
+                        className={`btn-icon-action ${activeMenuId === quiz.id ? 'active' : ''}`}
                       >
                         <MoreVertical size={20} />
                       </button>
 
                       {activeMenuId === quiz.id && (
-                        <div style={{
-                          position: 'absolute', 
-                          right: 0, 
-                          // Nếu là 3 hàng cuối thì mở ngược lên trên
+                        <div className="dropdown-menu-quiz" style={{
                           ...(index >= quizzes.length - 3 && quizzes.length > 3 
                             ? { bottom: '100%', marginBottom: '0.5rem' } 
                             : { top: '100%', marginTop: '0.5rem' }
-                          ),
-                          background: 'white', 
-                          borderRadius: '12px', 
-                          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                          border: '1px solid #edf2f7', 
-                          zIndex: 100, 
-                          width: '190px', 
-                          overflow: 'hidden',
-                          animation: 'fadeIn 0.15s ease-out'
+                          )
                         }}>
                           {quiz.status === 'DRAFT' && (
                             <button 
                               onClick={() => handlePublish(quiz.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--teal-dark)', fontSize: '0.9rem', textAlign: 'left' }}
+                              className="dropdown-item-quiz publish"
                             >
                               <Plus size={16} /> Xuất bản bài test
                             </button>
@@ -462,7 +403,7 @@ export default function QuizListPage() {
                           {quiz.status === 'PUBLISHED' && (
                             <button 
                               onClick={() => handleArchive(quiz.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: '#d69e2e', fontSize: '0.9rem', textAlign: 'left' }}
+                              className="dropdown-item-quiz archive"
                             >
                               <Archive size={16} /> Lưu trữ bài test
                             </button>
@@ -470,7 +411,7 @@ export default function QuizListPage() {
                           {quiz.status === 'ARCHIVED' && (
                             <button 
                               onClick={() => handleUnarchive(quiz.id)}
-                              style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: '#3182ce', fontSize: '0.9rem', textAlign: 'left' }}
+                              className="dropdown-item-quiz restore"
                             >
                               <RotateCcw size={16} /> Khôi phục bài test
                             </button>
@@ -478,7 +419,7 @@ export default function QuizListPage() {
                           <div style={{ height: '1px', background: '#edf2f7' }}></div>
                           <button 
                             onClick={() => handleViewDetail(quiz)}
-                            style={{ width: '100%', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'left' }}
+                            className="dropdown-item-quiz view"
                           >
                             <Search size={16} /> Xem chi tiết
                           </button>
@@ -494,17 +435,11 @@ export default function QuizListPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div style={{ 
-            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '2rem', paddingBottom: '2rem'
-          }}>
+          <div className="pagination-quiz-controls">
             <button 
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
-              style={{ 
-                padding: '0.6rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white',
-                cursor: page === 0 ? 'not-allowed' : 'pointer', color: page === 0 ? '#cbd5e0' : 'var(--teal-dark)',
-                display: 'flex', alignItems: 'center', transition: 'all 0.2s'
-              }}
+              className="pagination-btn-quiz"
             >
               <ChevronLeft size={20} />
             </button>
@@ -521,7 +456,7 @@ export default function QuizListPage() {
 
               if (start > 0) {
                 pages.push(
-                  <button key={0} onClick={() => setPage(0)} style={paginationBtnStyle(page === 0)}>1</button>
+                  <button key={0} onClick={() => setPage(0)} className={`pagination-btn-quiz ${page === 0 ? 'active' : ''}`}>1</button>
                 );
                 if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
               }
@@ -531,7 +466,7 @@ export default function QuizListPage() {
                   <button 
                     key={i} 
                     onClick={() => setPage(i)}
-                    style={paginationBtnStyle(page === i)}
+                    className={`pagination-btn-quiz ${page === i ? 'active' : ''}`}
                   >
                     {i + 1}
                   </button>
@@ -541,7 +476,7 @@ export default function QuizListPage() {
               if (end < totalPages - 1) {
                 if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
                 pages.push(
-                  <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} style={paginationBtnStyle(page === totalPages - 1)}>
+                  <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className={`pagination-btn-quiz ${page === totalPages - 1 ? 'active' : ''}`}>
                     {totalPages}
                   </button>
                 );
@@ -553,11 +488,7 @@ export default function QuizListPage() {
             <button 
               disabled={page === totalPages - 1}
               onClick={() => setPage(page + 1)}
-              style={{ 
-                padding: '0.6rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white',
-                cursor: page === totalPages - 1 ? 'not-allowed' : 'pointer', color: page === totalPages - 1 ? '#cbd5e0' : 'var(--teal-dark)',
-                display: 'flex', alignItems: 'center', transition: 'all 0.2s'
-              }}
+              className="pagination-btn-quiz"
             >
               <ChevronRight size={20} />
             </button>
@@ -576,80 +507,19 @@ export default function QuizListPage() {
 
       {/* View Detail Modal */}
       {showDetailModal && (
-        <div 
-          onClick={() => setShowDetailModal(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.85)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '2rem',
-            backdropFilter: 'blur(8px)',
-            cursor: 'zoom-out'
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: '1200px',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              cursor: 'default'
-            }}
-          >
-            <div style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem',
-              color: 'white'
-            }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>Chi tiết bài test</h2>
-                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>Chế độ xem nhanh nội dung câu hỏi và phản hồi</p>
+        <div className="detail-modal-overlay" onClick={() => setShowDetailModal(false)}>
+          <div className="detail-modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
+            <div className="detail-modal-header">
+              <div className="detail-modal-header-info">
+                <h2>Chi tiết bài test</h2>
+                <p>Chế độ xem nhanh nội dung câu hỏi và phản hồi</p>
               </div>
-              <button 
-                onClick={() => setShowDetailModal(false)}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  width: '45px',
-                  height: '45px',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              >
+              <button className="detail-modal-close-btn" onClick={() => setShowDetailModal(false)}>
                 <X size={24} />
               </button>
             </div>
             
-            <div style={{
-              width: '100%',
-              background: 'white',
-              borderRadius: '24px',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-              flex: 1,
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
+            <div className="detail-modal-main-card">
               {detailLoading ? (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
                   <Loader2 className="animate-spin" size={40} color="#1a1a4b" />
@@ -660,7 +530,7 @@ export default function QuizListPage() {
               )}
             </div>
             
-            <p style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textAlign: 'center' }}>
+            <p className="detail-modal-footer-hint">
               Nhấn ra ngoài hoặc nút [X] để đóng
             </p>
           </div>
@@ -669,22 +539,3 @@ export default function QuizListPage() {
     </div>
   );
 }
-
-// Helper style for pagination buttons
-const paginationBtnStyle = (isActive) => ({
-  minWidth: '40px',
-  height: '40px',
-  padding: '0 0.5rem',
-  borderRadius: '10px',
-  border: isActive ? 'none' : '1px solid #e2e8f0',
-  background: isActive ? 'var(--teal-dark)' : 'white',
-  color: isActive ? 'white' : 'var(--teal-dark)',
-  fontWeight: '700',
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  transition: 'all 0.2s',
-  boxShadow: isActive ? '0 4px 12px rgba(45, 106, 79, 0.2)' : 'none',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center'
-});

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, User, Mail, Lock, ShieldCheck } from 'lucide-react';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
+import './AdminCreateModal.css';
 
 export default function AdminCreateModal({ isOpen, onClose, onSuccess }) {
   const [form, setForm] = useState({ email: '', password: '', fullName: '' });
@@ -45,100 +46,75 @@ export default function AdminCreateModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)'
-    }}>
-      <div style={{
-        background: 'white', borderRadius: '16px', width: '100%', maxWidth: '450px', 
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden', animation: 'modalFadeIn 0.3s ease-out'
-      }}>
-        <div style={{ 
-          padding: '1.5rem', borderBottom: '1px solid #edf2f7', display: 'flex', 
-          justifyContent: 'space-between', alignItems: 'center', background: 'var(--teal-dark)', color: 'white'
-        }}>
-          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className="modal-overlay-blur">
+      <div className="modal-content-card">
+        <div className="modal-header-teal">
+          <h3>
             <ShieldCheck size={24} /> Thêm Quản trị viên
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '4px' }}>
+          <button onClick={onClose} className="modal-close-icon-btn">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem', color: 'var(--teal-dark)' }}>Họ và tên</label>
-            <div style={{ position: 'relative' }}>
-              <User style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+        <form onSubmit={handleSubmit} className="modal-form-body">
+          <div className="form-group-field">
+            <label className="field-label-teal">Họ và tên</label>
+            <div className="input-icon-wrapper">
+              <User className="input-icon-left" size={18} />
               <input
                 type="text"
                 placeholder="Nhập họ tên"
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                style={{
-                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '10px',
-                  border: errors.fullName ? '1px solid #e53e3e' : '1px solid #e2e8f0', outline: 'none'
-                }}
+                className={`modal-input-field ${errors.fullName ? 'error' : ''}`}
               />
             </div>
-            {errors.fullName && <p style={{ color: '#e53e3e', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.fullName}</p>}
+            {errors.fullName && <p className="error-text-small">{errors.fullName}</p>}
           </div>
 
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem', color: 'var(--teal-dark)' }}>Email</label>
-            <div style={{ position: 'relative' }}>
-              <Mail style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+          <div className="form-group-field">
+            <label className="field-label-teal">Email</label>
+            <div className="input-icon-wrapper">
+              <Mail className="input-icon-left" size={18} />
               <input
                 type="email"
                 placeholder="admin@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                style={{
-                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '10px',
-                  border: errors.email ? '1px solid #e53e3e' : '1px solid #e2e8f0', outline: 'none'
-                }}
+                className={`modal-input-field ${errors.email ? 'error' : ''}`}
               />
             </div>
-            {errors.email && <p style={{ color: '#e53e3e', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.email}</p>}
+            {errors.email && <p className="error-text-small">{errors.email}</p>}
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem', color: 'var(--teal-dark)' }}>Mật khẩu</label>
-            <div style={{ position: 'relative' }}>
-              <Lock style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+          <div className="form-group-field last">
+            <label className="field-label-teal">Mật khẩu</label>
+            <div className="input-icon-wrapper">
+              <Lock className="input-icon-left" size={18} />
               <input
                 type="password"
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                style={{
-                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '10px',
-                  border: errors.password ? '1px solid #e53e3e' : '1px solid #e2e8f0', outline: 'none'
-                }}
+                className={`modal-input-field ${errors.password ? 'error' : ''}`}
               />
             </div>
-            {errors.password && <p style={{ color: '#e53e3e', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.password}</p>}
+            {errors.password && <p className="error-text-small">{errors.password}</p>}
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+          <div className="modal-footer-btns">
             <button
               type="button"
               onClick={onClose}
-              style={{
-                flex: 1, padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0',
-                background: 'white', color: 'var(--muted)', fontWeight: '700', cursor: 'pointer'
-              }}
+              className="btn-modal-secondary"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
-              style={{
-                flex: 2, padding: '0.75rem', borderRadius: '10px', border: 'none',
-                background: 'var(--teal-dark)', color: 'white', fontWeight: '700', cursor: 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
+              className="btn-modal-primary-teal"
             >
               {loading ? 'Đang tạo...' : 'Tạo tài khoản'}
             </button>

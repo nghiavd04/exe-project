@@ -1,5 +1,6 @@
 package com.product.exe.backend.dto.request;
 
+import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -27,6 +28,9 @@ public class SubscriptionPlanRequest {
     @NotNull(message = "Thời hạn không được để trống")
     @Min(value = 1, message = "Thời hạn phải ít nhất 1 ngày")
     private Integer durationDays;
+
+    @NotNull(message = "Cấp độ gói không được để trống")
+    private SubscriptionTier tier;
 
     private String description;
     

@@ -49,6 +49,17 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [forgotTimer]);
 
+  // Auto-hide errors after 5 seconds
+  useEffect(() => {
+    if (serverError || Object.keys(errors).length > 0) {
+      const timer = setTimeout(() => {
+        setServerError('');
+        setErrors({});
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [serverError, errors]);
+
 
   const validate = () => {
     const errs = {};

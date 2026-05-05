@@ -4,13 +4,15 @@ import lombok.Getter;
 
 @Getter
 public enum SubscriptionStatus implements DbValueEnum {
-    ACTIVE("ACTIVE"),
-    EXPIRED("EXPIRED"),
-    CANCELLED("CANCELLED");
+    ACTIVE("ACTIVE", "Đang hoạt động"),
+    EXPIRED("EXPIRED", "Hết hạn"),
+    CANCELLED("CANCELLED", "Đã hủy");
 
     private final String dbValue;
+    private final String displayName;
 
-    SubscriptionStatus(String dbValue) {
+    SubscriptionStatus(String dbValue, String displayName) {
         this.dbValue = dbValue;
+        this.displayName = displayName;
     }
 }

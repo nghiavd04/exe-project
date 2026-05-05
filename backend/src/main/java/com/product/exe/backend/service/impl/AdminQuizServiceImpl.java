@@ -49,10 +49,12 @@ public class AdminQuizServiceImpl implements AdminQuizService {
                 createdAt = (LocalDateTime) dateObj;
             }
 
+            QuizStatus quizStatus = QuizStatus.valueOf((String) row[2]);
             return AdminQuizResponse.builder()
                 .id(((Number) row[0]).longValue())
                 .title((String) row[1])
-                .status(QuizStatus.valueOf((String) row[2]))
+                .status(quizStatus)
+                .statusDisplayName(quizStatus.getDisplayName())
                 .createdAt(createdAt)
                 .attemptCount(((Number) row[4]).longValue())
                 .build();

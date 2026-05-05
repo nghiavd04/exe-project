@@ -2,18 +2,6 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { 
   ArrowLeft,
   Image as ImageIcon, 
-  Bold, 
-  Italic, 
-  Underline, 
-  List as ListIcon, 
-  ListOrdered, 
-  Quote, 
-  AlignLeft, 
-  AlignCenter,
-  AlignRight,
-  Sigma, 
-  Table as TableIcon, 
-  Link as LinkIcon, 
   Eye, 
   Target,
   Send,
@@ -32,63 +20,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import ConfirmModal from '../../../components/ConfirmModal';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
-
-const QUILL_STYLE = `
-  .article-quill-editor .ql-container {
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    font-family: inherit;
-    font-size: 1.1rem;
-    background: #fff;
-  }
-  .article-quill-editor .ql-toolbar {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    background: #f8fafc;
-    border-color: #edf2f7 !important;
-  }
-  .article-quill-editor .ql-container {
-    border-color: #edf2f7 !important;
-  }
-  .article-quill-editor .ql-editor {
-    min-height: 450px;
-    line-height: 1.8;
-    color: #2d3748;
-  }
-  .article-quill-editor .ql-editor.ql-blank::before {
-    color: #a0aec0;
-    font-style: normal;
-  }
-  .article-quill-editor .ql-editor img {
-    display: block;
-    max-width: 100%;
-    margin: 1rem auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: all 0.2s ease;
-  }
-  .article-quill-editor .ql-editor img:hover {
-    outline: 3px solid #4361ee;
-    box-shadow: 0 8px 24px rgba(67, 97, 238, 0.2);
-    cursor: pointer;
-  }
-  /* Optional: Style for captions */
-  .article-quill-editor .ql-editor p.ql-align-center {
-    margin-top: -0.5rem;
-    margin-bottom: 1.5rem;
-  }
-  .article-quill-editor .ql-editor p.ql-align-center em,
-  .article-quill-editor .ql-editor p.ql-align-center i {
-    display: block;
-    font-size: 0.9rem;
-    color: #718096;
-    font-style: italic;
-    margin-top: -1.2rem;
-    margin-bottom: 2rem;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px dashed #e2e8f0;
-  }
-`;
+import './CreateArticlePage.css';
 
 export default function CreateArticlePage() {
   const { id } = useParams();
@@ -260,23 +192,7 @@ export default function CreateArticlePage() {
     status: 'DRAFT'
   });
 
-  const TIER_LABELS = {
-    FREE: 'Miễn phí',
-    VIP: 'Thành viên VIP',
-    PREMIUM: 'Thành viên Premium'
-  };
-
   const [tiers, setTiers] = useState([]);
-
-  const CATEGORY_LABELS = {
-    EDUCATION: 'Giáo dục',
-    SCIENCE: 'Khoa học',
-    TECHNOLOGY: 'Công nghệ',
-    HEALTH: 'Sức khỏe',
-    PSYCHOLOGY: 'Tâm lý học',
-    LIFESTYLE: 'Lối sống'
-  };
-
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -288,17 +204,11 @@ export default function CreateArticlePage() {
         ]);
 
         if (categoriesRes.data.success) {
-          setCategories(categoriesRes.data.data.map(cat => ({
-            value: cat,
-            label: CATEGORY_LABELS[cat] || cat
-          })));
+          setCategories(categoriesRes.data.data);
         }
 
         if (tiersRes.data.success) {
-          setTiers(tiersRes.data.data.map(tier => ({
-            value: tier,
-            label: TIER_LABELS[tier] || tier
-          })));
+          setTiers(tiersRes.data.data);
         }
       } catch (error) {
         console.error('Error fetching meta data:', error);
@@ -488,101 +398,68 @@ export default function CreateArticlePage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', flexDirection: 'column', gap: '1rem' }}>
+      <div className="admin-loading-container">
         <Loader2 className="animate-spin" size={48} color="#1a1a4b" />
-        <p style={{ color: 'var(--muted)', fontWeight: '600' }}>Đang tải thông tin bài viết...</p>
+        <p>Đang tải thông tin bài viết...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
-      <style>{QUILL_STYLE}</style>
+    <div className="article-editor-container">
       {/* Header */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <header className="create-article-header">
+        <div className="header-left">
           <button 
             onClick={() => navigate('/admin/articles')}
-            style={{ 
-              background: '#f8fafc', border: '1px solid #edf2f7', borderRadius: '10px', 
-              padding: '0.5rem', cursor: 'pointer', color: '#1a1a4b' 
-            }}
+            className="btn-back-square"
           >
             <ArrowLeft size={20} />
           </button>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '800', color: '#1a1a4b' }}>{isEdit ? 'Chỉnh sửa bài viết' : 'Viết bài nghiên cứu mới'}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+          <div className="header-title-section">
+            <h1>{isEdit ? 'Chỉnh sửa bài viết' : 'Viết bài nghiên cứu mới'}</h1>
+            <div className="header-breadcrumb">
               <span>ADMIN</span>
               <ChevronRight size={14} />
               <span>KHO LƯU TRỮ</span>
               <ChevronRight size={14} />
-              <span style={{ color: '#4361ee', fontWeight: '600' }}>{isEdit ? 'CẬP NHẬT' : 'TẠO MỚI'}</span>
+              <span className="breadcrumb-active">{isEdit ? 'CẬP NHẬT' : 'TẠO MỚI'}</span>
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="header-actions">
           <button 
             onClick={() => setShowPreviewModal(true)}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', 
-              borderRadius: '12px', border: '1px solid #edf2f7', background: 'white', 
-              fontWeight: '700', color: '#4a5568', cursor: 'pointer' 
-            }}
+            className="btn-preview-outline"
           >
             <Eye size={18} /> Xem thử
           </button>
           <button 
             onClick={handleSubmit}
             disabled={submitting || (isEdit && articleData.status === 'PUBLISHED')}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem', 
-              padding: '0.75rem 1.25rem', 
-              borderRadius: '12px', 
-              border: 'none', 
-              background: '#1a1a4b', 
-              fontWeight: '700', 
-              color: 'white',
-              cursor: (submitting || (isEdit && articleData.status === 'PUBLISHED')) ? 'not-allowed' : 'pointer',
-              opacity: (submitting || (isEdit && articleData.status === 'PUBLISHED')) ? 0.7 : 1
-            }}
+            className="btn-save-primary"
           >
             <Send size={18} /> {submitting ? 'Đang lưu...' : (isEdit && articleData.status === 'PUBLISHED') ? 'Đã xuất bản (Khóa)' : isEdit ? 'Lưu thay đổi' : 'Lưu bản nháp'}
           </button>
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      <div className="editor-main-layout">
         {/* Main Editor */}
-        <div style={{ flex: 1, background: 'white', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+        <div className="editor-content-card">
           {/* Image Upload Area */}
           <div 
             onClick={() => !uploadingImage && fileInputRef.current?.click()}
-            style={{ 
-              width: '100%', 
-              height: '300px', 
-              background: articleData.thumbnailUrl ? `url(${articleData.thumbnailUrl}) center/cover` : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', 
-              borderRadius: '20px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              border: articleData.thumbnailUrl ? 'none' : '2px dashed #e2e8f0',
-              marginBottom: '2.5rem',
-              cursor: uploadingImage ? 'not-allowed' : 'pointer',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
+            className={`thumbnail-upload-area ${!articleData.thumbnailUrl ? 'empty' : ''} ${uploadingImage ? 'uploading' : ''}`}
+            style={articleData.thumbnailUrl ? { background: `url(${articleData.thumbnailUrl}) center/cover` } : {}}
           >
             {!articleData.thumbnailUrl && !uploadingImage && (
               <>
-                <div style={{ background: 'white', padding: '1.25rem', borderRadius: '50%', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', marginBottom: '1rem' }}>
+                <div className="thumbnail-placeholder-icon">
                   <ImageIcon size={36} color="#1a1a4b" />
                 </div>
-                <p style={{ margin: 0, fontWeight: '800', color: '#1a1a4b' }}>Tải lên ảnh bìa bài viết</p>
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--muted)' }}>Tỷ lệ 21:9 được khuyến nghị</p>
+                <p className="thumbnail-upload-text">Tải lên ảnh bìa bài viết</p>
+                <p className="thumbnail-upload-hint">Tỷ lệ 21:9 được khuyến nghị</p>
               </>
             )}
             {uploadingImage && (
@@ -592,43 +469,15 @@ export default function CreateArticlePage() {
               </div>
             )}
             {articleData.thumbnailUrl && !uploadingImage && (
-              <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '0.75rem' }}>
+              <div className="thumbnail-actions-overlay">
                 <button 
                   onClick={handleDeleteThumbnail}
                   title="Xóa ảnh bìa"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.9)', 
-                    border: 'none', 
-                    padding: '0.6rem', 
-                    borderRadius: '10px', 
-                    color: '#ef4444', 
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    backdropFilter: 'blur(4px)'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'white'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.9)'}
+                  className="btn-delete-thumbnail"
                 >
                   <X size={20} />
                 </button>
-                <div 
-                  style={{ 
-                    background: 'rgba(255,255,255,0.9)', 
-                    padding: '0.6rem 1.2rem', 
-                    borderRadius: '10px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem', 
-                    fontWeight: '700', 
-                    fontSize: '0.85rem', 
-                    color: '#1a1a4b', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    backdropFilter: 'blur(4px)'
-                  }}
-                >
+                <div className="thumbnail-change-badge">
                   <Upload size={16} /> Thay đổi ảnh bìa
                 </div>
               </div>
@@ -641,27 +490,13 @@ export default function CreateArticlePage() {
             placeholder="Tiêu đề bài nghiên cứu của bạn..." 
             value={articleData.title}
             onChange={(e) => handleFieldChange('title', e.target.value)}
-            style={{ 
-              width: '100%', 
-              border: 'none', 
-              outline: 'none', 
-              fontSize: '2.5rem', 
-              fontWeight: '900', 
-              color: '#1a1a4b',
-              marginBottom: '1rem',
-              resize: 'none',
-              fontFamily: '"Outfit", sans-serif',
-              lineHeight: '1.2',
-              whiteSpace: 'pre-wrap'
-            }}
+            className="article-title-textarea"
             onInput={(e) => {
               e.target.style.height = 'auto';
               e.target.style.height = e.target.scrollHeight + 'px';
             }}
           />
-          <div style={{ width: '80px', height: '6px', background: '#4361ee', marginBottom: '2.5rem', borderRadius: '3px' }}></div>
-
-          {/* Toolbar (Removed manual toolbar) */}
+          <div className="title-underline-decoration"></div>
 
           {/* Content Area - React Quill */}
           <div className="article-quill-editor" style={{ marginTop: '1rem', position: 'relative' }}>
@@ -677,81 +512,59 @@ export default function CreateArticlePage() {
             />
 
             {imageMenu && (
-              <div style={{
-                position: 'absolute',
+              <div className="image-menu-floating" style={{
                 top: imageMenu.top,
-                left: imageMenu.left,
-                transform: 'translateX(-50%)',
-                background: '#1a1a4b',
-                padding: '0.4rem',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                zIndex: 1000,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                animation: 'fadeInUp 0.2s ease-out'
+                left: imageMenu.left
               }}>
-                <style>{`
-                  @keyframes fadeInUp {
-                    from { opacity: 0; transform: translate(-50%, 10px); }
-                    to { opacity: 1; transform: translate(-50%, 0); }
-                  }
-                `}</style>
-                <span style={{ color: 'white', fontSize: '0.75rem', fontWeight: '700', marginLeft: '0.5rem', opacity: 0.8 }}>ẢNH ĐÃ CĂN GIỮA</span>
-                <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.2)', margin: '0 4px' }}></div>
-                <ImageMenuButton onClick={handleDeleteInlineImage} title="Xóa ảnh" isDelete><X size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: '700', marginLeft: '0.25rem' }}>Xóa</span></ImageMenuButton>
+                <span className="image-menu-title">ẢNH ĐÃ CĂN GIỮA</span>
+                <div className="image-menu-divider"></div>
+                <ImageMenuButton onClick={handleDeleteInlineImage} title="Xóa ảnh" isDelete>
+                  <X size={16} /> <span className="btn-img-menu-text">Xóa</span>
+                </ImageMenuButton>
               </div>
             )}
           </div>
         </div>
 
         {/* Sidebar */}
-        <div style={{ width: '340px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="editor-sidebar">
           {/* Settings Card */}
-          <div style={{ background: 'white', borderRadius: '24px', padding: '1.75rem', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: '#f0f4ff', color: '#1a1a4b', padding: '0.5rem', borderRadius: '10px' }}>
+          <div className="sidebar-settings-card">
+            <div className="card-title-row">
+              <div className="card-icon-box">
                 <Info size={20} />
               </div>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800' }}>Cấu hình bài viết</h3>
+              <h3>Cấu hình bài viết</h3>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="settings-group">
               {/* Category */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: '#4a5568', marginBottom: '0.5rem' }}>Chuyên mục</label>
-                <div style={{ position: 'relative' }}>
+                <label className="field-label">Chuyên mục</label>
+                <div className="select-wrapper">
                   <select 
                     value={articleData.category}
                     onChange={(e) => handleFieldChange('category', e.target.value)}
-                    style={{ 
-                      width: '100%', padding: '0.85rem 1.25rem', borderRadius: '12px', 
-                      border: '1px solid #edf2f7', outline: 'none', background: '#f8fafc',
-                      appearance: 'none', fontWeight: '600', color: '#1a1a4b', cursor: 'pointer'
-                    }}
+                    className="admin-select"
                   >
                     {categories.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
-                  <ChevronDown size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }} />
+                  <ChevronDown size={18} className="select-icon-absolute" />
                 </div>
               </div>
 
               {/* Subscription Tier Selection */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: '#4a5568', marginBottom: '0.5rem' }}>Gói truy cập</label>
-                <div style={{ position: 'relative' }}>
+                <label className="field-label">Gói truy cập</label>
+                <div className="select-wrapper">
                   <select 
                     value={articleData.requiredTier}
                     onChange={(e) => handleFieldChange('requiredTier', e.target.value)}
+                    className="admin-select"
                     style={{ 
-                      width: '100%', padding: '0.85rem 1.25rem', borderRadius: '12px', 
-                      border: '1px solid #edf2f7', outline: 'none', 
                       background: articleData.requiredTier === 'FREE' ? '#f8fafc' : (articleData.requiredTier === 'VIP' ? '#f0f9ff' : '#fff9db'),
-                      appearance: 'none', fontWeight: '600', color: '#1a1a4b', cursor: 'pointer',
                       borderLeft: articleData.requiredTier === 'FREE' ? '1px solid #edf2f7' : (articleData.requiredTier === 'VIP' ? '4px solid #0ea5e9' : '4px solid #fcc419')
                     }}
                   >
@@ -759,9 +572,9 @@ export default function CreateArticlePage() {
                       <option key={tier.value} value={tier.value}>{tier.label}</option>
                     ))}
                   </select>
-                  <ChevronDown size={18} style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }} />
+                  <ChevronDown size={18} className="select-icon-absolute" />
                 </div>
-                <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: '#718096' }}>
+                <p className="field-hint">
                   {articleData.requiredTier === 'FREE' && "Mọi người đều có thể xem bài viết này."}
                   {articleData.requiredTier === 'VIP' && "Chỉ thành viên gói VIP hoặc Premium mới có thể xem."}
                   {articleData.requiredTier === 'PREMIUM' && "Chỉ thành viên gói Premium mới có thể xem."}
@@ -771,14 +584,14 @@ export default function CreateArticlePage() {
           </div>
 
           {/* Tips Card */}
-          <section style={{ background: '#1a1a4b', padding: '1.75rem', borderRadius: '24px', color: 'white', boxShadow: '0 10px 30px rgba(26, 26, 75, 0.15)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-              <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.5rem', borderRadius: '10px' }}>
+          <section className="tips-sidebar-section">
+            <div className="tips-header-row">
+              <div className="tips-icon-box">
                 <Target size={20} color="#4361ee" />
               </div>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800' }}>Mẹo viết bài</h3>
+              <h3>Mẹo viết bài</h3>
             </div>
-            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', opacity: 0.9 }}>
+            <ul className="tips-list">
               <li>Sử dụng ngôn ngữ khách quan, dựa trên dữ liệu.</li>
               <li>Ảnh bìa đẹp giúp tăng 40% tỷ lệ nhấn vào đọc.</li>
               <li>Phân cấp các đề mục rõ ràng để người đọc dễ theo dõi.</li>
@@ -816,82 +629,23 @@ export default function CreateArticlePage() {
 
       {/* Preview Modal */}
       {showPreviewModal && (
-        <div 
-          onClick={() => setShowPreviewModal(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.85)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '2rem',
-            backdropFilter: 'blur(8px)',
-            cursor: 'zoom-out'
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: '1200px',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              cursor: 'default'
-            }}
-          >
-            <div style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem',
-              color: 'white'
-            }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>Xem trước bài viết</h2>
-                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>Giao diện hiển thị với người dùng (Customer View)</p>
+        <div className="detail-modal-overlay" onClick={() => setShowPreviewModal(false)}>
+          <div className="detail-modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
+            <div className="detail-modal-header">
+              <div className="detail-modal-header-info">
+                <h2>Xem trước bài viết</h2>
+                <p>Giao diện hiển thị với người dùng (Customer View)</p>
               </div>
-              <button 
-                onClick={() => setShowPreviewModal(false)}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  color: 'white',
-                  width: '45px',
-                  height: '45px',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              >
+              <button className="detail-modal-close-btn" onClick={() => setShowPreviewModal(false)}>
                 <X size={24} />
               </button>
             </div>
             
-            <div style={{
-              width: '100%',
-              background: 'white',
-              borderRadius: '24px',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-              flex: 1,
-              position: 'relative'
-            }}>
+            <div className="detail-modal-main-card">
               <ArticleRenderer article={articleData} isPreview={true} />
             </div>
             
-            <p style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textAlign: 'center' }}>
+            <p className="detail-modal-footer-hint">
               Nhấn ra ngoài hoặc nút [X] để quay lại chỉnh sửa
             </p>
           </div>
@@ -911,37 +665,10 @@ function ImageMenuButton({ children, onClick, title, isDelete }) {
         onClick();
       }}
       title={title}
-      style={{
-        background: 'none',
-        border: 'none',
-        color: isDelete ? '#ff4d4f' : 'white',
-        padding: '0.5rem',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.2s'
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+      className={`btn-img-menu ${isDelete ? 'delete' : ''}`}
+      style={!isDelete ? { color: 'white' } : { color: '#ff4d4f' }}
     >
       {children}
-    </button>
-  );
-}
-
-function ToolbarButton({ icon }) {
-  return (
-    <button style={{ 
-      background: 'none', border: 'none', padding: '0.5rem', borderRadius: '8px', 
-      cursor: 'pointer', color: '#4a5568', display: 'flex', alignItems: 'center', 
-      justifyContent: 'center' 
-    }}
-    onMouseEnter={(e) => e.currentTarget.style.background = 'white'}
-    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-    >
-      {icon}
     </button>
   );
 }

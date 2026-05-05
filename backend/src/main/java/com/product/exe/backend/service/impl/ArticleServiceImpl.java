@@ -64,7 +64,9 @@ public class ArticleServiceImpl implements ArticleService {
                 .slug(article.getSlug())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .category(article.getCategory())
+                .categoryDisplayName(article.getCategory() != null ? article.getCategory().getDisplayName() : null)
                 .requiredTier(article.getRequiredTier())
+                .requiredTierDisplayName(article.getRequiredTier() != null ? article.getRequiredTier().getDisplayName() : null)
                 .publishedAt(article.getPublishedAt())
                 .build();
     }
@@ -77,7 +79,9 @@ public class ArticleServiceImpl implements ArticleService {
                 .content(article.getContent())
                 .thumbnailUrl(article.getThumbnailUrl())
                 .category(article.getCategory())
+                .categoryDisplayName(article.getCategory() != null ? article.getCategory().getDisplayName() : null)
                 .requiredTier(article.getRequiredTier())
+                .requiredTierDisplayName(article.getRequiredTier() != null ? article.getRequiredTier().getDisplayName() : null)
                 .publishedAt(article.getPublishedAt())
                 .authorName(article.getAdmin() != null ? article.getAdmin().getFullName() : "Admin")
                 .build();

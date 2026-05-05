@@ -4,14 +4,16 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentStatus implements DbValueEnum {
-    PENDING("PENDING"),
-    SUCCESS("SUCCESS"),
-    FAILED("FAILED"),
-    REFUNDED("REFUNDED");
+    PENDING("PENDING", "Đang chờ"),
+    SUCCESS("SUCCESS", "Thành công"),
+    FAILED("FAILED", "Thất bại"),
+    REFUNDED("REFUNDED", "Đã hoàn tiền");
 
     private final String dbValue;
+    private final String displayName;
 
-    PaymentStatus(String dbValue) {
+    PaymentStatus(String dbValue, String displayName) {
         this.dbValue = dbValue;
+        this.displayName = displayName;
     }
 }

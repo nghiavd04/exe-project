@@ -3,6 +3,7 @@ package com.product.exe.backend.controller.customer;
 import com.product.exe.backend.dto.response.ApiResponse;
 import com.product.exe.backend.dto.response.ArticleDetailResponse;
 import com.product.exe.backend.dto.response.ArticleSummaryResponse;
+import com.product.exe.backend.dto.response.EnumMetadataResponse;
 import com.product.exe.backend.entity.User;
 import com.product.exe.backend.enums.ArticleCategory;
 import com.product.exe.backend.enums.SubscriptionTier;
@@ -17,6 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/customer/articles")
@@ -41,13 +46,19 @@ public class CustomerArticleController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<ApiResponse<ArticleCategory[]>> getCategories() {
-        return ResponseEntity.ok(ApiResponse.success(ArticleCategory.values()));
+    public ResponseEntity<ApiResponse<List<EnumMetadataResponse>>> getCategories() {
+        List<EnumMetadataResponse> categories = Arrays.stream(ArticleCategory.values())
+                .map(cat -> new EnumMetadataResponse(cat.name(), cat.getDisplayName()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(categories));
     }
 
     @GetMapping("/tiers")
-    public ResponseEntity<ApiResponse<SubscriptionTier[]>> getTiers() {
-        return ResponseEntity.ok(ApiResponse.success(SubscriptionTier.values()));
+    public ResponseEntity<ApiResponse<List<EnumMetadataResponse>>> getTiers() {
+        List<EnumMetadataResponse> tiers = Arrays.stream(SubscriptionTier.values())
+                .map(tier -> new EnumMetadataResponse(tier.name(), tier.getDisplayName()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(tiers));
     }
 
     @GetMapping("/{slug}")

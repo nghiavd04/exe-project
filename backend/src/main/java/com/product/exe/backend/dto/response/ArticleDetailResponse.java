@@ -20,7 +20,9 @@ public class ArticleDetailResponse {
     private String content;
     private String thumbnailUrl;
     private ArticleCategory category;
+    private String categoryDisplayName;
     private SubscriptionTier requiredTier;
+    private String requiredTierDisplayName;
     private LocalDateTime publishedAt;
     private String authorName;
 }

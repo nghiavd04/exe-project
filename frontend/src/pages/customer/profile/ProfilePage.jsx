@@ -290,8 +290,8 @@ export default function ProfilePage() {
                                 </button>
                             )}
                         </div>
-                        <h2 className="user-name">{user?.fullName}</h2>
-                        <p className="user-email">{user?.email}</p>
+                        <h2 className="user-name" title={user?.fullName}>{user?.fullName}</h2>
+                        <p className="user-email" title={user?.email}>{user?.email}</p>
                     </div>
 
                     <div className="profile-nav-card">
@@ -348,7 +348,7 @@ export default function ProfilePage() {
                                                 </div>
                                             ) : (
                                                 <div className="info-text-box">
-                                                    <span className="info-text">{user?.fullName}</span>
+                                                    <span className="info-text" title={user?.fullName}>{user?.fullName}</span>
                                                     <button className="btn-edit-inline" onClick={() => {
                                                         setTempFullName(user.fullName);
                                                         setIsEditingName(true);
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                                         <div className="info-label">Email</div>
                                         <div className="info-value-wrapper">
                                             <div className="info-text-box">
-                                                <span className="info-text">{user?.email}</span>
+                                                <span className="info-text" title={user?.email}>{user?.email}</span>
                                                 <button className="btn-edit-inline" onClick={() => {
                                                     setNewEmailForm('');
                                                     setEmailOtp(['', '', '', '', '', '']);

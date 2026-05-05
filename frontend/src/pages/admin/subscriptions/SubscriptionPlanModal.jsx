@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, CreditCard, Tag, Clock, AlignLeft } from 'lucide-react';
+import { X, CreditCard, Tag, Clock, Shield, ChevronDown } from 'lucide-react';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
+import './SubscriptionPlanModal.css';
 
 export default function SubscriptionPlanModal({ isOpen, onClose, onSuccess, plan }) {
   const [form, setForm] = useState({
@@ -9,25 +10,44 @@ export default function SubscriptionPlanModal({ isOpen, onClose, onSuccess, plan
     price: '',
     durationDays: '',
     description: '',
+    tier: 'VIP',
     isActive: true
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [tiers, setTiers] = useState([]);
+
 
   useEffect(() => {
-    if (plan) {
-      setForm({
-        name: plan.name,
-        price: plan.price,
-        durationDays: plan.durationDays,
-        description: plan.description || '',
-        isActive: plan.isActive
-      });
-    } else {
-      setForm({ name: '', price: '', durationDays: '', description: '', isActive: true });
+    if (isOpen) {
+      fetchTiers();
+      if (plan) {
+        setForm({
+          name: plan.name,
+          price: plan.price,
+          durationDays: plan.durationDays,
+          description: plan.description || '',
+          tier: plan.tier || 'VIP',
+          isActive: plan.isActive
+        });
+      } else {
+        setForm({ name: '', price: '', durationDays: '', description: '', tier: 'VIP', isActive: true });
+      }
+      setErrors({});
     }
-    setErrors({});
   }, [plan, isOpen]);
+
+  const fetchTiers = async () => {
+    try {
+      const response = await adminApi.getArticleTiers();
+      if (response.data.success) {
+        const filteredTiers = response.data.data.filter(t => t.value !== 'FREE');
+        setTiers(filteredTiers);
+      }
+    } catch (error) {
+      console.error('Error fetching tiers:', error);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -38,6 +58,7 @@ export default function SubscriptionPlanModal({ isOpen, onClose, onSuccess, plan
     else if (form.price < 0) errs.price = 'Giá không được âm';
     if (!form.durationDays) errs.durationDays = 'Thời hạn không được để trống';
     else if (form.durationDays < 1) errs.durationDays = 'Thời hạn ít nhất 1 ngày';
+    if (!form.tier) errs.tier = 'Cấp độ gói không được để trống';
     return errs;
   };
 
@@ -68,99 +89,106 @@ export default function SubscriptionPlanModal({ isOpen, onClose, onSuccess, plan
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)'
-    }}>
-      <div style={{
-        background: 'white', borderRadius: '16px', width: '100%', maxWidth: '500px', 
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden'
-      }}>
-        <div style={{ 
-          padding: '1.5rem', borderBottom: '1px solid #edf2f7', display: 'flex', 
-          justifyContent: 'space-between', alignItems: 'center', background: 'var(--teal-dark)', color: 'white'
-        }}>
-          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className="plan-modal-overlay">
+      <div className="plan-modal-card">
+        <div className="plan-modal-header">
+          <h3>
             <CreditCard size={24} /> {plan ? 'Chỉnh sửa gói' : 'Tạo gói dịch vụ mới'}
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+          <button onClick={onClose} className="btn-close-modal-icon">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={labelStyle}>Tên gói dịch vụ</label>
-            <div style={{ position: 'relative' }}>
-              <Tag style={iconStyle} size={18} />
+        <form onSubmit={handleSubmit} className="plan-modal-form">
+          <div className="modal-field-group">
+            <label className="modal-label-teal">Tên gói dịch vụ</label>
+            <div className="input-with-icon-wrapper">
+              <Tag className="modal-input-icon" size={18} />
               <input
                 type="text"
                 placeholder="Ví dụ: Premium Monthly"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                style={{ ...inputStyle, paddingLeft: '2.5rem', border: errors.name ? '1px solid #e53e3e' : '1px solid #e2e8f0' }}
+                className={`modal-input-styled has-icon ${errors.name ? 'error' : ''}`}
               />
             </div>
-            {errors.name && <p style={errorStyle}>{errors.name}</p>}
+            {errors.name && <p className="modal-error-msg">{errors.name}</p>}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div className="modal-field-group">
+            <label className="modal-label-teal">Hạng thành viên (Tier)</label>
+            <div className="input-with-icon-wrapper">
+              <Shield className="modal-input-icon" size={18} />
+              <select
+                value={form.tier}
+                onChange={(e) => setForm({ ...form, tier: e.target.value })}
+                className={`modal-input-styled has-icon ${errors.tier ? 'error' : ''}`}
+                style={{ appearance: 'none' }}
+              >
+                {tiers.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+              <ChevronDown size={18} className="modal-input-icon" style={{ left: 'auto', right: '12px', pointerEvents: 'none' }} />
+            </div>
+            {errors.tier && <p className="modal-error-msg">{errors.tier}</p>}
+          </div>
+
+          <div className="modal-grid-2">
             <div>
-              <label style={labelStyle}>Giá (VND)</label>
+              <label className="modal-label-teal">Giá (VND)</label>
               <input
                 type="number"
                 min="0"
                 placeholder="0"
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
-                style={{ ...inputStyle, border: errors.price ? '1px solid #e53e3e' : '1px solid #e2e8f0' }}
+                className={`modal-input-styled ${errors.price ? 'error' : ''}`}
               />
-              {errors.price && <p style={errorStyle}>{errors.price}</p>}
+              {errors.price && <p className="modal-error-msg">{errors.price}</p>}
             </div>
             <div>
-              <label style={labelStyle}>Thời hạn (Ngày)</label>
-              <div style={{ position: 'relative' }}>
-                <Clock style={iconStyle} size={18} />
+              <label className="modal-label-teal">Thời hạn (Ngày)</label>
+              <div className="input-with-icon-wrapper">
+                <Clock className="modal-input-icon" size={18} />
                 <input
                   type="number"
                   min="1"
                   placeholder="30"
                   value={form.durationDays}
                   onChange={(e) => setForm({ ...form, durationDays: e.target.value })}
-                  style={{ ...inputStyle, paddingLeft: '2.5rem', border: errors.durationDays ? '1px solid #e53e3e' : '1px solid #e2e8f0' }}
+                  className={`modal-input-styled has-icon ${errors.durationDays ? 'error' : ''}`}
                 />
               </div>
-              {errors.durationDays && <p style={errorStyle}>{errors.durationDays}</p>}
+              {errors.durationDays && <p className="modal-error-msg">{errors.durationDays}</p>}
             </div>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={labelStyle}>Mô tả</label>
-            <div style={{ position: 'relative' }}>
-              <AlignLeft style={{ ...iconStyle, top: '12px', transform: 'none' }} size={18} />
-              <textarea
-                placeholder="Mô tả các quyền lợi của gói..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                style={{ ...inputStyle, paddingLeft: '2.5rem', minHeight: '100px', resize: 'vertical' }}
-              />
-            </div>
+          <div className="modal-field-group">
+            <label className="modal-label-teal">Mô tả</label>
+            <textarea
+              placeholder="Mô tả các quyền lợi của gói..."
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              className="modal-textarea-styled"
+            />
           </div>
 
-          <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="modal-checkbox-row">
             <input 
               type="checkbox" 
               id="isActive" 
               checked={form.isActive} 
               onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-              style={{ width: '18px', height: '18px', accentColor: 'var(--teal-dark)' }}
+              className="modal-checkbox-input"
             />
-            <label htmlFor="isActive" style={{ fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer' }}>Kích hoạt gói này ngay lập tức</label>
+            <label htmlFor="isActive" className="modal-checkbox-label">Kích hoạt gói này ngay lập tức</label>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button type="button" onClick={onClose} style={btnCancelStyle}>Hủy</button>
-            <button type="submit" disabled={loading} style={btnSubmitStyle}>
+          <div className="modal-actions-footer">
+            <button type="button" onClick={onClose} className="btn-modal-cancel">Hủy</button>
+            <button type="submit" disabled={loading} className="btn-modal-submit-teal">
               {loading ? 'Đang xử lý...' : plan ? 'Cập nhật gói' : 'Tạo gói mới'}
             </button>
           </div>
@@ -169,10 +197,3 @@ export default function SubscriptionPlanModal({ isOpen, onClose, onSuccess, plan
     </div>
   );
 }
-
-const labelStyle = { display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem', color: 'var(--teal-dark)' };
-const inputStyle = { width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.95rem' };
-const iconStyle = { position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' };
-const errorStyle = { color: '#e53e3e', fontSize: '0.75rem', marginTop: '0.25rem' };
-const btnCancelStyle = { flex: 1, padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', color: 'var(--muted)', fontWeight: '700', cursor: 'pointer' };
-const btnSubmitStyle = { flex: 2, padding: '0.75rem', borderRadius: '10px', border: 'none', background: 'var(--teal-dark)', color: 'white', fontWeight: '700', cursor: 'pointer' };
