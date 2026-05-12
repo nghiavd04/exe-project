@@ -159,7 +159,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
                                 .id(a.getId())
                                 .content(a.getContent())
                                 .value(a.getValue())
-                                .feedbackText(a.getFeedbackText())
+
                                 .orderIndex(a.getOrderIndex())
                                 .build())
                             .collect(Collectors.toList());
@@ -283,7 +283,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
                         .question(question)
                         .content(aReq.getContent())
                         .value(aReq.getValue())
-                        .feedbackText(aReq.getFeedbackText())
+
                         .orderIndex(aReq.getOrderIndex())
                         .build();
                 answerRepository.save(answer);

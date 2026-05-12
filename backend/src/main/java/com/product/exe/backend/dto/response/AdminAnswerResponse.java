@@ -13,6 +13,6 @@ public class AdminAnswerResponse {
     private Long id;
     private String content;
     private String value;
-    private String feedbackText;
+
     private Integer orderIndex;
 }

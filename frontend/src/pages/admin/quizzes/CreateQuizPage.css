@@ -319,38 +319,7 @@
   box-shadow: 0 0 0 3px rgba(26, 26, 75, 0.05);
 }
 
-.feedback-container {
-  margin-left: 40px;
-}
 
-.feedback-label-small {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #718096;
-  margin-bottom: 0.4rem;
-}
-
-.feedback-textarea-dashed {
-  width: 100%;
-  padding: 0.85rem;
-  border-radius: 10px;
-  border: 1px dashed #cbd5e0;
-  outline: none;
-  background: white;
-  min-height: 80px;
-  font-size: 0.85rem;
-  resize: none;
-  white-space: pre-wrap;
-  transition: all 0.2s;
-  line-height: 1.5;
-}
-
-.feedback-textarea-dashed:focus {
-  border-color: #1a1a4b;
-  border-style: solid;
-  box-shadow: 0 0 0 3px rgba(26, 26, 75, 0.05);
-}
 
 .btn-add-answer-link {
   display: flex;

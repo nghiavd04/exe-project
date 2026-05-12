@@ -11,6 +11,7 @@ import com.product.exe.backend.exception.ResourceNotFoundException;
 import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.QuizService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
@@ -69,15 +71,17 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
-    public FeedbackResponse submitAnswer(Long attemptId, SubmitAnswerRequest request, Long userId) {
+    public void submitAnswer(Long attemptId, SubmitAnswerRequest request, Long userId) {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found"));
 
         if (!attempt.getCustomer().getUser().getId().equals(userId)) {
+            log.warn("Permission denied for user {} on attempt {}", userId, attemptId);
             throw new BadRequestException("You do not have permission to access this attempt");
         }
 
         if (attempt.getStatus() != QuizAttemptStatus.IN_PROGRESS) {
+            log.warn("Attempt {} is not in progress (status: {})", attemptId, attempt.getStatus());
             throw new BadRequestException("This attempt is already finished or expired");
         }
 
@@ -85,50 +89,53 @@ public class QuizServiceImpl implements QuizService {
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
 
         if (!question.getQuiz().getId().equals(attempt.getQuiz().getId())) {
+            log.warn("Question {} does not belong to quiz {}", question.getId(), attempt.getQuiz().getId());
             throw new BadRequestException("Question does not belong to this quiz");
         }
 
-        // Check if already answered
-        userAnswerRepository.findByAttemptIdAndQuestionId(attemptId, question.getId())
-                .ifPresent(a -> { throw new BadRequestException("Question already answered"); });
+        // Handle re-submission: delete existing answers for this question in this attempt
+        List<UserAnswer> existingAnswers = userAnswerRepository.findAllByAttemptIdAndQuestionId(attemptId, question.getId());
+        if (!existingAnswers.isEmpty()) {
+            log.info("Re-submission detected for attempt {} question {}. Deleting {} old answers.", attemptId, question.getId(), existingAnswers.size());
+            userAnswerRepository.deleteAll(existingAnswers);
+        }
 
         if (request.getSelectedAnswerIds() == null || request.getSelectedAnswerIds().isEmpty()) {
+            log.warn("No answers selected for question {} in attempt {}", question.getId(), attemptId);
             throw new BadRequestException("At least one answer must be selected");
         }
 
         List<Answer> selectedAnswers = answerRepository.findAllById(request.getSelectedAnswerIds());
         if (selectedAnswers.size() != request.getSelectedAnswerIds().size()) {
+            log.warn("Some answer IDs not found: expected {}, found {}", request.getSelectedAnswerIds().size(), selectedAnswers.size());
             throw new ResourceNotFoundException("One or more answers not found");
         }
 
         // Validate all answers belong to the question
         for (Answer a : selectedAnswers) {
             if (!a.getQuestion().getId().equals(question.getId())) {
+                log.warn("Answer {} does not belong to question {}", a.getId(), question.getId());
                 throw new BadRequestException("Answer ID " + a.getId() + " does not belong to this question");
             }
         }
 
         if (question.getType() == QuestionType.SINGLE_CHOICE && selectedAnswers.size() > 1) {
+            log.warn("Multiple answers submitted for single choice question {}", question.getId());
             throw new BadRequestException("Single choice questions only accept one answer");
         }
 
-        StringBuilder feedbackBuilder = new StringBuilder();
         for (Answer a : selectedAnswers) {
             UserAnswer userAnswer = UserAnswer.builder()
                     .attempt(attempt)
                     .question(question)
                     .answer(a)
-                    .feedbackShown(a.getFeedbackText())
                     .build();
             userAnswerRepository.save(userAnswer);
-
-            if (a.getFeedbackText() != null && !a.getFeedbackText().isEmpty()) {
-                if (feedbackBuilder.length() > 0) feedbackBuilder.append("\n\n");
-                feedbackBuilder.append(a.getFeedbackText());
-            }
         }
 
-        return new FeedbackResponse(feedbackBuilder.toString());
+        // Force version increment on attempt to prevent concurrent conflicting submissions
+        attempt.setLastActivityAt(LocalDateTime.now());
+        quizAttemptRepository.save(attempt);
     }
 
     @Override
@@ -193,17 +200,25 @@ public class QuizServiceImpl implements QuizService {
 
     private QuizDetailResponse mapToDetail(Quiz quiz, Long attemptId) {
         List<Question> questions = questionRepository.findAllByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(quiz.getId());
+        List<Long> questionIds = questions.stream().map(Question::getId).collect(Collectors.toList());
+        
+        // Fetch all answers for all questions in one go to avoid N+1 problem
+        List<Answer> allAnswers = answerRepository.findAllByQuestionIdInAndIsActiveTrueOrderByOrderIndexAsc(questionIds);
+        java.util.Map<Long, List<Answer>> answersByQuestionId = allAnswers.stream()
+                .collect(Collectors.groupingBy(a -> a.getQuestion().getId()));
+
         return QuizDetailResponse.builder()
                 .id(quiz.getId())
                 .attemptId(attemptId)
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
-                .questions(questions.stream().map(this::mapToQuestionDto).collect(Collectors.toList()))
+                .questions(questions.stream()
+                        .map(q -> mapToQuestionDto(q, answersByQuestionId.getOrDefault(q.getId(), List.of())))
+                        .collect(Collectors.toList()))
                 .build();
     }
 
-    private QuestionDto mapToQuestionDto(Question question) {
-        List<Answer> answers = answerRepository.findAllByQuestionIdAndIsActiveTrueOrderByOrderIndexAsc(question.getId());
+    private QuestionDto mapToQuestionDto(Question question, List<Answer> answers) {
         return QuestionDto.builder()
                 .id(question.getId())
                 .content(question.getContent())
@@ -212,6 +227,7 @@ public class QuizServiceImpl implements QuizService {
                 .answers(answers.stream().map(this::mapToAnswerDto).collect(Collectors.toList()))
                 .build();
     }
+
 
     private AnswerDto mapToAnswerDto(Answer answer) {
         return AnswerDto.builder()

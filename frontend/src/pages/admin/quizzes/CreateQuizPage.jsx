@@ -58,8 +58,8 @@ export default function CreateQuizPage() {
         type: 'SINGLE_CHOICE',
         orderIndex: 0,
         answers: [
-          { id: Date.now() + 1, content: '', value: '1', feedbackText: '', orderIndex: 0 },
-          { id: Date.now() + 2, content: '', value: '2', feedbackText: '', orderIndex: 1 }
+          { id: Date.now() + 1, content: '', value: '0', orderIndex: 0 },
+          { id: Date.now() + 2, content: '', value: '1', orderIndex: 1 }
         ]
       }
     ]
@@ -144,7 +144,6 @@ export default function CreateQuizPage() {
               id: a.id,
               content: a.content,
               value: a.value,
-              feedbackText: a.feedbackText,
               orderIndex: a.orderIndex
             }))
           }))
@@ -236,8 +235,8 @@ export default function CreateQuizPage() {
       type: 'SINGLE_CHOICE',
       orderIndex: quizData.questions.length,
       answers: [
-        { id: Date.now() + 1, content: '', value: '0', feedbackText: '', orderIndex: 0 },
-        { id: Date.now() + 2, content: '', value: '0', feedbackText: '', orderIndex: 1 }
+        { id: Date.now() + 1, content: '', value: '0', orderIndex: 0 },
+        { id: Date.now() + 2, content: '', value: '1', orderIndex: 1 }
       ]
     };
     setQuizData(prev => ({
@@ -277,7 +276,6 @@ export default function CreateQuizPage() {
             id: Date.now(),
             content: '',
             value: '0',
-            feedbackText: '',
             orderIndex: q.answers.length
           };
           return { ...q, answers: [...q.answers, newAnswer] };
@@ -383,7 +381,6 @@ export default function CreateQuizPage() {
           answers: q.answers.map((a, aIdx) => ({
             content: a.content,
             value: a.value || (aIdx + 1).toString(),
-            feedbackText: a.feedbackText,
             orderIndex: aIdx
           }))
         }))
@@ -535,13 +532,14 @@ export default function CreateQuizPage() {
                         onChange={(e) => handleRuleChange(rule.id, 'minScore', e.target.value)}
                         onBlur={(e) => {
                           const val = parseInt(e.target.value, 10);
-                          handleRuleChange(rule.id, 'minScore', isNaN(val) || val < 0 ? 0 : val);
+                          handleRuleChange(rule.id, 'minScore', isNaN(val) || val < 0 ? '0' : val.toString());
                         }}
                         onKeyDown={(e) => {
                           if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
                           if (e.key === 'Enter') e.target.blur();
                         }}
                         className="answer-input-compact score-input-compact"
+                        placeholder="0"
                       />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -553,13 +551,14 @@ export default function CreateQuizPage() {
                         onChange={(e) => handleRuleChange(rule.id, 'maxScore', e.target.value)}
                         onBlur={(e) => {
                           const val = parseInt(e.target.value, 10);
-                          handleRuleChange(rule.id, 'maxScore', isNaN(val) || val < 0 ? 0 : val);
+                          handleRuleChange(rule.id, 'maxScore', isNaN(val) || val < 0 ? '0' : val.toString());
                         }}
                         onKeyDown={(e) => {
                           if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
                           if (e.key === 'Enter') e.target.blur();
                         }}
                         className="answer-input-compact score-input-compact"
+                        placeholder="0"
                       />
                     </div>
                     <button 
@@ -641,7 +640,7 @@ export default function CreateQuizPage() {
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                   <label className="field-label-bold" style={{ marginBottom: '1rem' }}>Các lựa chọn và Feedback riêng</label>
+                   <label className="field-label-bold" style={{ marginBottom: '1rem' }}>Các lựa chọn</label>
                    <div className="answers-stack">
                       {q.answers.map((answer, aIdx) => (
                         <div key={answer.id} className="answer-item-card">
@@ -678,15 +677,6 @@ export default function CreateQuizPage() {
                             >
                               <X size={18} />
                             </button>
-                          </div>
-                          <div className="feedback-container">
-                            <label className="feedback-label-small">Nhận xét/Thông tin hữu ích cho lựa chọn này (Feedback)</label>
-                            <textarea 
-                              value={answer.feedbackText}
-                              onChange={(e) => handleAnswerChange(q.id, answer.id, 'feedbackText', e.target.value)}
-                              placeholder="Nếu chọn đáp án này, hệ thống sẽ hiện thông tin gì cho user? (Để trống nếu không muốn hiện feedback)"
-                              className="feedback-textarea-dashed"
-                            />
                           </div>
                         </div>
                       ))}
@@ -764,9 +754,8 @@ export default function CreateQuizPage() {
           <section className="sidebar-help-card-dark">
             <h4>Hướng dẫn nhanh</h4>
             <ul>
-              <li>Quiz này không tính điểm, dùng để phản hồi thông tin.</li>
               <li>Bạn có thể thêm nhiều đáp án cho mỗi câu hỏi.</li>
-              <li>Mỗi đáp án nên có feedback hữu ích để giúp user tự nhận thức hành vi.</li>
+              <li>Bài quiz sẽ được tự động tính điểm theo từng lựa chọn.</li>
               <li>Sau khi lưu bản nháp, hãy vào danh sách để "Xuất bản" Quiz.</li>
             </ul>
           </section>

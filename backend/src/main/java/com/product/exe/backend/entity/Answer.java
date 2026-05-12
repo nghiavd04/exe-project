@@ -28,8 +28,7 @@ public class Answer {
     @Column(nullable = false, length = 100)
     private String value;
 
-    @Column(name = "feedback_text", columnDefinition = "TEXT")
-    private String feedbackText;
+
 
     @Column(name = "order_index", nullable = false)
     @Builder.Default

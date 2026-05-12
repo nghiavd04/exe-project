@@ -43,6 +43,12 @@ public class QuizAttempt {
     @Builder.Default
     private QuizAttemptStatus status = QuizAttemptStatus.IN_PROGRESS;
 
+    @Version
+    private Long version;
+
+    @Column(name = "last_activity_at")
+    private LocalDateTime lastActivityAt;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

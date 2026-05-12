@@ -15,5 +15,5 @@ public class UserAnswerDto {
     private Long selectedAnswerId;
     private String selectedAnswerContent;
     private Double numericValue;
-    private String feedbackShown;
+
 }

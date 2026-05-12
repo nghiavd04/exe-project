@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../../apis/customerApi';
 import toast from 'react-hot-toast';
@@ -7,30 +7,30 @@ import './QuizRunnerPage.css';
 const QuizRunnerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const questionRef = useRef(null);
 
   const [quiz, setQuiz] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(-1); 
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null);
   const [overallResult, setOverallResult] = useState(null);
-  const [answers, setAnswers] = useState({});
 
-  useEffect(() => {
-    fetchQuizDetail();
-  }, [id]);
+  // Local state: track all selections + which questions are submitted
+  const [answers, setAnswers] = useState({});         // { questionId: id | [ids] }
+  const [submitted, setSubmitted] = useState({});     // { questionId: true }
+  const [animDir, setAnimDir] = useState('forward');  // for slide animation
+
+  useEffect(() => { fetchQuizDetail(); }, [id]);
 
   const fetchQuizDetail = async () => {
     try {
       setLoading(true);
-      const response = await quizApi.getQuizDetail(id);
-      if (response.data.success) {
-        setQuiz(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching quiz:', error);
+      const res = await quizApi.getQuizDetail(id);
+      if (res.data.success) setQuiz(res.data.data);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -39,150 +39,185 @@ const QuizRunnerPage = () => {
   const handleStartQuiz = async () => {
     try {
       setSubmitting(true);
-      const response = await quizApi.startQuiz(id);
-      if (response.data.success) {
-        const data = response.data.data;
+      const res = await quizApi.startQuiz(id);
+      if (res.data.success) {
+        const data = res.data.data;
         setAttemptId(data.attemptId);
         setQuestions(data.questions);
         setCurrentIndex(0);
       }
-    } catch (error) {
-      console.error('Error starting quiz:', error);
-      const msg = error?.response?.data?.message || 'Không thể bắt đầu bài test. Vui lòng thử lại.';
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Không thể bắt đầu bài test.';
       toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleAnswerSelect = (questionId, value, type) => {
+  // Handle answer selection (local only, no API call)
+  const handleAnswerSelect = (questionId, answerId, type) => {
+    if (submitted[questionId]) return; // read-only if already submitted
     if (type === 'MULTIPLE_CHOICE') {
       setAnswers(prev => {
-        const currentAnswers = prev[questionId] || [];
-        if (currentAnswers.includes(value)) {
-          return { ...prev, [questionId]: currentAnswers.filter(id => id !== value) };
-        } else {
-          return { ...prev, [questionId]: [...currentAnswers, value] };
-        }
+        const cur = prev[questionId] || [];
+        return {
+          ...prev,
+          [questionId]: cur.includes(answerId)
+            ? cur.filter(x => x !== answerId)
+            : [...cur, answerId]
+        };
       });
     } else {
-      setAnswers(prev => ({ ...prev, [questionId]: value }));
+      setAnswers(prev => ({ ...prev, [questionId]: answerId }));
     }
   };
 
-  const handleSubmitAnswer = async () => {
-    const currentQuestion = questions[currentIndex];
-    const value = answers[currentQuestion.id];
+  // Submit current question's answer to API, then move forward
+  const handleConfirmAndNext = async () => {
+    const q = questions[currentIndex];
+    const val = answers[q.id];
 
-    if (value === undefined || value === '') {
-      toast.error('Vui lòng chọn hoặc nhập câu trả lời.');
+    if (!val || (Array.isArray(val) && val.length === 0)) {
+      toast.error('Vui lòng chọn câu trả lời trước khi tiếp tục.');
       return;
     }
 
-    try {
-      setSubmitting(true);
-      const selectedIds = currentQuestion.type === 'MULTIPLE_CHOICE'
-        ? (answers[currentQuestion.id] || [])
-        : [answers[currentQuestion.id]];
-
-      const payload = {
-        questionId: currentQuestion.id,
-        selectedAnswerIds: selectedIds
-      };
-
-      const response = await quizApi.submitAnswer(attemptId, payload);
-      if (response.data.success) {
-        const fbText = response.data.data.feedbackText;
-        if (fbText) {
-          setFeedback(fbText);
-        } else {
-          handleNext();
+    if (!submitted[q.id]) {
+      try {
+        setSubmitting(true);
+        const selectedIds = q.type === 'MULTIPLE_CHOICE' ? val : [val];
+        const res = await quizApi.submitAnswer(attemptId, {
+          questionId: q.id,
+          selectedAnswerIds: selectedIds,
+        });
+        if (res.data.success) {
+          setSubmitted(prev => ({ ...prev, [q.id]: true }));
         }
+      } catch (err) {
+        toast.error(err?.response?.data?.message || 'Lỗi khi gửi câu trả lời.');
+        return;
+      } finally {
+        setSubmitting(false);
       }
-    } catch (error) {
-      console.error('Error submitting answer:', error);
-    } finally {
-      setSubmitting(false);
+    }
+
+    // Move to next or finish
+    if (currentIndex < questions.length - 1) {
+      goTo(currentIndex + 1, 'forward');
+    } else {
+      await handleFinishQuiz();
     }
   };
 
-  const handleNext = () => {
-    setFeedback(null);
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      handleFinishQuiz();
-    }
+  const goTo = (index, direction = 'forward') => {
+    setAnimDir(direction);
+    setCurrentIndex(index);
+    setTimeout(() => questionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) goTo(currentIndex - 1, 'backward');
   };
 
   const handleFinishQuiz = async () => {
     try {
       setSubmitting(true);
-      const response = await quizApi.finishQuiz(attemptId);
-      if (response.data.success) {
-        setOverallResult(response.data.data);
-        setCurrentIndex(-2); // Show result
+      const res = await quizApi.finishQuiz(attemptId);
+      if (res.data.success) {
+        setOverallResult(res.data.data);
+        setCurrentIndex(-2);
       }
-    } catch (error) {
-      console.error('Error finishing quiz:', error);
+    } catch (err) {
+      toast.error('Không thể hoàn thành bài test. Vui lòng thử lại.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ─────────────────────────────────────────────
+  // LOADING
+  // ─────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="qr-loading">
+        <div className="qr-spinner" />
+        <p>Đang tải bài test...</p>
+      </div>
+    );
+  }
 
-  if (loading) return <div className="quiz-runner-loading">Đang tải bài test...</div>;
-
-  // ── INTRO VIEW ──
+  // ─────────────────────────────────────────────
+  // INTRO VIEW
+  // ─────────────────────────────────────────────
   if (currentIndex === -1) {
     return (
-      <div className="quiz-runner-page intro">
-        <div className="intro-container">
-          <h1>{quiz.title}</h1>
-          <p>{quiz.description}</p>
-          <div className="quiz-meta-info">
-            <div className="meta-item">
-              <span>Số câu hỏi:</span>
-              <strong>{quiz.questions?.length || 0} câu</strong>
+      <div className="qr-page qr-intro">
+        <div className="qr-intro-card">
+          {quiz.imageUrl && (
+            <div className="qr-intro-banner">
+              <img src={quiz.imageUrl} alt={quiz.title} />
+              <div className="qr-intro-banner-overlay" />
             </div>
+          )}
+          <div className="qr-intro-body">
+            <div className="qr-intro-badge">Bài trắc nghiệm tâm lý</div>
+            <h1 className="qr-intro-title">{quiz.title}</h1>
+            <p className="qr-intro-desc">{quiz.description}</p>
+
+            <div className="qr-intro-meta">
+              <div className="qr-meta-item">
+                <span className="qr-meta-icon">📋</span>
+                <span><strong>{quiz.questions?.length || 0}</strong> câu hỏi</span>
+              </div>
+              <div className="qr-meta-item">
+                <span className="qr-meta-icon">⏱</span>
+                <span>Không giới hạn thời gian</span>
+              </div>
+              <div className="qr-meta-item">
+                <span className="qr-meta-icon">🔒</span>
+                <span>Kết quả bảo mật</span>
+              </div>
+            </div>
+
+            <div className="qr-intro-note">
+              <span>💡</span>
+              <p>Hãy trả lời thành thật nhất có thể. Không có câu trả lời đúng hay sai.</p>
+            </div>
+
+            <button className="qr-btn-start" onClick={handleStartQuiz} disabled={submitting}>
+              {submitting ? (
+                <><span className="qr-btn-spinner" /> Đang khởi tạo...</>
+              ) : (
+                <>Bắt đầu làm bài <span>→</span></>
+              )}
+            </button>
           </div>
-          <button className="btn-begin" onClick={handleStartQuiz} disabled={submitting}>
-            {submitting ? 'Đang khởi tạo...' : 'Bắt đầu làm bài'}
-          </button>
         </div>
       </div>
     );
   }
 
-  // ── RESULT VIEW ──
+  // ─────────────────────────────────────────────
+  // RESULT VIEW
+  // ─────────────────────────────────────────────
   if (currentIndex === -2) {
-    const score = overallResult?.totalScore ?? 0;
-    const maxPossibleScore = questions.reduce((total, q) => {
-      const maxAnswer = Math.max(...(q.answers?.map(a => parseInt(a.value || '0', 10)) || [0]));
-      return total + maxAnswer;
-    }, 0);
-    const percent = maxPossibleScore > 0 ? Math.round((score / maxPossibleScore) * 100) : 0;
-
     return (
       <div className="quiz-result-page">
         <div className="result-wave-bg">
-          <svg viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#f0f4ff" fillOpacity="1" d="M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,181.3C672,192,768,160,864,138.7C960,117,1056,107,1152,122.7C1248,139,1344,181,1392,202.7L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>
+          <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="#f0f4ff" fillOpacity="1" d="M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,181.3C672,192,768,160,864,138.7C960,117,1056,107,1152,122.7C1248,139,1344,181,1392,202.7L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" />
+          </svg>
         </div>
-
         <div className="result-content-card">
-          {/* Completion Badge */}
           <div className="result-badge-row">
             <div className="result-badge">
               <span className="result-badge-icon">✓</span>
               <span>Hoàn thành bài test</span>
             </div>
           </div>
-
-          {/* Main heading */}
           <h1 className="result-title">Cảm ơn bạn đã chia sẻ!</h1>
           <p className="result-subtitle">Câu trả lời của bạn đã được ghi lại. Dưới đây là những gì chúng tôi nhận thấy.</p>
 
-          {/* Assessment result (main content, no score number) */}
           {overallResult?.assessmentResult && (
             <div className="result-assessment-card">
               <div className="result-assessment-icon">🌿</div>
@@ -190,7 +225,6 @@ const QuizRunnerPage = () => {
             </div>
           )}
 
-          {/* Overall assessment (secondary) */}
           {overallResult?.overallAssessment && (
             <div className="result-overall-section">
               <h3 className="result-section-label">Lời nhắn từ chúng tôi</h3>
@@ -198,13 +232,11 @@ const QuizRunnerPage = () => {
             </div>
           )}
 
-          {/* Gentle note, no alarming numbers */}
           <div className="result-gentle-note">
             <span>💙</span>
             <p>Đây là bài test tự nhận thức, không phải chẩn đoán y tế. Nếu bạn cảm thấy lo lắng, hãy trao đổi với chuyên gia tâm lý.</p>
           </div>
 
-          {/* Actions */}
           <div className="result-actions">
             <Link to="/quizzes" className="btn-result-primary">Khám phá thêm bài test</Link>
             <Link to="/" className="btn-result-secondary">Về trang chủ</Link>
@@ -214,75 +246,121 @@ const QuizRunnerPage = () => {
     );
   }
 
-  // ── QUESTION VIEW ──
-  const currentQuestion = questions[currentIndex];
+  // ─────────────────────────────────────────────
+  // QUESTION VIEW
+  // ─────────────────────────────────────────────
+  const q = questions[currentIndex];
+  const isSubmitted = !!submitted[q.id];
+  const selectedVal = answers[q.id];
+  const isLast = currentIndex === questions.length - 1;
+  const allPreviousSubmitted = questions.slice(0, currentIndex).every(qq => submitted[qq.id]);
+  const canGoNext = isSubmitted || (selectedVal !== undefined && selectedVal !== '' && !(Array.isArray(selectedVal) && selectedVal.length === 0));
+
   return (
-    <div className="quiz-runner-page playing">
-      <header className="quiz-runner-header">
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}></div>
+    <div className="qr-page qr-playing">
+      {/* ── Sticky Header ── */}
+      <header className="qr-header" ref={questionRef}>
+        <div className="qr-progress-track">
+          <div
+            className="qr-progress-fill"
+            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+          />
         </div>
-        <div className="quiz-status-bar">
-          <span className="question-count">Câu hỏi {currentIndex + 1} / {questions.length}</span>
+        <div className="qr-header-inner">
+          <span className="qr-header-label">
+            {currentIndex + 1} / {questions.length}
+          </span>
+          {/* Dot navigation */}
+          <div className="qr-dots">
+            {questions.map((qq, i) => (
+              <button
+                key={qq.id}
+                className={`qr-dot ${i === currentIndex ? 'active' : ''} ${submitted[qq.id] ? 'done' : ''}`}
+                onClick={() => goTo(i, i > currentIndex ? 'forward' : 'backward')}
+                title={`Câu ${i + 1}`}
+              />
+            ))}
+          </div>
+          <span className="qr-header-label" style={{ opacity: 0 }}>
+            {currentIndex + 1} / {questions.length}
+          </span>
         </div>
       </header>
 
-      <main className="question-container">
-        <div className="question-header-info">
-          <h2 className="question-text">{currentQuestion.content}</h2>
-        </div>
+      {/* ── Question Card ── */}
+      <main className="qr-main">
+        <div className={`qr-question-card ${animDir}`} key={currentIndex}>
+          {/* Question meta */}
+          <div className="qr-question-meta">
+            <span className="qr-question-badge">Câu {currentIndex + 1}</span>
+            <span className={`qr-type-badge ${q.type === 'SINGLE_CHOICE' ? 'single' : 'multi'}`}>
+              {q.type === 'SINGLE_CHOICE' ? '◉ Chọn một' : '☑ Chọn nhiều'}
+            </span>
+          </div>
 
-        <div className="options-container">
-          {currentQuestion.type === 'SINGLE_CHOICE' ? (
-            currentQuestion.answers.map(answer => (
-              <label key={answer.id} className={`option-label ${answers[currentQuestion.id] === answer.id ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name={`q-${currentQuestion.id}`}
-                  value={answer.id}
-                  checked={answers[currentQuestion.id] === answer.id}
-                  onChange={() => handleAnswerSelect(currentQuestion.id, answer.id, 'SINGLE_CHOICE')}
-                />
-                <div className="custom-indicator radio"></div>
-                <span className="option-text">{answer.content}</span>
-              </label>
-            ))
-          ) : (
-            currentQuestion.answers.map(answer => (
-              <label key={answer.id} className={`option-label checkbox-label ${(answers[currentQuestion.id] || []).includes(answer.id) ? 'selected' : ''}`}>
-                <input
-                  type="checkbox"
-                  name={`q-${currentQuestion.id}`}
-                  value={answer.id}
-                  checked={(answers[currentQuestion.id] || []).includes(answer.id)}
-                  onChange={() => handleAnswerSelect(currentQuestion.id, answer.id, 'MULTIPLE_CHOICE')}
-                />
-                <div className="custom-indicator checkbox"></div>
-                <span className="option-text">{answer.content}</span>
-              </label>
-            ))
+          <h2 className="qr-question-text">{q.content}</h2>
+
+          {/* Answers */}
+          <div className="qr-answers">
+            {q.answers.map((a, aIdx) => {
+              const isSelected = q.type === 'MULTIPLE_CHOICE'
+                ? (selectedVal || []).includes(a.id)
+                : selectedVal === a.id;
+
+              return (
+                <label
+                  key={a.id}
+                  className={`qr-option ${isSelected ? 'selected' : ''} ${isSubmitted ? 'locked' : ''}`}
+                  style={{ animationDelay: `${aIdx * 0.06}s` }}
+                >
+                  <input
+                    type={q.type === 'SINGLE_CHOICE' ? 'radio' : 'checkbox'}
+                    name={`q-${q.id}`}
+                    checked={isSelected}
+                    onChange={() => handleAnswerSelect(q.id, a.id, q.type)}
+                    disabled={isSubmitted}
+                  />
+                  <div className={`qr-indicator ${q.type === 'SINGLE_CHOICE' ? 'radio' : 'checkbox'} ${isSelected ? 'checked' : ''}`}>
+                    {isSelected && (q.type === 'SINGLE_CHOICE' ? <span className="dot" /> : <span className="check">✓</span>)}
+                  </div>
+                  <span className="qr-option-text">{a.content}</span>
+                </label>
+              );
+            })}
+          </div>
+
+          {isSubmitted && (
+            <div className="qr-submitted-note">
+              <span>✅</span> Câu trả lời đã được ghi lại
+            </div>
           )}
         </div>
 
-        <button
-          className="btn-submit-answer"
-          onClick={handleSubmitAnswer}
-          disabled={submitting}
-        >
-          {currentIndex === questions.length - 1 ? 'Hoàn thành' : 'Tiếp tục'}
-        </button>
-      </main>
+        {/* ── Navigation Buttons ── */}
+        <div className="qr-nav">
+          <button
+            className="qr-btn-prev"
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+          >
+            ← Câu trước
+          </button>
 
-      {feedback && (
-        <div className="feedback-overlay">
-          <div className="feedback-modal">
-            <div className="feedback-icon">💡</div>
-            <h3>Nhận xét nhanh</h3>
-            <div className="feedback-content" dangerouslySetInnerHTML={{ __html: feedback }}></div>
-            <button className="btn-next" onClick={handleNext}>Tiếp tục &rarr;</button>
-          </div>
+          <button
+            className={`qr-btn-next ${isLast && canGoNext ? 'finish' : ''}`}
+            onClick={handleConfirmAndNext}
+            disabled={submitting || !canGoNext}
+          >
+            {submitting ? (
+              <><span className="qr-btn-spinner" /> Đang xử lý...</>
+            ) : isSubmitted ? (
+              isLast ? '🎯 Xem kết quả' : 'Câu tiếp theo →'
+            ) : (
+              isLast ? '✅ Hoàn thành & Xem kết quả' : 'Xác nhận & Tiếp theo →'
+            )}
+          </button>
         </div>
-      )}
+      </main>
     </div>
   );
 };

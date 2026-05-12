@@ -11,6 +11,6 @@ public interface QuizService {
     Page<QuizSummaryResponse> getQuizzes(String search, Pageable pageable);
     QuizDetailResponse getQuizDetail(Long quizId);
     QuizDetailResponse startQuiz(Long quizId, Long userId);
-    FeedbackResponse submitAnswer(Long attemptId, SubmitAnswerRequest request, Long userId);
+    void submitAnswer(Long attemptId, SubmitAnswerRequest request, Long userId);
     QuizResultResponse finishQuiz(Long attemptId, Long userId);
 }

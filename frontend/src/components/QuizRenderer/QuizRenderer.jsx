@@ -51,12 +51,7 @@ const QuizRenderer = ({ quiz, isPreview = false }) => {
                         )}
                       </div>
                     </div>
-                    {a.feedbackText && (
-                      <div className="answer-feedback">
-                        <CheckCircle2 size={14} className="feedback-icon" />
-                        <span dangerouslySetInnerHTML={{ __html: a.feedbackText }}></span>
-                      </div>
-                    )}
+
                   </div>
                 ))}
               </div>

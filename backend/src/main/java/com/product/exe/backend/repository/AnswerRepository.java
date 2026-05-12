@@ -12,6 +12,8 @@ import java.util.List;
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     List<Answer> findAllByQuestionIdAndIsActiveTrueOrderByOrderIndexAsc(Long questionId);
     
+    List<Answer> findAllByQuestionIdInAndIsActiveTrueOrderByOrderIndexAsc(List<Long> questionIds);
+    
     @Modifying
     @Query("UPDATE Answer a SET a.isActive = false WHERE a.question.id = :questionId")
     void markAllAsInactiveByQuestionId(Long questionId);

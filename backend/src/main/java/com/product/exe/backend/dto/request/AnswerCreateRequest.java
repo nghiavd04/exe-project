@@ -18,7 +18,7 @@ public class AnswerCreateRequest {
     @NotBlank(message = "Answer value is required")
     private String value;
 
-    private String feedbackText;
+
 
     @NotNull(message = "Order index is required")
     private Integer orderIndex;

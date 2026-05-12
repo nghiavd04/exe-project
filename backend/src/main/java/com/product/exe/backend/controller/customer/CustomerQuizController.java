@@ -50,12 +50,12 @@ public class CustomerQuizController {
     }
 
     @PostMapping("/attempts/{attemptId}/answers")
-    public ResponseEntity<ApiResponse<FeedbackResponse>> submitAnswer(
+    public ResponseEntity<ApiResponse<Void>> submitAnswer(
             @PathVariable Long attemptId,
             @RequestBody SubmitAnswerRequest request) {
         Long userId = getCurrentUserId();
-        FeedbackResponse feedback = quizService.submitAnswer(attemptId, request, userId);
-        return ResponseEntity.ok(ApiResponse.success(feedback));
+        quizService.submitAnswer(attemptId, request, userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PostMapping("/attempts/{attemptId}/submit")

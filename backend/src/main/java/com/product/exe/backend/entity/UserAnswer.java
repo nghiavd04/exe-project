@@ -30,8 +30,7 @@ public class UserAnswer {
     @JoinColumn(name = "answer_id")
     private Answer answer;
 
-    @Column(name = "feedback_shown", columnDefinition = "TEXT")
-    private String feedbackShown;
+
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
