@@ -530,9 +530,7 @@ export default function QuizListPage() {
               )}
             </div>
             
-            <p className="detail-modal-footer-hint">
-              Nhấn ra ngoài hoặc nút [X] để đóng
-            </p>
+            
           </div>
         </div>
       )}

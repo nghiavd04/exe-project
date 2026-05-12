@@ -222,3 +222,58 @@
     .quiz-info h1 { font-size: 1.75rem; }
     .q-content { font-size: 1.15rem; }
 }
+
+.answer-text-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.answer-score-badge {
+    background: #edf2f7;
+    color: #4a5568;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.assessment-rules-section {
+    margin-bottom: 4rem;
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.rule-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #edf2f7;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.rule-header {
+    margin-bottom: 0.75rem;
+}
+
+.rule-range {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #4361ee;
+    background: #f0f4ff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.rule-text {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.5;
+    margin: 0;
+}

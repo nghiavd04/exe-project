@@ -25,6 +25,8 @@ public class QuizCreateRequest {
 
     private String imagePublicId;
 
+    private List<QuizAssessmentRuleRequest> assessmentRules;
+
     @NotEmpty(message = "Quiz must have at least one question")
     private List<QuestionCreateRequest> questions;
 }

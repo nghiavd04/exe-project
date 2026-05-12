@@ -477,3 +477,11 @@
   gap: 0.5rem;
   opacity: 0.9;
 }
+
+.score-input-compact {
+  width: 60px;
+  height: 32px;
+  padding: 0.2rem;
+  text-align: center;
+  margin: 0;
+}

@@ -12,6 +12,8 @@ import com.product.exe.backend.enums.QuizStatus;
 import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
 import com.product.exe.backend.repository.*;
+import com.product.exe.backend.entity.QuizAssessmentRule;
+import com.product.exe.backend.dto.request.QuizAssessmentRuleRequest;
 import com.product.exe.backend.service.AdminQuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     private final AdminRepository adminRepository;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+    private final QuizAssessmentRuleRepository assessmentRuleRepository;
 
     @Override
     public Page<AdminQuizResponse> getQuizzesForAdmin(QuizStatus status, String search, Pageable pageable) {
@@ -127,14 +130,16 @@ public class AdminQuizServiceImpl implements AdminQuizService {
             throw new IllegalStateException("Only DRAFT quizzes can be deleted. Please archive others instead.");
         }
         
-        // Manual delete of questions and answers to avoid FK issues if cascade is not set
+        // Soft delete
         List<Question> questions = questionRepository.findAllByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(id);
         for (Question q : questions) {
-            answerRepository.deleteAllByQuestionId(q.getId());
+            answerRepository.markAllAsInactiveByQuestionId(q.getId());
         }
-        questionRepository.deleteAllByQuizId(id);
+        questionRepository.markAllAsInactiveByQuizId(id);
+        assessmentRuleRepository.markAllAsInactiveByQuizId(id);
         
-        quizRepository.delete(quiz);
+        quiz.setStatus(QuizStatus.ARCHIVED); // Archive instead of physical delete
+        quizRepository.save(quiz);
     }
 
     @Override
@@ -170,6 +175,19 @@ public class AdminQuizServiceImpl implements AdminQuizService {
                 .collect(Collectors.toList());
         }
 
+        List<QuizAssessmentRuleDto> assessmentRuleDtos = List.of();
+        if (quiz.getAssessmentRules() != null) {
+            assessmentRuleDtos = quiz.getAssessmentRules().stream()
+                .filter(QuizAssessmentRule::getIsActive)
+                .map(r -> QuizAssessmentRuleDto.builder()
+                    .id(r.getId())
+                    .minScore(r.getMinScore())
+                    .maxScore(r.getMaxScore())
+                    .resultText(r.getResultText())
+                    .build())
+                .collect(Collectors.toList());
+        }
+
         return AdminQuizDetailResponse.builder()
                 .id(quiz.getId())
                 .title(quiz.getTitle())
@@ -178,6 +196,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
                 .imageUrl(quiz.getImageUrl())
                 .imagePublicId(quiz.getImagePublicId())
                 .status(quiz.getStatus())
+                .assessmentRules(assessmentRuleDtos)
                 .questions(questionDtos)
                 .build();
     }
@@ -200,6 +219,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
 
         quiz = quizRepository.save(quiz);
 
+        saveAssessmentRules(quiz, request.getAssessmentRules());
         saveQuestionsAndAnswers(quiz, request.getQuestions());
     }
 
@@ -220,15 +240,31 @@ public class AdminQuizServiceImpl implements AdminQuizService {
         quiz.setImagePublicId(request.getImagePublicId());
         quizRepository.save(quiz);
 
-        // Delete old questions and answers
+        // Soft delete old ones
         List<Question> oldQuestions = questionRepository.findAllByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(id);
         for (Question q : oldQuestions) {
-            answerRepository.deleteAllByQuestionId(q.getId());
+            answerRepository.markAllAsInactiveByQuestionId(q.getId());
         }
-        questionRepository.deleteAllByQuizId(id);
+        questionRepository.markAllAsInactiveByQuizId(id);
+        assessmentRuleRepository.markAllAsInactiveByQuizId(id);
 
         // Save new ones
+        saveAssessmentRules(quiz, request.getAssessmentRules());
         saveQuestionsAndAnswers(quiz, request.getQuestions());
+    }
+
+    private void saveAssessmentRules(Quiz quiz, List<QuizAssessmentRuleRequest> ruleRequests) {
+        if (ruleRequests != null) {
+            for (QuizAssessmentRuleRequest rReq : ruleRequests) {
+                QuizAssessmentRule rule = QuizAssessmentRule.builder()
+                        .quiz(quiz)
+                        .minScore(rReq.getMinScore())
+                        .maxScore(rReq.getMaxScore())
+                        .resultText(rReq.getResultText())
+                        .build();
+                assessmentRuleRepository.save(rule);
+            }
+        }
     }
 
     private void saveQuestionsAndAnswers(Quiz quiz, List<QuestionCreateRequest> questionRequests) {

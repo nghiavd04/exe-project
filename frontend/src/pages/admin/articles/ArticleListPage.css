@@ -5,7 +5,7 @@
   color: var(--muted);
   font-size: 0.85rem;
   margin-bottom: 0.5rem;
-  fontWeight: 600;
+  font-weight: 600;
 }
 
 .admin-breadcrumb a {
@@ -45,7 +45,7 @@
   border: none;
   padding: 0.75rem 1.25rem;
   border-radius: 10px;
-  fontWeight: 600;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
   text-decoration: none;
@@ -377,7 +377,7 @@
   border: 1px solid #e2e8f0;
   background: white;
   color: var(--teal-dark);
-  fontWeight: 700;
+  font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -400,9 +400,9 @@
   right: 0;
   bottom: 0;
   background: rgba(0,0,0,0.85);
-  zIndex: 9999;
+  z-index: 9999;
   display: flex;
-  flexDirection: column;
+  flex-direction: column;
   align-items: center;
   padding: 2rem;
   backdrop-filter: blur(8px);
@@ -411,9 +411,9 @@
 
 .detail-modal-content-wrapper {
   width: 100%;
-  maxWidth: 1200px;
+  max-width: 1200px;
   display: flex;
-  flexDirection: column;
+  flex-direction: column;
   height: 100%;
   cursor: default;
 }
@@ -445,7 +445,7 @@
   color: white;
   width: 45px;
   height: 45px;
-  borderRadius: 12px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -460,19 +460,19 @@
 .detail-modal-main-card {
   width: 100%;
   background: white;
-  borderRadius: 24px;
+  border-radius: 24px;
   overflow: hidden;
-  boxShadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   flex: 1;
   position: relative;
   display: flex;
-  flexDirection: column;
+  flex-direction: column;
 }
 
 .detail-modal-loading {
   flex: 1;
   display: flex;
-  flexDirection: column;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1rem;
@@ -484,10 +484,10 @@
 }
 
 .detail-modal-footer-hint {
-  marginTop: 1.5rem;
+  margin-top: 1.5rem;
   color: rgba(255,255,255,0.6);
   font-size: 0.85rem;
-  textAlign: center;
+  text-align: center;
 }
 
 @keyframes fadeIn {

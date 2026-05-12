@@ -20,5 +20,6 @@ public class AdminQuizDetailResponse {
     private String imageUrl;
     private String imagePublicId;
     private QuizStatus status;
+    private List<QuizAssessmentRuleDto> assessmentRules;
     private List<AdminQuestionResponse> questions;
 }

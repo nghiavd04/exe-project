@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
@@ -38,7 +39,7 @@ public class AdminManagerAccountController {
     }
 
     @PostMapping("/admins")
-    public ResponseEntity<ApiResponse<String>> createAdmin(@jakarta.validation.Valid @RequestBody AdminCreateRequest request) {
+    public ResponseEntity<ApiResponse<String>> createAdmin(@Valid @RequestBody AdminCreateRequest request) {
         adminManagerAccountService.createAdmin(request);
         return ResponseEntity.ok(ApiResponse.success("Tạo tài khoản quản trị viên thành công"));
     }

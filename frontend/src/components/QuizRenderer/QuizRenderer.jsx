@@ -44,7 +44,12 @@ const QuizRenderer = ({ quiz, isPreview = false }) => {
                   <div key={a.id || aIdx} className="answer-item">
                     <div className="answer-content">
                       <div className={`custom-indicator ${q.type === 'SINGLE_CHOICE' ? 'radio' : 'checkbox'}`}></div>
-                      <span className="text">{a.content || '(Đáp án trống)'}</span>
+                      <div className="answer-text-flex">
+                        <span className="text">{a.content || '(Đáp án trống)'}</span>
+                        {a.value !== undefined && (
+                          <span className="answer-score-badge">+{a.value} điểm</span>
+                        )}
+                      </div>
                     </div>
                     {a.feedbackText && (
                       <div className="answer-feedback">
@@ -58,6 +63,22 @@ const QuizRenderer = ({ quiz, isPreview = false }) => {
             </div>
           ))}
         </div>
+
+        {quiz.assessmentRules?.length > 0 && (
+          <div className="assessment-rules-section">
+            <h2 className="section-title">Quy tắc tính điểm & Kết quả</h2>
+            <div className="rules-grid">
+              {quiz.assessmentRules.map((rule, rIdx) => (
+                <div key={rule.id || rIdx} className="rule-card">
+                  <div className="rule-header">
+                    <span className="rule-range">{rule.minScore} - {rule.maxScore} điểm</span>
+                  </div>
+                  <p className="rule-text">{rule.resultText || '(Chưa có kết luận)'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="assessment-section">
           <h2 className="section-title">Nhận xét tổng thể sau bài test</h2>

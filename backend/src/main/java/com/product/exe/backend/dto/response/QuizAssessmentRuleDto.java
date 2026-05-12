@@ -6,13 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class QuizResultResponse {
-    private Long attemptId;
-    private String overallAssessment;
-    private String status;
-    private Integer totalScore;
-    private String assessmentResult;
+public class QuizAssessmentRuleDto {
+    private Long id;
+    private Integer minScore;
+    private Integer maxScore;
+    private String resultText;
 }

@@ -46,4 +46,10 @@ public class QuizAttempt {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    @Column(name = "total_score")
+    private Integer totalScore;
+
+    @Column(name = "assessment_result", columnDefinition = "TEXT")
+    private String assessmentResult;
 }

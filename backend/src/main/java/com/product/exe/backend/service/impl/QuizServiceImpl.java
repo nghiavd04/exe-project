@@ -144,6 +144,33 @@ public class QuizServiceImpl implements QuizService {
         if (attempt.getStatus() == QuizAttemptStatus.IN_PROGRESS) {
             attempt.setStatus(QuizAttemptStatus.COMPLETED);
             attempt.setSubmittedAt(LocalDateTime.now());
+            
+            // Calculate score
+            List<UserAnswer> userAnswers = userAnswerRepository.findAllByAttemptId(attemptId);
+            int totalScore = 0;
+            for (UserAnswer ua : userAnswers) {
+                if (ua.getAnswer() != null && ua.getAnswer().getValue() != null) {
+                    try {
+                        totalScore += Integer.parseInt(ua.getAnswer().getValue());
+                    } catch (NumberFormatException e) {
+                        // Ignore non-integer values
+                    }
+                }
+            }
+            attempt.setTotalScore(totalScore);
+
+            // Determine assessment result
+            String resultText = attempt.getQuiz().getOverallAssessment(); // Default fallback
+            if (attempt.getQuiz().getAssessmentRules() != null) {
+                for (QuizAssessmentRule rule : attempt.getQuiz().getAssessmentRules()) {
+                    if (totalScore >= rule.getMinScore() && totalScore <= rule.getMaxScore()) {
+                        resultText = rule.getResultText();
+                        break;
+                    }
+                }
+            }
+            attempt.setAssessmentResult(resultText);
+
             attempt = quizAttemptRepository.save(attempt);
         }
 
@@ -151,6 +178,8 @@ public class QuizServiceImpl implements QuizService {
                 .attemptId(attempt.getId())
                 .overallAssessment(attempt.getQuiz().getOverallAssessment())
                 .status(attempt.getStatus().name())
+                .totalScore(attempt.getTotalScore())
+                .assessmentResult(attempt.getAssessmentResult())
                 .build();
     }
 

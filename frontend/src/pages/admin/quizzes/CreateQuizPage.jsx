@@ -45,6 +45,9 @@ export default function CreateQuizPage() {
     title: '',
     description: '',
     overallAssessment: '',
+    assessmentRules: [
+      { id: Date.now(), minScore: 0, maxScore: 0, resultText: '' }
+    ],
     imageUrl: 'https://images.unsplash.com/photo-1510070112810-d4e9a46d9e91?q=80&w=2069&auto=format&fit=crop',
     imagePublicId: '',
     status: 'DRAFT',
@@ -128,6 +131,7 @@ export default function CreateQuizPage() {
           title: quiz.title,
           description: quiz.description,
           overallAssessment: quiz.overallAssessment,
+          assessmentRules: quiz.assessmentRules?.length > 0 ? quiz.assessmentRules.map(r => ({ ...r, id: r.id || Date.now() + Math.random() })) : [{ id: Date.now(), minScore: 0, maxScore: 0, resultText: '' }],
           imageUrl: quiz.imageUrl,
           imagePublicId: quiz.imagePublicId,
           status: quiz.status,
@@ -200,6 +204,31 @@ export default function CreateQuizPage() {
     }
   };
 
+  const handleAddRule = () => {
+    setQuizData(prev => ({
+      ...prev,
+      assessmentRules: [...prev.assessmentRules, { id: Date.now(), minScore: 0, maxScore: 0, resultText: '' }]
+    }));
+    setIsDirty(true);
+  };
+
+  const handleRemoveRule = (rId) => {
+    setQuizData(prev => ({
+      ...prev,
+      assessmentRules: prev.assessmentRules.filter(r => r.id !== rId)
+    }));
+    setIsDirty(true);
+  };
+
+  const handleRuleChange = (rId, field, value) => {
+    if (!initialLoaded) return;
+    setQuizData(prev => ({
+      ...prev,
+      assessmentRules: prev.assessmentRules.map(r => r.id === rId ? { ...r, [field]: value } : r)
+    }));
+    setIsDirty(true);
+  };
+
   const handleAddQuestion = () => {
     const newQuestion = {
       id: Date.now(),
@@ -207,8 +236,8 @@ export default function CreateQuizPage() {
       type: 'SINGLE_CHOICE',
       orderIndex: quizData.questions.length,
       answers: [
-        { id: Date.now() + 1, content: '', value: '1', feedbackText: '', orderIndex: 0 },
-        { id: Date.now() + 2, content: '', value: '2', feedbackText: '', orderIndex: 1 }
+        { id: Date.now() + 1, content: '', value: '0', feedbackText: '', orderIndex: 0 },
+        { id: Date.now() + 2, content: '', value: '0', feedbackText: '', orderIndex: 1 }
       ]
     };
     setQuizData(prev => ({
@@ -247,7 +276,7 @@ export default function CreateQuizPage() {
           const newAnswer = {
             id: Date.now(),
             content: '',
-            value: (q.answers.length + 1).toString(),
+            value: '0',
             feedbackText: '',
             orderIndex: q.answers.length
           };
@@ -293,19 +322,41 @@ export default function CreateQuizPage() {
     setIsDirty(true);
   };
 
+  const validateAssessmentRules = (rules) => {
+    for (let i = 0; i < rules.length; i++) {
+      const min = parseInt(rules[i].minScore, 10);
+      const max = parseInt(rules[i].maxScore, 10);
+      if (isNaN(min) || isNaN(max)) {
+        toast.error(`Quy tắc ${i + 1}: Vui lòng nhập điểm hợp lệ.`);
+        return false;
+      }
+      if (min > max) {
+        toast.error(`Quy tắc ${i + 1}: "Điểm tối thiểu" (${min}) không được lớn hơn "Điểm tối đa" (${max}).`);
+        return false;
+      }
+      for (let j = i + 1; j < rules.length; j++) {
+        const min2 = parseInt(rules[j].minScore, 10);
+        const max2 = parseInt(rules[j].maxScore, 10);
+        if (min <= max2 && max >= min2) {
+          toast.error(`Quy tắc ${i + 1} (${min}–${max}) và Quy tắc ${j + 1} (${min2}–${max2}) bị chồng lấp nhau.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
-    // Basic validation
     if (!quizData.title.trim()) {
       toast.error('Vui lòng nhập tiêu đề bài test.');
       return;
     }
-
     const emptyQuestion = quizData.questions.find(q => !q.content.trim());
     if (emptyQuestion) {
       toast.error('Vui lòng nhập nội dung cho tất cả các câu hỏi.');
       return;
     }
-
+    if (!validateAssessmentRules(quizData.assessmentRules)) return;
     setShowSaveModal(true);
   };
 
@@ -318,6 +369,11 @@ export default function CreateQuizPage() {
         title: quizData.title,
         description: quizData.description,
         overallAssessment: quizData.overallAssessment,
+        assessmentRules: quizData.assessmentRules.map(r => ({
+          minScore: parseInt(r.minScore) || 0,
+          maxScore: parseInt(r.maxScore) || 0,
+          resultText: r.resultText
+        })),
         imageUrl: quizData.imageUrl,
         imagePublicId: quizData.imagePublicId,
         questions: quizData.questions.map((q, qIdx) => ({
@@ -339,13 +395,18 @@ export default function CreateQuizPage() {
       } else {
         await adminApi.createQuiz(payload);
         toast.success('Đã tạo Quiz thành công dưới dạng bản nháp!');
-        localStorage.removeItem('QUIZ_CREATE_DRAFT'); // Clear draft on success
+        localStorage.removeItem('QUIZ_CREATE_DRAFT');
       }
-      setIsDirty(false); // Reset dirty flag
+      setIsDirty(false);
       setTimeout(() => navigate('/admin/quizzes'), 100);
     } catch (error) {
       console.error('Error saving quiz:', error);
-      toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi lưu Quiz.');
+      const msg = error?.response?.data?.message || '';
+      if (msg.includes('foreign key constraint fails')) {
+        toast.error('Dữ liệu này đã có người tham gia làm bài, không thể xóa trực tiếp. Hệ thống đã tự động chuyển sang chế độ lưu trữ dữ liệu cũ.');
+      } else {
+        toast.error(msg || 'Có lỗi xảy ra khi lưu bài test. Vui lòng kiểm tra lại kết nối.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -448,6 +509,87 @@ export default function CreateQuizPage() {
             </div>
           </section>
 
+
+          {/* Assessment Rules Section */}
+          <section className="quiz-edit-section">
+            <div className="section-title-wrapper">
+              <div className="section-icon-box" style={{ background: 'rgba(255,107,107,0.1)', color: '#ff6b6b' }}>
+                <Target size={20} />
+              </div>
+              <h3>Quy tắc kết quả (Dựa trên điểm số)</h3>
+            </div>
+            <p style={{fontSize: '0.85rem', color: '#718096', marginBottom: '1rem'}}>
+              Hệ thống sẽ cộng dồn điểm từ các đáp án người dùng chọn. Hãy cấu hình các khoảng điểm và kết quả tương ứng.
+            </p>
+            
+            <div className="answers-stack">
+              {quizData.assessmentRules.map((rule, idx) => (
+                <div key={rule.id} className="answer-item-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Từ điểm:</span>
+                      <input 
+                        type="number" 
+                        min="0"
+                        value={rule.minScore ?? ''}
+                        onChange={(e) => handleRuleChange(rule.id, 'minScore', e.target.value)}
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          handleRuleChange(rule.id, 'minScore', isNaN(val) || val < 0 ? 0 : val);
+                        }}
+                        onKeyDown={(e) => {
+                          if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+                          if (e.key === 'Enter') e.target.blur();
+                        }}
+                        className="answer-input-compact score-input-compact"
+                      />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Đến điểm:</span>
+                      <input 
+                        type="number" 
+                        min="0"
+                        value={rule.maxScore ?? ''}
+                        onChange={(e) => handleRuleChange(rule.id, 'maxScore', e.target.value)}
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          handleRuleChange(rule.id, 'maxScore', isNaN(val) || val < 0 ? 0 : val);
+                        }}
+                        onKeyDown={(e) => {
+                          if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+                          if (e.key === 'Enter') e.target.blur();
+                        }}
+                        className="answer-input-compact score-input-compact"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveRule(rule.id)}
+                      style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', marginLeft: 'auto' }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                  <div>
+                    <textarea 
+                      value={rule.resultText}
+                      onChange={(e) => handleRuleChange(rule.id, 'resultText', e.target.value)}
+                      placeholder="Kết luận chi tiết cho khoảng điểm này (Ví dụ: Bạn đang có dấu hiệu quá tải Dopamine)..."
+                      className="quiz-textarea-styled"
+                      style={{ minHeight: '60px' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button 
+              onClick={handleAddRule}
+              className="btn-add-question-dashed"
+              style={{ marginTop: '1rem', background: 'transparent', borderColor: '#ff6b6b', color: '#ff6b6b' }}
+            >
+              <Plus size={18} /> Thêm quy tắc đánh giá
+            </button>
+          </section>
+
           {/* Questions Section */}
           <section className="questions-stack">
             <div className="section-title-wrapper" style={{ marginBottom: '0' }}>
@@ -511,6 +653,25 @@ export default function CreateQuizPage() {
                               placeholder="Nội dung đáp án..."
                               className="answer-input-compact"
                             />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#718096' }}>Điểm:</span>
+                              <input 
+                                type="number" 
+                                min="0"
+                                value={answer.value ?? ''}
+                                onChange={(e) => handleAnswerChange(q.id, answer.id, 'value', e.target.value)}
+                                onBlur={(e) => {
+                                  const val = parseInt(e.target.value, 10);
+                                  handleAnswerChange(q.id, answer.id, 'value', isNaN(val) || val < 0 ? '0' : val.toString());
+                                }}
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+                                  if (e.key === 'Enter') e.target.blur();
+                                }}
+                                className="answer-input-compact score-input-compact"
+                                placeholder="0"
+                              />
+                            </div>
                             <button 
                               onClick={() => handleRemoveAnswer(q.id, answer.id)}
                               style={{ background: 'none', border: 'none', color: '#cbd5e0', cursor: 'pointer' }}
@@ -657,9 +818,7 @@ export default function CreateQuizPage() {
                <QuizRenderer quiz={quizData} isPreview={true} />
             </div>
             
-            <p className="detail-modal-footer-hint">
-              Nhấn ra ngoài hoặc nút [X] để đóng
-            </p>
+            
           </div>
         </div>
       )}

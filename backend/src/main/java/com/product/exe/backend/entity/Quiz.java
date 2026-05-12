@@ -62,4 +62,8 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Question> questions;
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<QuizAssessmentRule> assessmentRules;
 }
