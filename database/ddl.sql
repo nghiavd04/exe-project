@@ -5,7 +5,7 @@ DROP DATABASE IF EXISTS `exe_db`;
 CREATE DATABASE `exe_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `exe_db`;
 
-
+-- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- 2. Customers Table
 CREATE TABLE IF NOT EXISTS customers (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS customers (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 3. Admins Table
 CREATE TABLE IF NOT EXISTS admins (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -36,29 +38,35 @@ CREATE TABLE IF NOT EXISTS admins (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 4. Articles Table
 CREATE TABLE IF NOT EXISTS articles (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    admin_id BIGINT NOT NULL,
+    admin_id BIGINT,
     category ENUM('HEALTH', 'SCIENCE', 'LIFESTYLE', 'EDUCATION', 'PSYCHOLOGY') NOT NULL,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(280) UNIQUE NOT NULL,
     content TEXT NOT NULL,
     thumbnail_url TEXT,
+    thumbnail_public_id VARCHAR(255),
     required_tier VARCHAR(50) NOT NULL DEFAULT 'FREE',
     status ENUM('DRAFT', 'PUBLISHED', 'ARCHIVED') NOT NULL DEFAULT 'DRAFT',
+    view_count BIGINT NOT NULL DEFAULT 0,
     published_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
 );
 
+-- 5. Quizzes Table
 CREATE TABLE IF NOT EXISTS quizzes (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     admin_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     overall_assessment TEXT,
+    image_url TEXT,
+    image_public_id VARCHAR(255),
     status ENUM('DRAFT', 'PUBLISHED', 'ARCHIVED') NOT NULL DEFAULT 'DRAFT',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -66,6 +74,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
 );
 
+-- 6. Questions Table
 CREATE TABLE IF NOT EXISTS questions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     quiz_id BIGINT NOT NULL,
@@ -77,17 +86,29 @@ CREATE TABLE IF NOT EXISTS questions (
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
+-- 7. Answers Table
 CREATE TABLE IF NOT EXISTS answers (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     question_id BIGINT NOT NULL,
     content TEXT NOT NULL,
     value VARCHAR(100) NOT NULL,
-    feedback_text TEXT,
     order_index INT NOT NULL DEFAULT 0,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
+-- 8. Quiz Assessment Rules Table
+CREATE TABLE IF NOT EXISTS quiz_assessment_rules (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    quiz_id BIGINT NOT NULL,
+    min_score INT NOT NULL,
+    max_score INT NOT NULL,
+    result_text TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+-- 9. Subscription Plans Table
 CREATE TABLE IF NOT EXISTS subscription_plans (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
@@ -99,12 +120,16 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 10. Quiz Attempts Table
 CREATE TABLE IF NOT EXISTS quiz_attempts (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT NOT NULL,
     quiz_id BIGINT NOT NULL,
     status ENUM('IN_PROGRESS', 'COMPLETED', 'EXPIRED') NOT NULL DEFAULT 'IN_PROGRESS',
-    time_spent_seconds INT,
+    total_score INT,
+    assessment_result TEXT,
+    version BIGINT NOT NULL DEFAULT 0,
+    last_activity_at TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     submitted_at TIMESTAMP NULL,
@@ -112,18 +137,19 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
+-- 11. User Answers Table
 CREATE TABLE IF NOT EXISTS user_answers (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     attempt_id BIGINT NOT NULL,
     question_id BIGINT NOT NULL,
     answer_id BIGINT,
-    feedback_shown TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (attempt_id) REFERENCES quiz_attempts(id) ON DELETE CASCADE,
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
     FOREIGN KEY (answer_id) REFERENCES answers(id) ON DELETE SET NULL
 );
 
+-- 12. User Subscriptions Table
 CREATE TABLE IF NOT EXISTS user_subscriptions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT NOT NULL,
@@ -135,6 +161,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
     FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE
 );
 
+-- 13. Payments Table
 CREATE TABLE IF NOT EXISTS payments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT NOT NULL,
