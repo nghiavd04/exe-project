@@ -148,6 +148,7 @@ public class AuthServiceImpl implements AuthService {
         verification.setVerified(true);
         verificationRepository.save(verification);
     }
+
     @Override
     @Transactional
     public void forgotPassword(String email) {
