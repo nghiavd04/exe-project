@@ -1,0 +1,26 @@
+# Caddyfile - Reverse Proxy Configuration
+# Sử dụng domain thực hoặc localhost
+
+{
+    auto_https off
+}
+
+:80 {
+    # Reverse proxy cho API backend (JavaSpring)
+    # Tất cả requests đến /api/* sẽ được chuyển đến backend
+    handle /api/* {
+        reverse_proxy backend:8080
+    }
+
+    # Reverse proxy cho frontend (React)
+    # Tất cả requests còn lại sẽ được chuyển đến frontend
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    # Logging
+    log {
+        output stdout
+        format console
+    }
+}

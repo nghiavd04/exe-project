@@ -15,10 +15,10 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # Copy the built artifact from the build stage
-COPY --from=build /app/target/*.war app.war
+COPY --from=build /app/target/*.jar app.jar
 
 # Expose port 8080
 EXPOSE 8080
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.war"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

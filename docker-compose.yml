@@ -1,0 +1,72 @@
+services:
+  # Reverse Proxy
+  caddy:
+    image: caddy:2-alpine
+    container_name: todo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+  # MySQL Database
+  mysql:
+    image: mysql:8
+    container_name: dopaless-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dopaless_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: dopaless-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+
+  # Spring Boot Backend
+  backend:
+    image: tungtq123/dopaless-backend:latest
+    container_name: dopaless-backend
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/dopaless_db
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+      JWT_SECRET: SIQjsUC1rX3x1wCDjoUnk6TRjmvWeVfRMirBGDWPQW4=
+      FRONTEND_URL: https://dopaless.cloud
+      BACKEND_URL: https://dopaless.cloud/api
+    expose:
+      - "8080"
+    depends_on:
+      - mysql
+      - redis
+
+  # React Frontend
+  frontend:
+    image: tungtq123/dopaless-frontend:latest
+    container_name: dopaless-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:
