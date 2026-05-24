@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { quizApi } from '../../../apis/customerApi';
+import defaultQuizImg from '../../../assets/dopamine-bg.png';
 import './QuizListPage.css';
 
 const QuizListPage = () => {
@@ -56,15 +57,23 @@ const QuizListPage = () => {
           <div className="quiz-grid">
             {quizzes.map((quiz) => (
               <div key={quiz.id} className="quiz-card">
-                <div className="quiz-card-header">
-                  <div className="quiz-icon">🧠</div>
+                <div className="quiz-card-banner">
+                  <img 
+                    src={quiz.imageUrl || defaultQuizImg} 
+                    alt={quiz.title} 
+                    className="quiz-card-img" 
+                    onError={(e) => { e.target.src = defaultQuizImg; }}
+                  />
+                  <div className="quiz-card-badge">Tâm lý</div>
                 </div>
-                <div className="quiz-card-body">
-                  <h3>{quiz.title}</h3>
-                  <p>{quiz.description || 'Không có mô tả cho bài test này.'}</p>
-                </div>
-                <div className="quiz-card-footer">
-                  <Link to={`/quizzes/${quiz.id}/start`} className="btn-start">Bắt đầu test</Link>
+                <div className="quiz-card-content">
+                  <div className="quiz-card-body">
+                    <h3>{quiz.title}</h3>
+                    <p>{quiz.description || 'Không có mô tả cho bài test này.'}</p>
+                  </div>
+                  <div className="quiz-card-footer">
+                    <Link to={`/quizzes/${quiz.id}/start`} className="btn-start">Bắt đầu test</Link>
+                  </div>
                 </div>
               </div>
             ))}

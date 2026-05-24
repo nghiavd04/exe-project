@@ -18,6 +18,7 @@ import ArticleDetailPage from '../pages/customer/articles/ArticleDetailPage';
 import QuizListPage from '../pages/customer/quizzes/QuizListPage';
 import QuizRunnerPage from '../pages/customer/quizzes/QuizRunnerPage';
 import ProfilePage from '../pages/customer/profile/ProfilePage';
+import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ) 
       },
+      { path: 'terms-privacy', element: <TermsAndPrivacyPage /> },
       { 
         path: '*', 
         element: <PlaceholderPage 

@@ -40,7 +40,13 @@
 ────────────────────────────────────────── */
 .qr-intro {
     background: linear-gradient(160deg, #f0f4ff 0%, #fdf4ff 100%);
-    padding: 3rem 1.5rem;
+    padding: calc(75px + 3rem) 1.5rem 4rem;
+}
+
+@media (max-width: 768px) {
+    .qr-intro {
+        padding: calc(65px + 2rem) 1.5rem 3rem;
+    }
 }
 
 .qr-intro-card {
@@ -48,9 +54,9 @@
     width: 100%;
     background: white;
     border-radius: 28px;
-    box-shadow: 0 20px 60px rgba(67, 97, 238, 0.1), 0 4px 16px rgba(0,0,0,0.04);
+    box-shadow: 0 20px 60px rgba(67, 97, 238, 0.08), 0 4px 16px rgba(0,0,0,0.03);
     overflow: hidden;
-    animation: fadeUp 0.5s ease both;
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes fadeUp {
@@ -60,9 +66,10 @@
 
 .qr-intro-banner {
     width: 100%;
-    height: 220px;
+    height: 260px;
     position: relative;
     overflow: hidden;
+    background: #edf2f7;
 }
 
 .qr-intro-banner img {
@@ -74,97 +81,118 @@
 .qr-intro-banner-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.4));
+    background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.35));
 }
 
 .qr-intro-body {
-    padding: 2.5rem;
+    padding: 3rem 2.5rem 2.5rem;
     text-align: center;
+}
+
+@media (max-width: 600px) {
+    .qr-intro-body {
+        padding: 2rem 1.5rem 1.75rem;
+    }
 }
 
 .qr-intro-badge {
     display: inline-block;
-    background: #eef2ff;
+    background: rgba(67, 97, 238, 0.08);
     color: #4361ee;
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 0.35rem 1rem;
-    border-radius: 20px;
-    margin-bottom: 1.25rem;
+    letter-spacing: 1.5px;
+    padding: 0.4rem 1.2rem;
+    border-radius: 30px;
+    margin-bottom: 1.5rem;
 }
 
 .qr-intro-title {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #1a1a4b;
-    line-height: 1.25;
-    margin: 0 0 1rem;
+    line-height: 1.3;
+    margin: 0 0 1.25rem;
 }
 
 .qr-intro-desc {
-    font-size: 1rem;
-    color: #718096;
-    line-height: 1.7;
-    margin: 0 0 1.75rem;
+    font-size: 1.05rem;
+    color: #4a5568;
+    line-height: 1.75;
+    margin: 0 0 2rem;
     white-space: pre-wrap;
 }
 
 .qr-intro-meta {
     display: flex;
     justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 1.75rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #edf2f7;
 }
 
 .qr-meta-item {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     font-size: 0.9rem;
     color: #4a5568;
     font-weight: 600;
 }
 
-.qr-meta-icon { font-size: 1rem; }
+.qr-meta-icon {
+    font-size: 1.1rem;
+    background: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 
 .qr-intro-note {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 0.85rem;
     background: #fffaf0;
     border: 1px solid #feebc8;
-    border-radius: 12px;
-    padding: 0.9rem 1.1rem;
-    margin-bottom: 2rem;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2.5rem;
     text-align: left;
 }
 
-.qr-intro-note span { font-size: 1.1rem; flex-shrink: 0; }
-.qr-intro-note p { font-size: 0.87rem; color: #744210; line-height: 1.6; margin: 0; }
+.qr-intro-note span { font-size: 1.25rem; flex-shrink: 0; }
+.qr-intro-note p { font-size: 0.88rem; color: #744210; line-height: 1.6; margin: 0; }
 
 .qr-btn-start {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.75rem;
     background: linear-gradient(135deg, #4361ee, #7c3aed);
     color: white;
-    padding: 1rem 2.5rem;
+    padding: 1.1rem 3rem;
     border-radius: 50px;
     border: none;
     cursor: pointer;
     font-weight: 800;
-    font-size: 1.05rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.35);
+    font-size: 1.1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(67, 97, 238, 0.3);
 }
 
 .qr-btn-start:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(67, 97, 238, 0.45);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(67, 97, 238, 0.45);
 }
 
 .qr-btn-start:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -178,20 +206,35 @@
     animation: spin 0.7s linear infinite;
 }
 
+
 /* ──────────────────────────────────────────
    PLAYING VIEW – HEADER
 ────────────────────────────────────────── */
 .qr-playing {
     background: #f8fafc;
+    padding-top: 75px;
+}
+
+@media (max-width: 768px) {
+    .qr-playing {
+        padding-top: 65px;
+    }
 }
 
 .qr-header {
     width: 100%;
     position: sticky;
-    top: 0;
+    top: 75px;
     z-index: 50;
     background: white;
     box-shadow: 0 1px 0 #edf2f7, 0 4px 16px rgba(0,0,0,0.04);
+    transition: top 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .qr-header {
+        top: 65px;
+    }
 }
 
 .qr-progress-track {
@@ -508,6 +551,14 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    padding-top: 75px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .quiz-result-page {
+        padding-top: 65px;
+    }
 }
 
 .result-wave-bg {
@@ -524,7 +575,7 @@
 .result-content-card {
     max-width: 680px;
     width: 90%;
-    margin: 5rem auto 4rem;
+    margin: 3rem auto 4rem;
     padding: 3rem 2.5rem;
     background: white;
     border-radius: 32px;

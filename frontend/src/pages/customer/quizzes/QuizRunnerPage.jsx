@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { quizApi } from '../../../apis/customerApi';
 import toast from 'react-hot-toast';
+import defaultQuizImg from '../../../assets/dopamine-bg.png';
 import './QuizRunnerPage.css';
 
 const QuizRunnerPage = () => {
@@ -17,9 +18,8 @@ const QuizRunnerPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [overallResult, setOverallResult] = useState(null);
 
-  // Local state: track all selections + which questions are submitted
+  // Local state: track all selections
   const [answers, setAnswers] = useState({});         // { questionId: id | [ids] }
-  const [submitted, setSubmitted] = useState({});     // { questionId: true }
   const [animDir, setAnimDir] = useState('forward');  // for slide animation
 
   useEffect(() => { fetchQuizDetail(); }, [id]);
@@ -56,7 +56,6 @@ const QuizRunnerPage = () => {
 
   // Handle answer selection (local only, no API call)
   const handleAnswerSelect = (questionId, answerId, type) => {
-    if (submitted[questionId]) return; // read-only if already submitted
     if (type === 'MULTIPLE_CHOICE') {
       setAnswers(prev => {
         const cur = prev[questionId] || [];
@@ -72,8 +71,8 @@ const QuizRunnerPage = () => {
     }
   };
 
-  // Submit current question's answer to API, then move forward
-  const handleConfirmAndNext = async () => {
+  // Move to next question locally
+  const handleNext = () => {
     const q = questions[currentIndex];
     const val = answers[q.id];
 
@@ -82,30 +81,8 @@ const QuizRunnerPage = () => {
       return;
     }
 
-    if (!submitted[q.id]) {
-      try {
-        setSubmitting(true);
-        const selectedIds = q.type === 'MULTIPLE_CHOICE' ? val : [val];
-        const res = await quizApi.submitAnswer(attemptId, {
-          questionId: q.id,
-          selectedAnswerIds: selectedIds,
-        });
-        if (res.data.success) {
-          setSubmitted(prev => ({ ...prev, [q.id]: true }));
-        }
-      } catch (err) {
-        toast.error(err?.response?.data?.message || 'Lỗi khi gửi câu trả lời.');
-        return;
-      } finally {
-        setSubmitting(false);
-      }
-    }
-
-    // Move to next or finish
     if (currentIndex < questions.length - 1) {
       goTo(currentIndex + 1, 'forward');
-    } else {
-      await handleFinishQuiz();
     }
   };
 
@@ -120,8 +97,28 @@ const QuizRunnerPage = () => {
   };
 
   const handleFinishQuiz = async () => {
+    const q = questions[currentIndex];
+    const val = answers[q.id];
+
+    if (!val || (Array.isArray(val) && val.length === 0)) {
+      toast.error('Vui lòng chọn câu trả lời trước khi hoàn thành.');
+      return;
+    }
+
     try {
       setSubmitting(true);
+      // Gửi lần lượt toàn bộ đáp án của các câu hỏi lên server
+      for (const question of questions) {
+        const answerVal = answers[question.id];
+        if (answerVal) {
+          const selectedIds = question.type === 'MULTIPLE_CHOICE' ? answerVal : [answerVal];
+          await quizApi.submitAnswer(attemptId, {
+            questionId: question.id,
+            selectedAnswerIds: selectedIds,
+          });
+        }
+      }
+      // Sau khi gửi xong toàn bộ, kết thúc bài test
       const res = await quizApi.finishQuiz(attemptId);
       if (res.data.success) {
         setOverallResult(res.data.data);
@@ -153,12 +150,6 @@ const QuizRunnerPage = () => {
     return (
       <div className="qr-page qr-intro">
         <div className="qr-intro-card">
-          {quiz.imageUrl && (
-            <div className="qr-intro-banner">
-              <img src={quiz.imageUrl} alt={quiz.title} />
-              <div className="qr-intro-banner-overlay" />
-            </div>
-          )}
           <div className="qr-intro-body">
             <div className="qr-intro-badge">Bài trắc nghiệm tâm lý</div>
             <h1 className="qr-intro-title">{quiz.title}</h1>
@@ -250,11 +241,9 @@ const QuizRunnerPage = () => {
   // QUESTION VIEW
   // ─────────────────────────────────────────────
   const q = questions[currentIndex];
-  const isSubmitted = !!submitted[q.id];
   const selectedVal = answers[q.id];
   const isLast = currentIndex === questions.length - 1;
-  const allPreviousSubmitted = questions.slice(0, currentIndex).every(qq => submitted[qq.id]);
-  const canGoNext = isSubmitted || (selectedVal !== undefined && selectedVal !== '' && !(Array.isArray(selectedVal) && selectedVal.length === 0));
+  const canGoNext = selectedVal !== undefined && selectedVal !== '' && !(Array.isArray(selectedVal) && selectedVal.length === 0);
 
   return (
     <div className="qr-page qr-playing">
@@ -272,14 +261,17 @@ const QuizRunnerPage = () => {
           </span>
           {/* Dot navigation */}
           <div className="qr-dots">
-            {questions.map((qq, i) => (
-              <button
-                key={qq.id}
-                className={`qr-dot ${i === currentIndex ? 'active' : ''} ${submitted[qq.id] ? 'done' : ''}`}
-                onClick={() => goTo(i, i > currentIndex ? 'forward' : 'backward')}
-                title={`Câu ${i + 1}`}
-              />
-            ))}
+            {questions.map((qq, i) => {
+              const hasAnswer = answers[qq.id] !== undefined && answers[qq.id] !== '' && !(Array.isArray(answers[qq.id]) && answers[qq.id].length === 0);
+              return (
+                <button
+                  key={qq.id}
+                  className={`qr-dot ${i === currentIndex ? 'active' : ''} ${hasAnswer ? 'done' : ''}`}
+                  onClick={() => goTo(i, i > currentIndex ? 'forward' : 'backward')}
+                  title={`Câu ${i + 1}`}
+                />
+              );
+            })}
           </div>
           <span className="qr-header-label" style={{ opacity: 0 }}>
             {currentIndex + 1} / {questions.length}
@@ -310,7 +302,7 @@ const QuizRunnerPage = () => {
               return (
                 <label
                   key={a.id}
-                  className={`qr-option ${isSelected ? 'selected' : ''} ${isSubmitted ? 'locked' : ''}`}
+                  className={`qr-option ${isSelected ? 'selected' : ''}`}
                   style={{ animationDelay: `${aIdx * 0.06}s` }}
                 >
                   <input
@@ -318,7 +310,6 @@ const QuizRunnerPage = () => {
                     name={`q-${q.id}`}
                     checked={isSelected}
                     onChange={() => handleAnswerSelect(q.id, a.id, q.type)}
-                    disabled={isSubmitted}
                   />
                   <div className={`qr-indicator ${q.type === 'SINGLE_CHOICE' ? 'radio' : 'checkbox'} ${isSelected ? 'checked' : ''}`}>
                     {isSelected && (q.type === 'SINGLE_CHOICE' ? <span className="dot" /> : <span className="check">✓</span>)}
@@ -328,12 +319,6 @@ const QuizRunnerPage = () => {
               );
             })}
           </div>
-
-          {isSubmitted && (
-            <div className="qr-submitted-note">
-              <span>✅</span> Câu trả lời đã được ghi lại
-            </div>
-          )}
         </div>
 
         {/* ── Navigation Buttons ── */}
@@ -348,15 +333,15 @@ const QuizRunnerPage = () => {
 
           <button
             className={`qr-btn-next ${isLast && canGoNext ? 'finish' : ''}`}
-            onClick={handleConfirmAndNext}
+            onClick={isLast ? handleFinishQuiz : handleNext}
             disabled={submitting || !canGoNext}
           >
             {submitting ? (
               <><span className="qr-btn-spinner" /> Đang xử lý...</>
-            ) : isSubmitted ? (
-              isLast ? '🎯 Xem kết quả' : 'Câu tiếp theo →'
+            ) : isLast ? (
+              '✅ Hoàn thành & Xem kết quả'
             ) : (
-              isLast ? '✅ Hoàn thành & Xem kết quả' : 'Xác nhận & Tiếp theo →'
+              'Câu tiếp theo →'
             )}
           </button>
         </div>

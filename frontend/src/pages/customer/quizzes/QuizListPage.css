@@ -41,29 +41,59 @@
 .quiz-card {
     background: var(--white);
     border-radius: var(--radius-lg);
-    padding: 2rem;
     display: flex;
     flex-direction: column;
     border: 1px solid rgba(13, 122, 110, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
 }
 
 .quiz-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
     border-color: var(--teal);
 }
 
-.quiz-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
+.quiz-card-banner {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    background: #edf2f7;
 }
 
-.quiz-icon {
-    font-size: 2.5rem;
+.quiz-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.quiz-card:hover .quiz-card-img {
+    transform: scale(1.06);
+}
+
+.quiz-card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(13, 122, 110, 0.9);
+    color: var(--white);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quiz-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .quiz-card-body {
@@ -72,16 +102,31 @@
 
 .quiz-card-body h3 {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
     color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    font-weight: 700;
 }
 
 .quiz-card-body p {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--muted);
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 4.8em; /* Giữ cố định chiều cao của mô tả để các nút bấm thẳng hàng */
+}
+
+.quiz-card-footer {
+    margin-top: auto;
 }
 
 .btn-start {

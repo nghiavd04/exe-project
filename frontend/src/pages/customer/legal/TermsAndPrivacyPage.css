@@ -1,0 +1,219 @@
+.legal-page {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f3faf9 0%, #fafcff 40%, #ffffff 100%);
+    padding-top: 75px; /* Navbar height compensation */
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .legal-page {
+        padding-top: 65px;
+    }
+}
+
+/* ── HERO HEADER ── */
+.legal-hero {
+    padding: 5rem 1.5rem 3.5rem;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.legal-badge {
+    display: inline-block;
+    background: var(--teal-pale);
+    color: var(--teal);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 0.4rem 1.2rem;
+    border-radius: 30px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(13, 122, 110, 0.15);
+}
+
+.legal-hero h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.5px;
+}
+
+.legal-hero p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+}
+
+/* ── TAB NAVIGATOR ── */
+.legal-tabs-container {
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1.5rem;
+}
+
+.legal-tabs {
+    display: flex;
+    background: rgba(13, 122, 110, 0.05);
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid rgba(13, 122, 110, 0.08);
+}
+
+.legal-tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.9rem 1.25rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--muted);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.legal-tab-btn:hover:not(.active) {
+    color: var(--teal);
+    background: rgba(255,255,255,0.4);
+}
+
+.legal-tab-btn.active {
+    background: var(--white);
+    color: var(--teal);
+    box-shadow: 0 4px 15px rgba(13, 122, 110, 0.1);
+}
+
+/* ── CONTENT AREA ── */
+.legal-content-section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+}
+
+.legal-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 4rem 3.5rem;
+    border: 1px solid rgba(13, 122, 110, 0.08);
+    box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 600px) {
+    .legal-card {
+        padding: 2.5rem 1.5rem;
+        border-radius: 18px;
+    }
+}
+
+.legal-body h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.legal-updated {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.legal-body hr {
+    border: 0;
+    height: 1px;
+    background: rgba(13, 122, 110, 0.12);
+    margin-bottom: 2.5rem;
+}
+
+.legal-block {
+    margin-bottom: 2.5rem;
+}
+
+.legal-block:last-child {
+    margin-bottom: 0;
+}
+
+.legal-block h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.legal-block p {
+    font-size: 0.98rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1.2rem;
+}
+
+.legal-block p strong {
+    color: var(--text);
+}
+
+.legal-block ul {
+    margin-bottom: 1.2rem;
+    padding-left: 1.5rem;
+}
+
+.legal-block li {
+    font-size: 0.98rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 0.6rem;
+}
+
+.legal-block li strong {
+    color: var(--text);
+}
+
+/* ── ALERT BOXES ── */
+.legal-alert-box {
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.legal-alert-box.warning {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    color: #92400e;
+}
+
+.legal-alert-box.success {
+    background: #f0fdf4;
+    border: 1px solid #dcfce7;
+    color: #166534;
+}
+
+/* ── ANIMATIONS ── */
+.fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

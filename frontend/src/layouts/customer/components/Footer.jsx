@@ -38,7 +38,7 @@ export default function Footer() {
                 {/* Brand column */}
                 <div className="footer-brand">
                     <Link to="/" className="footer-logo-wrapper" style={{ textDecoration: 'none' }}>
-                        <span className="footer-brand-name" style={{ fontSize: '2rem', fontFamily: '"Outfit", sans-serif', fontWeight: '800', color: 'var(--white)' }}>DOPA<span style={{ color: 'var(--accent)' }}>MINE</span></span>
+                        <span className="footer-brand-name" style={{ fontSize: '2rem', fontFamily: '"Outfit", sans-serif', fontWeight: '800', color: 'var(--white)' }}>DOPA<span style={{ color: 'var(--accent)' }}>LESS</span></span>
                     </Link>
                     <p>
                         Sứ mệnh của chúng tôi: giúp người trẻ Việt Nam hiểu rõ tác động
@@ -105,9 +105,9 @@ export default function Footer() {
             <div className="footer-bottom">
                 <span>© 2024 Dopaless Education. Bảo lưu mọi quyền.</span>
                 <div className="footer-bottom-links">
-                    <Link to="#">Chính sách bảo mật</Link>
-                    <Link to="#">Điều khoản dịch vụ</Link>
-                    <Link to="#">Disclaimer y tế</Link>
+                    <Link to="/terms-privacy?tab=privacy" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</Link>
+                    <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer">Điều khoản dịch vụ</Link>
+                    <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer">Disclaimer y tế</Link>
                 </div>
             </div>
         </footer>
