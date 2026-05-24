@@ -26,7 +26,7 @@ apiClient.interceptors.response.use(
     if (error.response && error.response.status === 401 && !isAuthRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/dang-nhap';
     }
     return Promise.reject(error);
   }

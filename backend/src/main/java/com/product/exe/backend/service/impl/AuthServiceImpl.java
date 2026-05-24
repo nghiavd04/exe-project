@@ -15,6 +15,7 @@ import com.product.exe.backend.security.JwtTokenProvider;
 import com.product.exe.backend.repository.EmailVerificationRepository;
 import com.product.exe.backend.service.AuthService;
 import com.product.exe.backend.service.EmailService;
+import com.product.exe.backend.service.NotificationService;
 import com.product.exe.backend.entity.EmailVerification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider tokenProvider;
     private final EmailVerificationRepository verificationRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
@@ -98,6 +100,13 @@ public class AuthServiceImpl implements AuthService {
                 .isActive(true)
                 .build();
         customerRepository.save(customer);
+
+        // Gửi lời chào mừng cho tài khoản mới đăng ký
+        notificationService.createNotification(
+                savedUser,
+                "Chào mừng bạn đến với Dopaless! 🎉",
+                "Cảm ơn bạn đã tham gia cùng chúng tôi. Hãy bắt đầu cải thiện thói quen của mình bằng cách thực hiện bài trắc nghiệm Dopamine đầu tiên nhé!"
+        );
 
         // Delete verification record after successful registration
         verificationRepository.delete(verification);

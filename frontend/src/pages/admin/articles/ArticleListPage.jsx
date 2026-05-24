@@ -108,7 +108,7 @@ export default function ArticleListPage() {
           toast.success('Đã công khai bài viết!', { id: loadingToast });
           fetchArticles();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi xuất bản');
+          toast.error(err.response?.data?.message || 'Lỗi khi xuất bản', { id: loadingToast });
         }
       }
     });
@@ -127,7 +127,7 @@ export default function ArticleListPage() {
           toast.success('Đã lưu trữ bài viết!', { id: loadingToast });
           fetchArticles();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi lưu trữ');
+          toast.error(err.response?.data?.message || 'Lỗi khi lưu trữ', { id: loadingToast });
         }
       }
     });
@@ -146,7 +146,7 @@ export default function ArticleListPage() {
           toast.success('Đã khôi phục bài viết!', { id: loadingToast });
           fetchArticles();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi khôi phục');
+          toast.error(err.response?.data?.message || 'Lỗi khi khôi phục', { id: loadingToast });
         }
       }
     });
@@ -200,7 +200,7 @@ export default function ArticleListPage() {
           fetchArticles();
           fetchStats();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi xóa');
+          toast.error(err.response?.data?.message || 'Lỗi khi xóa', { id: loadingToast });
         }
       }
     });

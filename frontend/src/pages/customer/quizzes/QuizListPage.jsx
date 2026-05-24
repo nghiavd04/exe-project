@@ -72,7 +72,7 @@ const QuizListPage = () => {
                     <p>{quiz.description || 'Không có mô tả cho bài test này.'}</p>
                   </div>
                   <div className="quiz-card-footer">
-                    <Link to={`/quizzes/${quiz.id}/start`} className="btn-start">Bắt đầu test</Link>
+                    <Link to={`/trac-nghiem/${quiz.id}/bat-dau`} className="btn-start">Bắt đầu test</Link>
                   </div>
                 </div>
               </div>

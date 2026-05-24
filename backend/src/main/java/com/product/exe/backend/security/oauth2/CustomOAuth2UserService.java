@@ -6,6 +6,7 @@ import com.product.exe.backend.enums.AuthProvider;
 import com.product.exe.backend.enums.Role;
 import com.product.exe.backend.repository.CustomerRepository;
 import com.product.exe.backend.repository.UserRepository;
+import com.product.exe.backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -27,6 +28,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -91,6 +93,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .isActive(true)
                 .build();
         customerRepository.save(customer);
+
+        // Gửi lời chào mừng cho tài khoản mới đăng ký qua Google
+        notificationService.createNotification(
+                savedUser,
+                "Chào mừng bạn đến với Dopaless! 🎉",
+                "Cảm ơn bạn đã tham gia cùng chúng tôi. Hãy bắt đầu cải thiện thói quen của mình bằng cách thực hiện bài trắc nghiệm Dopamine đầu tiên nhé!"
+        );
 
         savedUser.setCustomer(customer);
         return userRepository.save(savedUser);

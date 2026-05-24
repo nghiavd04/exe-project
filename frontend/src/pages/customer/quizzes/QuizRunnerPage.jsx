@@ -229,7 +229,7 @@ const QuizRunnerPage = () => {
           </div>
 
           <div className="result-actions">
-            <Link to="/quizzes" className="btn-result-primary">Khám phá thêm bài test</Link>
+            <Link to="/trac-nghiem" className="btn-result-primary">Khám phá thêm bài test</Link>
             <Link to="/" className="btn-result-secondary">Về trang chủ</Link>
           </div>
         </div>

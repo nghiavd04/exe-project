@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   if (!token) {
     // Lưu lại vị trí trang hiện tại để sau khi đăng nhập có thể quay lại
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/dang-nhap" state={{ from: location }} replace />;
   }
 
   // Nếu có yêu cầu về Role (ví dụ: chỉ Admin mới được vào)

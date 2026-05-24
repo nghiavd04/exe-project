@@ -26,14 +26,15 @@ import CreateArticlePage from '../pages/admin/articles/CreateArticlePage';
 import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
 import AdminManagerAccountPage from '../pages/admin/accounts/AdminManagerAccountPage';
 import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptionPage';
+import AdminContactMessagesPage from '../pages/admin/contact/AdminContactMessagesPage';
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
+    path: '/dang-nhap',
     element: <LoginPage />,
   },
   {
-    path: '/register',
+    path: '/dang-ky',
     element: <RegisterPage />,
   },
   {
@@ -46,11 +47,11 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <HomePage /> },
       { path: 'gioi-thieu', element: <AboutPage /> },
-      { path: 'articles', element: <ArticleListPage /> },
-      { path: 'articles/:slug', element: <ArticleDetailPage /> },
-      { path: 'quizzes', element: <QuizListPage /> },
+      { path: 'bai-viet', element: <ArticleListPage /> },
+      { path: 'bai-viet/:slug', element: <ArticleDetailPage /> },
+      { path: 'trac-nghiem', element: <QuizListPage /> },
       { 
-        path: 'quizzes/:id/start', 
+        path: 'trac-nghiem/:id/bat-dau', 
         element: (
           <ProtectedRoute>
             <QuizRunnerPage />
@@ -59,14 +60,14 @@ export const router = createBrowserRouter([
       },
       { path: 'lien-he', element: <ContactPage /> },
       { 
-        path: 'profile', 
+        path: 'ho-so', 
         element: (
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
         ) 
       },
-      { path: 'terms-privacy', element: <TermsAndPrivacyPage /> },
+      { path: 'dieu-khoan-dich-vu', element: <TermsAndPrivacyPage /> },
       { 
         path: '*', 
         element: <PlaceholderPage 
@@ -94,6 +95,7 @@ export const router = createBrowserRouter([
           { path: 'articles/edit/:id', element: <CreateArticlePage /> },
           { path: 'users', element: <AdminManagerAccountPage /> },
           { path: 'subscriptions', element: <AdminSubscriptionPage /> },
+          { path: 'contact-messages', element: <AdminContactMessagesPage /> },
           { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
         ]
       }

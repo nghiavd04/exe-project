@@ -46,7 +46,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (!token) {
-            navigate('/login');
+            navigate('/dang-nhap');
             return;
         }
         fetchProfile();
@@ -75,7 +75,7 @@ export default function ProfilePage() {
             setAvatarPreview(data.avatarUrl);
             setLoading(false);
         } catch (error) {
-            toast.error('Không thể tải thông tin hồ sơ');
+            toast.error('Không thể tải thông tin hồ sơ', { id: 'fetch-profile-error' });
             setLoading(false);
         }
     };
@@ -245,7 +245,7 @@ export default function ProfilePage() {
 
     const handleLogout = () => {
         logout(); // Sử dụng hàm logout chuẩn từ AuthContext
-        navigate('/login');
+        navigate('/dang-nhap');
     };
 
     if (loading) return (

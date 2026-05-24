@@ -64,7 +64,7 @@ export default function AdminManagerAccountPage() {
       }
     } catch (err) {
       console.error('Error fetching users:', err);
-      toast.error('Không thể tải danh sách người dùng');
+      toast.error('Không thể tải danh sách người dùng', { id: 'fetch-users-error' });
     } finally {
       setLoading(false);
     }
@@ -85,13 +85,13 @@ export default function AdminManagerAccountPage() {
       message: `Bạn có chắc chắn muốn ${action} tài khoản của ${user.fullName} (${user.email})?`,
       type: user.isActive ? 'danger' : 'success',
       onConfirm: async () => {
+        const loadingToast = toast.loading('Đang xử lý...');
         try {
-          const loadingToast = toast.loading('Đang xử lý...');
           await adminApi.toggleUserStatus(user.id);
           toast.success(`Đã ${action} thành công!`, { id: loadingToast });
           fetchUsers();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi thực hiện');
+          toast.error(err.response?.data?.message || 'Lỗi khi thực hiện', { id: loadingToast });
         }
       }
     });

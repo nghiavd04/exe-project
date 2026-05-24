@@ -282,7 +282,7 @@
 }
 
 .form-group textarea {
-    resize: vertical;
+    resize: none;
     min-height: 120px;
 }
 
@@ -417,3 +417,44 @@
         font-size: 1rem;
     }
 }
+
+/* ── DISABLED & BANNER STYLES ── */
+.login-alert-banner {
+    background: rgba(249, 115, 22, 0.08);
+    border: 1px dashed rgba(249, 115, 22, 0.3);
+    color: var(--text);
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+    background: rgba(13, 122, 110, 0.03);
+    border-color: rgba(13, 122, 110, 0.1);
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+.btn-submit:disabled {
+    background: var(--muted) !important;
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.error-message {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    text-align: center;
+}

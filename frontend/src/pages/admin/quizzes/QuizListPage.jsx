@@ -109,7 +109,7 @@ export default function QuizListPage() {
           toast.success('Đã công khai bài test!', { id: loadingToast });
           fetchQuizzes();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi xuất bản');
+          toast.error(err.response?.data?.message || 'Lỗi khi xuất bản', { id: loadingToast });
         }
       }
     });
@@ -128,7 +128,7 @@ export default function QuizListPage() {
           toast.success('Đã lưu trữ bài test!', { id: loadingToast });
           fetchQuizzes();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi lưu trữ');
+          toast.error(err.response?.data?.message || 'Lỗi khi lưu trữ', { id: loadingToast });
         }
       }
     });
@@ -147,7 +147,7 @@ export default function QuizListPage() {
           toast.success('Đã khôi phục bài test!', { id: loadingToast });
           fetchQuizzes();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi khôi phục');
+          toast.error(err.response?.data?.message || 'Lỗi khi khôi phục', { id: loadingToast });
         }
       }
     });
@@ -201,7 +201,7 @@ export default function QuizListPage() {
           fetchQuizzes();
           fetchStats();
         } catch (err) {
-          toast.error(err.response?.data?.message || 'Lỗi khi xóa');
+          toast.error(err.response?.data?.message || 'Lỗi khi xóa', { id: loadingToast });
         }
       }
     });

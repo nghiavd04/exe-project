@@ -50,7 +50,7 @@ export default function AdminSubscriptionPage() {
         setTotalPages(response.data.data.totalPages || 0);
       }
     } catch (err) {
-      toast.error('Không thể tải danh sách gói dịch vụ');
+      toast.error('Không thể tải danh sách gói dịch vụ', { id: 'fetch-subscription-plans-error' });
     } finally {
       setLoading(false);
     }

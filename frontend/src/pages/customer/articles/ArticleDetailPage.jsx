@@ -44,12 +44,12 @@ const ArticleDetailPage = () => {
       
       if (err.response && (err.response.status === 403 || err.response.status === 402)) {
         if (!isLoggedIn) {
-          navigate('/login');
+          navigate('/dang-nhap');
         } else {
           setError('SUBSCRIPTION_REQUIRED');
         }
       } else if (err.response && err.response.status === 401) {
-        navigate('/login');
+        navigate('/dang-nhap');
       } else {
         setError('NOT_FOUND');
       }
@@ -69,7 +69,7 @@ const ArticleDetailPage = () => {
           <p>Bài viết này yêu cầu gói đăng ký thành viên để truy cập. Hãy nâng cấp tài khoản của bạn để xem nội dung này.</p>
           <div className="blocker-actions">
             <Link to="/subscription" className="btn-upgrade">Xem các gói đăng ký</Link>
-            <Link to="/articles" className="btn-back">Quay lại danh sách</Link>
+            <Link to="/bai-viet" className="btn-back">Quay lại danh sách</Link>
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@ const ArticleDetailPage = () => {
   }
 
   if (error === 'NOT_FOUND' || !article) {
-    return <div className="article-not-found">Không tìm thấy bài viết yêu cầu. <Link to="/articles">Quay lại</Link></div>;
+    return <div className="article-not-found">Không tìm thấy bài viết yêu cầu. <Link to="/bai-viet">Quay lại</Link></div>;
   }
 
   return <ArticleRenderer article={article} />;

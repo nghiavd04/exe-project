@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -108,6 +109,10 @@ export default function RegisterPage() {
 
   const handleSendCode = async (e) => {
     if (e) e.preventDefault();
+    if (!agreeTerms) {
+      setErrors({ agreeTerms: 'Bạn cần đồng ý với điều khoản sử dụng và chính sách bảo mật.' });
+      return;
+    }
     const emailErr = validateEmail();
     if (emailErr) { setErrors({ email: emailErr }); return; }
 
@@ -155,7 +160,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await authApi.register(form.email, form.password, form.fullName);
-      navigate('/login?registered=true');
+      navigate('/dang-nhap?registered=true');
     } catch (err) {
       const msg = err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
       setServerError(msg);
@@ -219,6 +224,25 @@ export default function RegisterPage() {
               </div>
               {errors.email && <span className="field-error">{errors.email}</span>}
             </div>
+
+            <div className="form-group checkbox-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px', marginBottom: '20px' }}>
+              <input
+                id="agreeTerms"
+                name="agreeTerms"
+                type="checkbox"
+                checked={agreeTerms}
+                onChange={(e) => {
+                  setAgreeTerms(e.target.checked);
+                  setErrors({ ...errors, agreeTerms: '' });
+                }}
+                style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer', accentColor: 'var(--teal)' }}
+              />
+              <label htmlFor="agreeTerms" style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: '1.4', cursor: 'pointer', userSelect: 'none' }}>
+                Tôi đồng ý với các <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '700', textDecoration: 'underline' }}>Điều khoản sử dụng</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '700', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của Dopaless.
+              </label>
+            </div>
+            {errors.agreeTerms && <span className="field-error" style={{ display: 'block', marginTop: '-12px', marginBottom: '16px' }}>{errors.agreeTerms}</span>}
+
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? (
                 <span className="loading-dots">
@@ -343,7 +367,7 @@ export default function RegisterPage() {
 
         <p className="auth-footer">
           Đã có tài khoản?{' '}
-          <Link to="/login" className="auth-link">Đăng nhập ngay</Link>
+          <Link to="/dang-nhap" className="auth-link">Đăng nhập ngay</Link>
         </p>
       </div>
     </div>

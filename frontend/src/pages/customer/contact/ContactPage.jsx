@@ -1,34 +1,64 @@
 import { useEffect, useState } from 'react';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
+import { useAuth } from '../../../hooks/AuthContext';
+import { contactApi } from '../../../apis/customerApi';
+import { Link } from 'react-router-dom';
 import './ContactPage.css';
 
 export default function ContactPage() {
     useScrollReveal();
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
-        topic: 'general',
         message: ''
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         document.title = 'Liên Hệ – Dopaless';
         window.scrollTo(0, 0);
     }, []);
 
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({ ...prev, name: user.fullName || '' }));
+        } else {
+            setFormData(prev => ({ ...prev, name: '', message: '' }));
+        }
+    }, [user]);
+
     const handleChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Giả lập gửi form thành công
-        setIsSubmitted(true);
-        setTimeout(() => {
-            setIsSubmitted(false);
-            setFormData({ name: '', email: '', topic: 'general', message: '' });
-        }, 3000);
+        if (!user) return;
+        if (!formData.message.trim()) return;
+
+        try {
+            setIsLoading(true);
+            setErrorMessage('');
+            const response = await contactApi.submitContact({
+                message: formData.message
+            });
+            if (response.data.success) {
+                setIsSubmitted(true);
+                setFormData(prev => ({ ...prev, message: '' }));
+                setTimeout(() => {
+                    setIsSubmitted(false);
+                }, 3000);
+            } else {
+                setErrorMessage(response.data.message || 'Có lỗi xảy ra khi gửi tin nhắn.');
+            }
+        } catch (err) {
+            console.error('Error sending contact message:', err);
+            setErrorMessage(err.response?.data?.message || 'Không thể gửi tin nhắn liên hệ. Vui lòng thử lại sau.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -44,7 +74,7 @@ export default function ContactPage() {
                         Chúng tôi luôn sẵn sàng<br /><span>lắng nghe bạn</span>
                     </h1>
                     <p>
-                        Dù bạn có thắc mắc về các khóa học, cần hỗ trợ kỹ thuật, hay đơn giản chỉ muốn chia sẻ câu chuyện "detox" của bản thân, đừng ngần ngại nhắn cho Dopaless.
+                        Dù bạn có thắc mắc về các bài test, bài viết, hay cần hỗ trợ kỹ thuật, hãy gửi lời nhắn trực tiếp cho chúng tôi qua form dưới đây.
                     </p>
                 </div>
             </section>
@@ -56,7 +86,7 @@ export default function ContactPage() {
                     {/* LEFT: Info Cards */}
                     <div className="contact-info reveal reveal-delay-1">
                         <h2>Thông tin liên lạc</h2>
-                        <p className="info-desc">Bạn có thể liên hệ trực tiếp với chúng tôi qua các kênh dưới đây hoặc để lại lời nhắn qua form bên cạnh.</p>
+                        <p className="info-desc">Bạn có thể liên hệ trực tiếp với chúng tôi qua các kênh dưới đây hoặc gửi tin nhắn hỗ trợ trực tiếp bên cạnh.</p>
 
                         <div className="info-cards">
                             <div className="info-card">
@@ -121,18 +151,6 @@ export default function ContactPage() {
                                         <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                                     </svg>
                                 </a>
-                                <a href="#" className="social-icon" aria-label="YouTube">
-                                    <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
-                                        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
-                                    </svg>
-                                </a>
-                                <a href="#" className="social-icon" aria-label="Zalo">
-                                    <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21.1 12.1a9 9 0 1 0-14 7.6l-3.3 1.1 1.2-3.2a9 9 0 0 0 16.1-5.5Z" />
-                                        <text x="50%" y="58%" textAnchor="middle" fontSize="9" fontWeight="800" fill="currentColor" stroke="none">Z</text>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -147,7 +165,7 @@ export default function ContactPage() {
                                     </svg>
                                 </div>
                                 <h3>Gửi thành công!</h3>
-                                <p>Cảm ơn bạn đã liên hệ. Đội ngũ Dopaless sẽ phản hồi lại bạn qua email thông thường trong vòng 24h làm việc.</p>
+                                <p>Lời nhắn của bạn đã được chuyển tới Admin Dopaless. Chúng tôi sẽ phản hồi sớm nhất qua hòm thư thông báo của bạn.</p>
                             </div>
                         ) : (
                             <form className="contact-form" onSubmit={handleSubmit}>
@@ -155,47 +173,28 @@ export default function ContactPage() {
                                     <h2>Gửi lời nhắn</h2>
                                 </div>
 
+                                {!user && (
+                                    <div className="login-alert-banner">
+                                        ⚠️ Bạn cần <Link to="/dang-nhap" style={{ color: 'var(--accent)', fontWeight: '700', textDecoration: 'underline' }}>Đăng nhập</Link> để gửi tin nhắn liên hệ.
+                                    </div>
+                                )}
+
+                                {errorMessage && (
+                                    <div className="error-message">
+                                        {errorMessage}
+                                    </div>
+                                )}
+
                                 <div className="form-group">
                                     <label htmlFor="name">Họ và tên</label>
                                     <input
                                         type="text"
                                         id="name"
                                         name="name"
-                                        placeholder="Ví dụ: Nguyễn Văn A"
+                                        placeholder="Tên của bạn..."
                                         value={formData.name}
-                                        onChange={handleChange}
-                                        required
+                                        disabled
                                     />
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="email">Email</label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        placeholder="Ví dụ: email@gmail.com"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="topic">Chủ đề</label>
-                                    <div className="select-wrapper">
-                                        <select
-                                            id="topic"
-                                            name="topic"
-                                            value={formData.topic}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="general">Thắc mắc chung</option>
-                                            <option value="feedback">Góp ý ứng dụng</option>
-                                            <option value="story">Chia sẻ câu chuyện</option>
-                                            <option value="partnership">Hợp tác & Tài trợ</option>
-                                        </select>
-                                    </div>
                                 </div>
 
                                 <div className="form-group">
@@ -203,16 +202,21 @@ export default function ContactPage() {
                                     <textarea
                                         id="message"
                                         name="message"
-                                        placeholder="Nhập nội dung bạn muốn gửi..."
-                                        rows="5"
+                                        placeholder={user ? "Nhập nội dung bạn muốn gửi..." : "Đăng nhập để nhập nội dung..."}
+                                        rows="6"
                                         value={formData.message}
                                         onChange={handleChange}
+                                        disabled={!user}
                                         required
                                     ></textarea>
                                 </div>
 
-                                <button type="submit" className="btn-submit">
-                                    Gửi thông điệp
+                                <button 
+                                    type="submit" 
+                                    className="btn-submit"
+                                    disabled={!user || !formData.message.trim() || isLoading}
+                                >
+                                    {isLoading ? 'Đang gửi thông điệp...' : 'Gửi thông điệp'}
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>

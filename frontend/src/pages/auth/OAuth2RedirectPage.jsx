@@ -27,18 +27,17 @@ export default function OAuth2RedirectPage() {
           const userData = response.data.data;
 
           login(userData, token);
-          toast.success('Đăng nhập Google thành công!');
           navigate('/');
         } catch (err) {
           console.error('Lỗi khi lấy thông tin người dùng:', err);
           toast.error('Không thể hoàn tất đăng nhập Google.');
-          navigate('/login');
+          navigate('/dang-nhap');
         }
       };
 
       fetchProfile();
     } else {
-      navigate('/login?error=' + (error || 'oauth2_failed'));
+      navigate('/dang-nhap?error=' + (error || 'oauth2_failed'));
     }
   }, [navigate, searchParams, login]);
 

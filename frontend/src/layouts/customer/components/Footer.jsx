@@ -4,7 +4,7 @@ import './Footer.css';
 
 const resourceLinks = [
     { label: 'Nghiên cứu khoa học', to: '#' },
-    { label: 'Blog & Bài viết', to: '/articles' },
+    { label: 'Blog & Bài viết', to: '/bai-viet' },
     { label: 'Hướng dẫn kỹ thuật số', to: '#' },
     { label: 'Podcast Dopaless', to: '#' },
     { label: '7-Day Reset Guide PDF', to: '#' },
@@ -105,9 +105,9 @@ export default function Footer() {
             <div className="footer-bottom">
                 <span>© 2024 Dopaless Education. Bảo lưu mọi quyền.</span>
                 <div className="footer-bottom-links">
-                    <Link to="/terms-privacy?tab=privacy" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</Link>
-                    <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer">Điều khoản dịch vụ</Link>
-                    <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer">Disclaimer y tế</Link>
+                    <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</Link>
+                    <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer">Điều khoản dịch vụ</Link>
+                    <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer">Disclaimer y tế</Link>
                 </div>
             </div>
         </footer>

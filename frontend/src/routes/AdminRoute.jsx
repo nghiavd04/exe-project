@@ -5,7 +5,7 @@ export default function AdminRoute() {
   const userStr = localStorage.getItem('user');
 
   if (!token || !userStr) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/dang-nhap" replace />;
   }
 
   try {
@@ -14,7 +14,7 @@ export default function AdminRoute() {
       return <Navigate to="/" replace />;
     }
   } catch (error) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/dang-nhap" replace />;
   }
 
   return <Outlet />;

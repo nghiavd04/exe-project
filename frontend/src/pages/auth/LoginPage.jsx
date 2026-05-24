@@ -35,7 +35,7 @@ export default function LoginPage() {
     if (params.get('registered')) {
       toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
       hasShownToast.current = true;
-      navigate('/login', { replace: true });
+      navigate('/dang-nhap', { replace: true });
     }
   }, [navigate]);
 
@@ -95,7 +95,6 @@ export default function LoginPage() {
       } else {
         navigate('/');
       }
-      toast.success('Đăng nhập thành công!');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
       setServerError(errorMsg);
@@ -318,9 +317,13 @@ export default function LoginPage() {
           Tiếp tục với Google
         </button>
 
+        <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--muted)', marginTop: '20px', lineHeight: '1.4' }}>
+          Bằng việc đăng nhập, bạn đồng ý với <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '600', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '600', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của Dopaless.
+        </p>
+
         <p className="auth-footer">
           Chưa có tài khoản?{' '}
-          <Link id="go-to-register" to="/register" className="auth-link">Đăng ký ngay</Link>
+          <Link id="go-to-register" to="/dang-ky" className="auth-link">Đăng ký ngay</Link>
         </p>
       </div>
 

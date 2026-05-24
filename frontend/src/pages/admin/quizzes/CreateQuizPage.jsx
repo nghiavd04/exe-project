@@ -152,7 +152,7 @@ export default function CreateQuizPage() {
       }
     } catch (error) {
       console.error('Error fetching quiz detail:', error);
-      toast.error('Không thể tải thông tin bài test.');
+      toast.error('Không thể tải thông tin bài test.', { id: 'fetch-quiz-detail-error' });
       setInitialLoaded(true);
     } finally {
       setLoading(false);

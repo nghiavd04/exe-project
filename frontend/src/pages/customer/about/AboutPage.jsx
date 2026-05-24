@@ -187,7 +187,7 @@ export default function AboutPage() {
                         <p>
                             Quy định rõ ràng về trách nhiệm sử dụng nền tảng. Dopaless đưa ra các <strong>tuyên bố miễn trừ trách nhiệm y khoa</strong> nhằm đảm bảo bạn hiểu rõ các bài test chỉ mang tính chất định hướng và tự nhận thức, không thay thế cho chẩn đoán y tế.
                         </p>
-                        <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer" className="btn-legal-link">
+                        <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" className="btn-legal-link">
                             Đọc toàn bộ điều khoản <span>→</span>
                         </Link>
                     </div>
@@ -203,7 +203,7 @@ export default function AboutPage() {
                         <p>
                             Chúng tôi cam kết <strong>bảo mật tuyệt đối 100% kết quả trắc nghiệm</strong> và dữ liệu lịch sử làm bài kiểm tra cá nhân của bạn. Không mua bán, không tiết lộ cho bất kỳ bên thứ ba nào khi chưa có sự đồng ý của bạn.
                         </p>
-                        <Link to="/terms-privacy?tab=privacy" target="_blank" rel="noopener noreferrer" className="btn-legal-link">
+                        <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" className="btn-legal-link">
                             Xem chính sách bảo mật <span>→</span>
                         </Link>
                     </div>
@@ -216,10 +216,10 @@ export default function AboutPage() {
                 <h2 className="section-title">Sẵn sàng để làm chủ sự tập trung?</h2>
                 <p className="section-sub">Bắt đầu hành trình của bạn ngay hôm nay với bài kiểm tra mức độ phụ thuộc Dopamine hoàn toàn miễn phí.</p>
                 <div className="cta-buttons">
-                    <Link to="/quizzes" className="about-banner-cta">Làm bài test ngay — miễn phí →</Link>
+                    <Link to="/trac-nghiem" className="about-banner-cta">Làm bài test ngay — miễn phí →</Link>
                 </div>
                 <div className="about-legal-note" style={{ marginTop: '2.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
-                    Bằng việc tham gia, bạn đồng ý với các <Link to="/terms-privacy?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="/terms-privacy?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của chúng tôi.
+                    Bằng việc tham gia, bạn đồng ý với các <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của chúng tôi.
                 </div>
             </section>
         </main>

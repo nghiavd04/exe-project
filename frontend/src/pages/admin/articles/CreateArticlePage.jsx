@@ -212,7 +212,7 @@ export default function CreateArticlePage() {
         }
       } catch (error) {
         console.error('Error fetching meta data:', error);
-        toast.error('Không thể tải dữ liệu cấu hình.');
+        toast.error('Không thể tải dữ liệu cấu hình.', { id: 'fetch-article-meta-error' });
       }
     };
 
@@ -295,7 +295,7 @@ export default function CreateArticlePage() {
       }
     } catch (error) {
       console.error('Error fetching article detail:', error);
-      toast.error('Không thể tải thông tin bài viết.');
+      toast.error('Không thể tải thông tin bài viết.', { id: 'fetch-article-detail-error' });
       setInitialLoaded(true);
     } finally {
       setLoading(false);

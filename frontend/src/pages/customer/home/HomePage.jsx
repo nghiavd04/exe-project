@@ -28,7 +28,7 @@ export default function HomePage() {
                         </div>
                         <h1 className="hero-title">
                             Não bạn đang bị<br />
-                            <span>hijack bởi <br />dopamine.</span>
+                            <span>thao túng bởi <br />dopamine.</span>
                         </h1>
                         <p className="hero-desc">
                             Trung bình sinh viên dành hơn{' '}
@@ -470,7 +470,7 @@ export default function HomePage() {
                             <strong> 5 phút</strong> và được xây dựng dựa trên nghiên cứu tâm
                             lý học hành vi.
                         </p>
-                        <Link to="/quizzes" className="btn-white">
+                        <Link to="/trac-nghiem" className="btn-white">
                             Bắt đầu kiểm tra ngay →
                         </Link>
                     </div>

@@ -23,7 +23,7 @@ apiClient.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/dang-nhap';
     }
     return Promise.reject(error);
   }
@@ -60,6 +60,17 @@ export const imageApi = {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
   }),
+};
+
+export const contactApi = {
+  submitContact: (data) => apiClient.post('/contact', data),
+};
+
+export const notificationApi = {
+  getNotifications: () => apiClient.get('/notifications'),
+  getUnreadCount: () => apiClient.get('/notifications/unread-count'),
+  markAsRead: (id) => apiClient.patch(`/notifications/${id}/read`),
+  markAllAsRead: () => apiClient.patch('/notifications/read-all'),
 };
 
 export default apiClient;

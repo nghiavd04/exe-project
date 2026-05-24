@@ -42,4 +42,11 @@ export const adminApi = {
   updateSubscriptionPlan: (id, data) => apiClient.put(`/v1/admin/subscription-plans/${id}`, data),
   deleteSubscriptionPlan: (id) => apiClient.delete(`/v1/admin/subscription-plans/${id}`),
   toggleSubscriptionPlanStatus: (id) => apiClient.patch(`/v1/admin/subscription-plans/${id}/toggle-status`),
+
+  // Contact messages
+  getContactMessages: (params) => apiClient.get('/v1/admin/contact-messages', { params }),
+  replyContactMessage: (id, data) => apiClient.post(`/v1/admin/contact-messages/${id}/reply`, data),
+  markContactMessageRead: (id) => apiClient.patch(`/v1/admin/contact-messages/${id}/read`),
+  getUnreadContactMessagesCount: () => apiClient.get('/v1/admin/contact-messages/unread-count'),
+  deleteContactMessage: (id) => apiClient.delete(`/v1/admin/contact-messages/${id}`),
 };

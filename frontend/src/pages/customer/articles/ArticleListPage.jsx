@@ -80,14 +80,14 @@ const ArticleListPage = () => {
     
     if (requiredTier !== 'FREE') {
       if (!isLoggedIn) {
-        navigate('/login');
+        navigate('/dang-nhap');
       } else if (!canAccess(requiredTier)) {
         setShowPremiumModal(true);
       } else {
-        navigate(`/articles/${article.slug}`);
+        navigate(`/bai-viet/${article.slug}`);
       }
     } else {
-      navigate(`/articles/${article.slug}`);
+      navigate(`/bai-viet/${article.slug}`);
     }
   };
 
