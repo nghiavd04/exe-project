@@ -28,16 +28,30 @@ export default function LoginPage() {
   const otpInputs = useRef([]);
 
   const hasShownToast = useRef(false);
+
   useEffect(() => {
-    if (hasShownToast.current) return;
-    
     const params = new URLSearchParams(window.location.search);
+    
+    const errorParam = params.get('error');
+    if (errorParam) {
+      let friendlyError = errorParam;
+      if (errorParam.includes('Email already registered with LOCAL provider')) {
+        friendlyError = 'Email này đã được đăng ký bằng mật khẩu thông thường. Vui lòng sử dụng đăng nhập bằng mật khẩu.';
+      } else if (errorParam === 'oauth2_failed') {
+        friendlyError = 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.';
+      }
+      setServerError(friendlyError);
+      // Clear search query parameters immediately from the address bar
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
+    if (hasShownToast.current) return;
     if (params.get('registered')) {
       toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
       hasShownToast.current = true;
-      navigate('/dang-nhap', { replace: true });
+      window.history.replaceState(null, '', window.location.pathname);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     let interval;

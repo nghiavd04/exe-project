@@ -1,14 +1,24 @@
 # Caddyfile - Reverse Proxy Configuration
-# Sử dụng domain thực hoặc localhost
+# Sử dụng domain thực
 
-{
-    auto_https off
-}
+# Cấu hình cũ cho chạy HTTP (Port 80) hoặc localhost:
+# {
+#     auto_https off
+# }
+# :80 {
 
-:80 {
+dopaless.cloud {
     # Reverse proxy cho API backend (JavaSpring)
-    # Tất cả requests đến /api/* sẽ được chuyển đến backend
+    # Tất cả requests đến /api/*, /oauth2/*, /login/oauth2/* sẽ được chuyển đến backend
     handle /api/* {
+        reverse_proxy backend:8080
+    }
+
+    handle /oauth2/authorize/* {
+        reverse_proxy backend:8080
+    }
+
+    handle /login/oauth2/* {
         reverse_proxy backend:8080
     }
 
