@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     price DECIMAL(10,2) NOT NULL,
     duration_days INT NOT NULL,
     description TEXT,
+    features TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     tier VARCHAR(50) NOT NULL DEFAULT 'FREE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
