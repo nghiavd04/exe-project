@@ -13,7 +13,7 @@ function App() {
         toastOptions={{
           duration: 4000, // Hiển thị trong 4 giây
           style: {
-            marginTop: '80px', // Đẩy xuống thấp hơn một chút
+            marginTop: '80px',
             borderRadius: '12px',
             fontSize: '14px',
             fontWeight: '500',
