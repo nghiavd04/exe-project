@@ -16,5 +16,6 @@ public class QuizDetailResponse {
     private Long attemptId; // Optional, for when quiz is started
     private String title;
     private String description;
+    private String imageUrl;
     private List<QuestionDto> questions;
 }

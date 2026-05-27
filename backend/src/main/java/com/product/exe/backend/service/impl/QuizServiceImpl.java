@@ -263,6 +263,7 @@ public class QuizServiceImpl implements QuizService {
                 .id(quiz.getId())
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
+                .imageUrl(quiz.getImageUrl())
                 .build();
     }
 
@@ -280,6 +281,7 @@ public class QuizServiceImpl implements QuizService {
                 .attemptId(attemptId)
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
+                .imageUrl(quiz.getImageUrl())
                 .questions(questions.stream()
                         .map(q -> mapToQuestionDto(q, answersByQuestionId.getOrDefault(q.getId(), List.of())))
                         .collect(Collectors.toList()))

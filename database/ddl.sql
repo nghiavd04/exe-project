@@ -9,7 +9,7 @@ USE `exe_db`;
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL,
+    password TEXT,
     role VARCHAR(50) NOT NULL DEFAULT 'CUSTOMER',
     provider VARCHAR(50) NOT NULL DEFAULT 'LOCAL',
     provider_id VARCHAR(255),
@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS customers (
     user_id BIGINT NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     avatar_url TEXT,
+    avatar_public_id VARCHAR(255),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS admins (
     user_id BIGINT NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     avatar_url TEXT,
+    avatar_public_id VARCHAR(255),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -42,7 +44,7 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE TABLE IF NOT EXISTS articles (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     admin_id BIGINT,
-    category ENUM('HEALTH', 'SCIENCE', 'LIFESTYLE', 'EDUCATION', 'PSYCHOLOGY') NOT NULL,
+    category ENUM('HEALTH', 'SCIENCE', 'LIFESTYLE', 'EDUCATION', 'PSYCHOLOGY', 'TECHNOLOGY') NOT NULL,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(280) UNIQUE NOT NULL,
     content TEXT NOT NULL,
@@ -154,9 +156,10 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT NOT NULL,
     plan_id BIGINT NOT NULL,
-    started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    status ENUM('ACTIVE', 'EXPIRED', 'CANCELLED') NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE
 );
@@ -165,12 +168,66 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
 CREATE TABLE IF NOT EXISTS payments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT NOT NULL,
+    subscription_id BIGINT NOT NULL,
     plan_id BIGINT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'VND',
+    payment_method ENUM('VNPAY', 'MOMO', 'ZALOPAY', 'BANK_TRANSFER') NOT NULL,
     status ENUM('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED') NOT NULL DEFAULT 'PENDING',
     transaction_id VARCHAR(255),
+    gateway_response JSON,
+    paid_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (subscription_id) REFERENCES user_subscriptions(id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE
+);
+
+-- 14. Contact Messages Table
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    reply_message TEXT,
+    replied_at TIMESTAMP NULL,
+    replied_by_admin_id BIGINT,
+    notes TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (replied_by_admin_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 15. Email Verifications Table
+CREATE TABLE IF NOT EXISTS email_verifications (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    code VARCHAR(255) NOT NULL,
+    expiry_date TIMESTAMP NOT NULL,
+    verified BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- 16. Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 17. User Notification Reads Table
+CREATE TABLE IF NOT EXISTS user_notification_reads (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    notification_id BIGINT NOT NULL,
+    read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_notification (user_id, notification_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE
 );
