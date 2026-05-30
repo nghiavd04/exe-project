@@ -82,7 +82,7 @@ public class CustomerSubscriptionPlanController {
         try {
             method = PaymentMethod.valueOf(request.getPaymentMethod());
         } catch (Exception e) {
-            method = PaymentMethod.BANK_TRANSFER; // Default fallback
+            method = PaymentMethod.PAYOS; // Default fallback
         }
 
         // Create associated successful payment record

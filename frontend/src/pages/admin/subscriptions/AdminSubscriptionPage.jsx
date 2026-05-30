@@ -178,7 +178,7 @@ export default function AdminSubscriptionPage() {
                     fontWeight: '800',
                     fontSize: '0.85rem',
                     color: plan.tier === 'BASIC' ? '#0ea5e9' : (plan.tier === 'PREMIUM' ? '#8b5cf6' : (plan.tier === 'ELITE' ? '#f59e0b' : '#64748b')),
-                    fontWeight: 600
+
                   }}>
                     {plan.tierDisplayName || plan.tier}
                   </div>

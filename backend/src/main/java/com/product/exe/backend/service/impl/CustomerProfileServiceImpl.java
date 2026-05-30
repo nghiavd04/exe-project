@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.product.exe.backend.service.SubscriptionService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     private final EmailVerificationRepository verificationRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final com.product.exe.backend.service.SubscriptionService subscriptionService;
+    private final SubscriptionService subscriptionService;
 
 
     @Override

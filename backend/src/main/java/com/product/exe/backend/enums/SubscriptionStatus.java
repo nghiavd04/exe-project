@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum SubscriptionStatus implements DbValueEnum {
+    PENDING("PENDING", "Đang chờ thanh toán"),
     ACTIVE("ACTIVE", "Đang hoạt động"),
     EXPIRED("EXPIRED", "Hết hạn"),
     CANCELLED("CANCELLED", "Đã hủy");

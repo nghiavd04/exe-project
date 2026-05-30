@@ -12,7 +12,7 @@ export default function SubscriptionPlansPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('MOMO');
+  const [paymentMethod, setPaymentMethod] = useState('PAYOS');
   const [submitting, setSubmitting] = useState(false);
   const [expandedPlans, setExpandedPlans] = useState({});
 
@@ -67,20 +67,30 @@ export default function SubscriptionPlansPage() {
     if (!selectedPlan) return;
     setSubmitting(true);
     try {
-      const res = await subscriptionApi.subscribeToPlan(selectedPlan.id, paymentMethod);
-      if (res.data.success) {
-        toast.success(res.data.data || 'Đăng ký thành viên thành công!');
-        
-        // Update user state in frontend
-        const updatedUser = { ...user, subscriptionTier: selectedPlan.tier };
-        updateUser(updatedUser);
-        
-        setSelectedPlan(null);
-        navigate('/ho-so');
+      if (paymentMethod === 'PAYOS') {
+        const res = await subscriptionApi.createPayOSPayment(selectedPlan.id);
+        if (res.data.success && res.data.data.checkoutUrl) {
+          toast.success('Đang chuyển hướng đến cổng thanh toán PayOS...');
+          window.location.href = res.data.data.checkoutUrl;
+        } else {
+          throw new Error('Không nhận được liên kết thanh toán');
+        }
+      } else {
+        const res = await subscriptionApi.subscribeToPlan(selectedPlan.id, paymentMethod);
+        if (res.data.success) {
+          toast.success(res.data.data || 'Đăng ký thành viên thành công!');
+          
+          // Update user state in frontend
+          const updatedUser = { ...user, subscriptionTier: selectedPlan.tier };
+          updateUser(updatedUser);
+          
+          setSelectedPlan(null);
+          navigate('/ho-so');
+        }
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      toast.error(error.response?.data?.message || 'Gặp lỗi trong quá trình xử lý đăng ký');
+      toast.error(error.response?.data?.message || error.message || 'Gặp lỗi trong quá trình xử lý đăng ký');
     } finally {
       setSubmitting(false);
     }
@@ -223,35 +233,24 @@ export default function SubscriptionPlansPage() {
               </div>
 
               <div className="payment-methods-select">
-                <label className="checkout-label">Phương thức thanh toán (Giả lập)</label>
+                <label className="checkout-label">Phương thức thanh toán</label>
                 <div className="methods-grid">
                   <div 
-                    className={`method-option ${paymentMethod === 'MOMO' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('MOMO')}
+                    className="method-option active"
+                    style={{ cursor: 'default' }}
                   >
                     <div className="method-bullet"></div>
-                    <span>Ví MoMo</span>
-                  </div>
-                  <div 
-                    className={`method-option ${paymentMethod === 'VNPAY' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('VNPAY')}
-                  >
-                    <div className="method-bullet"></div>
-                    <span>VNPAY QR</span>
-                  </div>
-                  <div 
-                    className={`method-option ${paymentMethod === 'BANK_TRANSFER' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('BANK_TRANSFER')}
-                  >
-                    <div className="method-bullet"></div>
-                    <span>Chuyển khoản</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      Cổng thanh toán PayOS (VietQR)
+                      <span style={{ backgroundColor: '#4f46e5', color: '#fff', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>Mặc định</span>
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="checkout-warning-note">
                 <Shield size={16} />
-                <span>Đây là phiên bản chạy thử nghiệm. Thanh toán sẽ được xử lý giả lập và kích hoạt tài khoản ngay tức thì.</span>
+                <span>Hệ thống chuyển hướng bạn tới cổng thanh toán an toàn PayOS để quét mã QR VietQR (môi trường Sandbox).</span>
               </div>
             </div>
 

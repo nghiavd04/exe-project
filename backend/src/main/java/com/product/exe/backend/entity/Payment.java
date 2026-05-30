@@ -53,6 +53,12 @@ public class Payment {
     @Column(name = "transaction_id", length = 255)
     private String transactionId;
 
+    @Column(name = "order_code", unique = true)
+    private Long orderCode;
+
+    @Column(name = "checkout_url", length = 1000)
+    private String checkoutUrl;
+
     // Use string type for JSONB in JPA by default or specify a custom type. We'll use String for basic mapping
     @Column(name = "gateway_response", columnDefinition = "json")
     private String gatewayResponse;

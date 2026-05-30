@@ -4,10 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum PaymentMethod implements DbValueEnum {
-    VNPAY("VNPAY", "VNPay"),
-    MOMO("MOMO", "MoMo"),
-    ZALOPAY("ZALOPAY", "ZaloPay"),
-    BANK_TRANSFER("BANK_TRANSFER", "Chuyển khoản ngân hàng");
+    PAYOS("PAYOS", "PayOS");
 
     private final String dbValue;
     private final String displayName;
