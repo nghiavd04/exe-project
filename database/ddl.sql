@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS payments (
     plan_id BIGINT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'VND',
-    payment_method ENUM('VNPAY', 'MOMO', 'ZALOPAY', 'BANK_TRANSFER') NOT NULL,
+    payment_method ENUM('PAYOS') NOT NULL,
     status ENUM('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED') NOT NULL DEFAULT 'PENDING',
     transaction_id VARCHAR(255),
     gateway_response JSON,

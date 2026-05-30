@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.product.exe.backend.service.SubscriptionService;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationRepository verificationRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
-    private final com.product.exe.backend.service.SubscriptionService subscriptionService;
+    private final SubscriptionService subscriptionService;
 
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;

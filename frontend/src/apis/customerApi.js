@@ -69,6 +69,8 @@ export const contactApi = {
 export const subscriptionApi = {
   getActivePlans: () => apiClient.get('/subscription-plans'),
   subscribeToPlan: (planId, paymentMethod) => apiClient.post(`/subscription-plans/${planId}/subscribe`, { paymentMethod }),
+  createPayOSPayment: (planId) => apiClient.post('/subscription-plans/payos/create-link', { planId }),
+  syncPayOSPayment: (orderCode) => apiClient.post(`/subscription-plans/payos/sync/${orderCode}`),
 };
 
 export const notificationApi = {

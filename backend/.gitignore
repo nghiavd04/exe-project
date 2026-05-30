@@ -36,3 +36,5 @@ build/
 
 .agent/*
 
+# Environment secrets
+.env

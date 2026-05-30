@@ -19,14 +19,14 @@ services:
   mysql:
     image: mysql:8
     container_name: dopaless-mysql
-    restart: unless-stoppedcd
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dopaless_db
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
 
   # Redis Cache
   redis:
@@ -58,6 +58,11 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
+      PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID}
+      PAYOS_API_KEY: ${PAYOS_API_KEY}
+      PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
+      PAYMENT_RETURN_URL: ${PAYMENT_RETURN_URL}
+      PAYMENT_CANCEL_URL: ${PAYMENT_CANCEL_URL}
     expose:
       - "8080"
     depends_on:
