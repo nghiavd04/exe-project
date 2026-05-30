@@ -1,6 +1,7 @@
 package com.product.exe.backend.repository;
 
 import com.product.exe.backend.entity.SubscriptionPlan;
+import com.product.exe.backend.enums.SubscriptionTier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,5 @@ import java.util.List;
 public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPlan, Long> {
     List<SubscriptionPlan> findAllByIsActiveTrue();
     Page<SubscriptionPlan> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
+    boolean existsByTier(SubscriptionTier tier);
 }

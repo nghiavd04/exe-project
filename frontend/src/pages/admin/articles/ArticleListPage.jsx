@@ -348,9 +348,9 @@ export default function ArticleListPage() {
                     <span className="tier-badge premium">
                       <Crown size={12} /> PREMIUM
                     </span>
-                  ) : article.requiredTier === 'VIP' ? (
-                    <span className="tier-badge vip">
-                      <Star size={12} fill="#0ea5e9" /> VIP
+                  ) : article.requiredTier === 'BASIC' ? (
+                    <span className="tier-badge basic" style={{ background: '#f0f9ff', color: '#0ea5e9', border: '1px solid #bae6fd' }}>
+                      <Star size={12} fill="#0ea5e9" /> BASIC
                     </span>
                   ) : (
                     <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Miễn phí</span>

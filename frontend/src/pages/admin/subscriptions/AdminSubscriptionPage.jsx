@@ -177,8 +177,8 @@ export default function AdminSubscriptionPage() {
                   <div style={{ 
                     fontWeight: '800',
                     fontSize: '0.85rem',
-                    color: plan.tier === 'VIP' ? '#0ea5e9' : (plan.tier === 'PREMIUM' ? '#f59e0b' : '#64748b'),
-                    letterSpacing: '0.02em'
+                    color: plan.tier === 'BASIC' ? '#0ea5e9' : (plan.tier === 'PREMIUM' ? '#8b5cf6' : (plan.tier === 'ELITE' ? '#f59e0b' : '#64748b')),
+                    fontWeight: 600
                   }}>
                     {plan.tierDisplayName || plan.tier}
                   </div>
@@ -228,10 +228,10 @@ export default function AdminSubscriptionPage() {
                           {plan.isActive ? 'Ngừng kích hoạt' : 'Kích hoạt'}
                         </button>
                         <button 
-                          onClick={() => !plan.isActive && handleDelete(plan)} 
-                          disabled={plan.isActive}
+                          onClick={() => !plan.isActive && plan.tier !== 'FREE' && handleDelete(plan)} 
+                          disabled={plan.isActive || plan.tier === 'FREE'}
                           className="action-menu-item danger"
-                          title={plan.isActive ? "Cần ngừng kích hoạt để xóa" : ""}
+                          title={plan.tier === 'FREE' ? "Không thể xóa gói mặc định (FREE)" : plan.isActive ? "Cần ngừng kích hoạt để xóa" : ""}
                         >
                           <Trash2 size={16} /> Xóa gói
                         </button>

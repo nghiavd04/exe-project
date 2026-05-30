@@ -19,6 +19,7 @@ import QuizListPage from '../pages/customer/quizzes/QuizListPage';
 import QuizRunnerPage from '../pages/customer/quizzes/QuizRunnerPage';
 import ProfilePage from '../pages/customer/profile/ProfilePage';
 import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
+import SubscriptionPlansPage from '../pages/customer/plans/SubscriptionPlansPage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
       { path: '', element: <HomePage /> },
       { path: 'gioi-thieu', element: <AboutPage /> },
       { path: 'bai-viet', element: <ArticleListPage /> },
+      { path: 'goi-dich-vu', element: <SubscriptionPlansPage /> },
       { path: 'bai-viet/:slug', element: <ArticleDetailPage /> },
       { path: 'trac-nghiem', element: <QuizListPage /> },
       { 

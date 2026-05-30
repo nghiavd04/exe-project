@@ -14,4 +14,5 @@ public interface SubscriptionPlanService {
     SubscriptionPlan updatePlan(Long id, SubscriptionPlanRequest request);
     void deletePlan(Long id);
     void togglePlanStatus(Long id);
+    List<SubscriptionPlanResponse> getActivePlans();
 }

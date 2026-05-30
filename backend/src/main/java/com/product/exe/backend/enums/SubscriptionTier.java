@@ -5,8 +5,9 @@ import lombok.Getter;
 @Getter
 public enum SubscriptionTier {
     FREE(0, "Miễn phí"),
-    VIP(1, "Thành viên VIP"),
-    PREMIUM(2, "Thành viên Premium");
+    BASIC(1, "Thành viên Basic"),
+    PREMIUM(2, "Thành viên Premium"),
+    ELITE(3, "Thành viên Elite");
 
     private final int weight;
     private final String displayName;

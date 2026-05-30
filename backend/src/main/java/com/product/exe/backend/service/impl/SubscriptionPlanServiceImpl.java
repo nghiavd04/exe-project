@@ -36,12 +36,16 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     @Override
     @Transactional
     public SubscriptionPlan createPlan(SubscriptionPlanRequest request) {
+        if (com.product.exe.backend.enums.SubscriptionTier.FREE.equals(request.getTier())) {
+            throw new BadRequestException("Không thể tạo thêm gói mặc định (FREE).");
+        }
         SubscriptionPlan plan = SubscriptionPlan.builder()
                 .name(request.getName())
                 .price(request.getPrice())
                 .durationDays(request.getDurationDays())
                 .tier(request.getTier())
                 .description(request.getDescription())
+                .features(request.getFeatures())
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
         return subscriptionPlanRepository.save(plan);
@@ -62,6 +66,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
         plan.setDurationDays(request.getDurationDays());
         plan.setTier(request.getTier());
         plan.setDescription(request.getDescription());
+        plan.setFeatures(request.getFeatures());
         if (request.getIsActive() != null) {
             plan.setIsActive(request.getIsActive());
         }
@@ -75,11 +80,23 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
         
+        if (com.product.exe.backend.enums.SubscriptionTier.FREE.equals(plan.getTier())) {
+            throw new BadRequestException("Không thể xóa gói mặc định (FREE).");
+        }
+
         if (Boolean.TRUE.equals(plan.getIsActive())) {
             throw new BadRequestException("Không thể xóa gói đang ở trạng thái kích hoạt. Vui lòng ngừng kích hoạt trước.");
         }
         
         subscriptionPlanRepository.delete(plan);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SubscriptionPlanResponse> getActivePlans() {
+        return subscriptionPlanRepository.findAllByIsActiveTrue().stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     @Override
@@ -103,6 +120,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
                 .tier(plan.getTier())
                 .tierDisplayName(plan.getTier() != null ? plan.getTier().getDisplayName() : null)
                 .description(plan.getDescription())
+                .features(plan.getFeatures())
                 .isActive(plan.getIsActive())
                 .subscriberCount(subscriberCount)
                 .createdAt(plan.getCreatedAt())

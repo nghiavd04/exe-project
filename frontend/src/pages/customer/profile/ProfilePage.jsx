@@ -291,6 +291,14 @@ export default function ProfilePage() {
                             )}
                         </div>
                         <h2 className="user-name" title={user?.fullName}>{user?.fullName}</h2>
+                        {user?.subscriptionTier && (
+                            <div className={`profile-tier-badge ${user.subscriptionTier.toLowerCase()}-tier`}>
+                                {user.subscriptionTier === 'FREE' && 'Gói Miễn Phí'}
+                                {user.subscriptionTier === 'BASIC' && 'Hội Viên Basic 💎'}
+                                {user.subscriptionTier === 'PREMIUM' && 'Hội Viên Premium ✨'}
+                                {user.subscriptionTier === 'ELITE' && 'Hội Viên Elite 👑'}
+                            </div>
+                        )}
                         <p className="user-email" title={user?.email}>{user?.email}</p>
                     </div>
 

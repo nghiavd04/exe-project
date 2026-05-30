@@ -17,8 +17,9 @@ const ArticleListPage = () => {
 
   const TIER_WEIGHTS = {
     'FREE': 0,
-    'VIP': 1,
-    'PREMIUM': 2
+    'BASIC': 1,
+    'PREMIUM': 2,
+    'ELITE': 3
   };
 
   const canAccess = (requiredTier) => {
@@ -75,20 +76,7 @@ const ArticleListPage = () => {
   };
 
   const handleCardClick = (article) => {
-    const isLoggedIn = !!localStorage.getItem('token');
-    const requiredTier = article.requiredTier || 'FREE';
-    
-    if (requiredTier !== 'FREE') {
-      if (!isLoggedIn) {
-        navigate('/dang-nhap');
-      } else if (!canAccess(requiredTier)) {
-        setShowPremiumModal(true);
-      } else {
-        navigate(`/bai-viet/${article.slug}`);
-      }
-    } else {
-      navigate(`/bai-viet/${article.slug}`);
-    }
+    navigate(`/bai-viet/${article.slug}`);
   };
 
   return (
@@ -141,14 +129,7 @@ const ArticleListPage = () => {
                   <div className="article-img-wrapper">
                     <img src={article.thumbnailUrl || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=600'} alt={article.title} />
                     {article.categoryDisplayName && <span className="article-category-badge">{article.categoryDisplayName}</span>}
-                    {article.requiredTier && article.requiredTier !== 'FREE' && (
-                      <div className={`premium-badge ${article.requiredTier.toLowerCase()}-tier`}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                        </svg>
-                        {article.requiredTierDisplayName || article.requiredTier}
-                      </div>
-                    )}
+
                   </div>
                   <div className="article-content">
                     <div className="article-meta">
@@ -210,7 +191,7 @@ const ArticleListPage = () => {
             <h2>Nội dung giới hạn</h2>
             <p>Bài viết này yêu cầu gói đăng ký thành viên. Hãy nâng cấp tài khoản để khám phá những kiến thức chuyên sâu và độc quyền.</p>
             <div className="premium-modal-actions">
-              <a href="#" className="btn-premium-register">Đăng ký ngay</a>
+              <Link to="/goi-dich-vu" className="btn-premium-register" onClick={() => setShowPremiumModal(false)}>Đăng ký ngay</Link>
               <button className="btn-modal-close" onClick={() => setShowPremiumModal(false)}>Đóng</button>
             </div>
           </div>

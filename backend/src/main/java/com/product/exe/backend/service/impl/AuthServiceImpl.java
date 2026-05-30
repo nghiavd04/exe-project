@@ -42,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailVerificationRepository verificationRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final com.product.exe.backend.service.SubscriptionService subscriptionService;
 
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
@@ -59,6 +60,7 @@ public class AuthServiceImpl implements AuthService {
         String jwt = tokenProvider.generateToken(user);
         String fullName = user.getCustomer() != null ? user.getCustomer().getFullName() : user.getEmail();
         String avatarUrl = user.getCustomer() != null ? user.getCustomer().getAvatarUrl() : "";
+        String tier = subscriptionService.getUserHighestTier(user.getId()).name();
 
         return LoginResponse.builder()
                 .token(jwt)
@@ -67,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
                 .role(user.getRole().name())
                 .fullName(fullName)
                 .avatarUrl(avatarUrl)
+                .subscriptionTier(tier)
                 .build();
     }
 

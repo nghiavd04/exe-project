@@ -21,6 +21,7 @@ public class SubscriptionPlanResponse {
     private SubscriptionTier tier;
     private String tierDisplayName;
     private String description;
+    private String features;
     private Boolean isActive;
     private Long subscriberCount;
     private LocalDateTime createdAt;

@@ -96,7 +96,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/customer/articles/**",
-                                "/api/v1/customer/quizzes/**"
+                                "/api/v1/customer/quizzes/**",
+                                "/api/v1/customer/subscription-plans/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

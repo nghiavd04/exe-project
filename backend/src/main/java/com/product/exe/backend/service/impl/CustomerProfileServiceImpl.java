@@ -26,6 +26,7 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     private final EmailVerificationRepository verificationRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final com.product.exe.backend.service.SubscriptionService subscriptionService;
 
 
     @Override
@@ -140,12 +141,15 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
             fullName = user.getAdmin().getFullName();
         }
 
+        String tier = subscriptionService.getUserHighestTier(user.getId()).name();
+
         return UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullName(fullName)
                 .avatarUrl(avatarUrl)
                 .role(user.getRole().name())
+                .subscriptionTier(tier)
                 .build();
     }
 }

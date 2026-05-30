@@ -38,10 +38,13 @@ public class ArticleServiceImpl implements ArticleService {
         Article article = articleRepository.findBySlugAndStatus(slug, ArticleStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found with slug: " + slug));
 
+        // Articles are free completely now, paid features are for future development.
+        /*
         SubscriptionTier userTier = subscriptionService.getUserHighestTier(currentUserId);
         if (userTier.getWeight() < article.getRequiredTier().getWeight()) {
             throw new SubscriptionRequiredException("This article requires a " + article.getRequiredTier().getDisplayName() + " subscription.");
         }
+        */
 
         return mapToDetail(article);
     }

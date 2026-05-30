@@ -33,6 +33,8 @@ public class SubscriptionPlanRequest {
     private SubscriptionTier tier;
 
     private String description;
+
+    private String features;
     
     private Boolean isActive;
 }

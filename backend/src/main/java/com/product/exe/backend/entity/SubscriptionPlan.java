@@ -38,6 +38,9 @@ public class SubscriptionPlan {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "features", columnDefinition = "TEXT")
+    private String features;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tier", nullable = false)
     @Builder.Default

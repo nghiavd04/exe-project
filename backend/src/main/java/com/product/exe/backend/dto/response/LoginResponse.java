@@ -16,4 +16,5 @@ public class LoginResponse {
     private String role;
     private String fullName;
     private String avatarUrl;
+    private String subscriptionTier;
 }

@@ -564,8 +564,8 @@ export default function CreateArticlePage() {
                     onChange={(e) => handleFieldChange('requiredTier', e.target.value)}
                     className="admin-select"
                     style={{ 
-                      background: articleData.requiredTier === 'FREE' ? '#f8fafc' : (articleData.requiredTier === 'VIP' ? '#f0f9ff' : '#fff9db'),
-                      borderLeft: articleData.requiredTier === 'FREE' ? '1px solid #edf2f7' : (articleData.requiredTier === 'VIP' ? '4px solid #0ea5e9' : '4px solid #fcc419')
+                      background: articleData.requiredTier === 'FREE' ? '#f8fafc' : (articleData.requiredTier === 'BASIC' ? '#f0f9ff' : '#fff9db'),
+                      borderLeft: articleData.requiredTier === 'FREE' ? '1px solid #edf2f7' : (articleData.requiredTier === 'BASIC' ? '4px solid #0ea5e9' : '4px solid #fcc419')
                     }}
                   >
                     {tiers.map(tier => (
@@ -576,8 +576,8 @@ export default function CreateArticlePage() {
                 </div>
                 <p className="field-hint">
                   {articleData.requiredTier === 'FREE' && "Mọi người đều có thể xem bài viết này."}
-                  {articleData.requiredTier === 'VIP' && "Chỉ thành viên gói VIP hoặc Premium mới có thể xem."}
-                  {articleData.requiredTier === 'PREMIUM' && "Chỉ thành viên gói Premium mới có thể xem."}
+                  {articleData.requiredTier === 'BASIC' && "Chỉ thành viên gói Basic trở lên mới có thể xem."}
+                  {articleData.requiredTier === 'PREMIUM' && "Chỉ thành viên gói Premium hoặc Elite mới có thể xem."}
                 </p>
               </div>
             </div>

@@ -66,6 +66,11 @@ export const contactApi = {
   submitContact: (data) => apiClient.post('/contact', data),
 };
 
+export const subscriptionApi = {
+  getActivePlans: () => apiClient.get('/subscription-plans'),
+  subscribeToPlan: (planId, paymentMethod) => apiClient.post(`/subscription-plans/${planId}/subscribe`, { paymentMethod }),
+};
+
 export const notificationApi = {
   getNotifications: () => apiClient.get('/notifications'),
   getUnreadCount: () => apiClient.get('/notifications/unread-count'),
