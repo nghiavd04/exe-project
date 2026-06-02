@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum QuizStatus implements DbValueEnum {
-    DRAFT("DRAFT", "Bản nháp"),
+    DRAFT("npm", "Bản nháp"),
     PUBLISHED("PUBLISHED", "Đã xuất bản"),
     ARCHIVED("ARCHIVED", "Đã lưu trữ");
 

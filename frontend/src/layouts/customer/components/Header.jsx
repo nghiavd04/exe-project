@@ -9,6 +9,7 @@ const navLinks = [
     { to: '/', label: 'Trang Chủ' },
     { to: '/gioi-thieu', label: 'Giới Thiệu' },
     { to: '/trac-nghiem', label: 'Bài Test' },
+    { to: '/phac-do', label: 'Phác Đồ' },
     { to: '/goi-dich-vu', label: 'Gói Dịch Vụ' },
     { to: '/bai-viet', label: 'Tin Tức' },
     { to: '/lien-he', label: 'Liên Hệ' },

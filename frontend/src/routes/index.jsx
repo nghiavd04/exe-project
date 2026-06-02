@@ -22,6 +22,7 @@ import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
 import SubscriptionPlansPage from '../pages/customer/plans/SubscriptionPlansPage';
 import PaymentSuccessPage from '../pages/customer/plans/PaymentSuccessPage';
 import PaymentCancelPage from '../pages/customer/plans/PaymentCancelPage';
+import ProgramDashboardPage from '../pages/customer/program/ProgramDashboardPage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -72,6 +73,22 @@ export const router = createBrowserRouter([
             <ProfilePage />
           </ProtectedRoute>
         ) 
+      },
+      {
+        path: 'phac-do',
+        element: (
+          <ProtectedRoute>
+            <ProgramDashboardPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: 'phac-do/chi-tiet',
+        element: (
+          <ProtectedRoute>
+            <ProgramDashboardPage />
+          </ProtectedRoute>
+        )
       },
       { path: 'dieu-khoan-dich-vu', element: <TermsAndPrivacyPage /> },
       { 

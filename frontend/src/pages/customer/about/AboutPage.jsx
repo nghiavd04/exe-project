@@ -88,7 +88,7 @@ export default function AboutPage() {
                         <div className="step-num" style={{ background: 'linear-gradient(135deg, var(--accent), #fb923c)' }}>🤝</div>
                         <h3>Cộng đồng hỗ trợ</h3>
                         <p>
-                            Kết nối với những người cùng chí hướng, chia sẻ hành trình "detox" và cùng nhau tiến bộ mỗi ngày.
+                            Kết nối với những người cùng chí hướng, chia sẻ hành trình cân bằng cuộc sống và cùng nhau tiến bộ mỗi ngày.
                         </p>
                     </div>
 

@@ -593,7 +593,7 @@ export default function HomePage() {
                             }}
                         >
                             Tham gia thử thách 7 ngày cùng cộng đồng Digital Reset Hà Nội.
-                            Không cần "cai nghiện" hoàn toàn — chỉ cần xây dựng lại mối quan
+                            Không cần ngắt kết nối hoàn toàn — chỉ cần xây dựng lại mối quan
                             hệ lành mạnh hơn với công nghệ.
                         </p>
                         <div
@@ -767,7 +767,7 @@ export default function HomePage() {
                                 }}
                             >
                                 "Cơ chế phần thưởng ngẫu nhiên (variable reward) trong mạng xã
-                                hội hoạt động tương tự cơ chế gây nghiện của máy đánh bạc."
+                                hội hoạt động tương tự cơ chế cuốn hút của máy đánh bạc."
                             </p>
                             <div
                                 style={{
