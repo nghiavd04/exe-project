@@ -49,37 +49,37 @@ public class AdminQuizController {
     public ResponseEntity<ApiResponse<String>> createQuiz(@Valid @RequestBody QuizCreateRequest request) {
         Long userId = getCurrentUserId();
         adminQuizService.createQuiz(request, userId);
-        return ResponseEntity.ok(ApiResponse.success("Quiz created successfully as DRAFT"));
+        return ResponseEntity.ok(ApiResponse.success("Tạo bài trắc nghiệm nháp thành công"));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> updateQuiz(@PathVariable Long id, @Valid @RequestBody QuizCreateRequest request) {
         adminQuizService.updateQuiz(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Quiz updated successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật bài trắc nghiệm thành công"));
     }
 
     @PatchMapping("/{id}/publish")
     public ResponseEntity<ApiResponse<String>> publishQuiz(@PathVariable Long id) {
         adminQuizService.publishQuiz(id);
-        return ResponseEntity.ok(ApiResponse.success("Quiz published successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Xuất bản bài trắc nghiệm thành công"));
     }
 
     @PatchMapping("/{id}/archive")
     public ResponseEntity<ApiResponse<String>> archiveQuiz(@PathVariable Long id) {
         adminQuizService.archiveQuiz(id);
-        return ResponseEntity.ok(ApiResponse.success("Quiz archived successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Lưu trữ bài trắc nghiệm thành công"));
     }
 
     @PatchMapping("/{id}/unarchive")
     public ResponseEntity<ApiResponse<String>> unarchiveQuiz(@PathVariable Long id) {
         adminQuizService.unarchiveQuiz(id);
-        return ResponseEntity.ok(ApiResponse.success("Quiz unarchived successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Hủy lưu trữ bài trắc nghiệm thành công"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteQuiz(@PathVariable Long id) {
         adminQuizService.deleteQuiz(id);
-        return ResponseEntity.ok(ApiResponse.success("Quiz deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa bài trắc nghiệm thành công"));
     }
 
     private Long getCurrentUserId() {

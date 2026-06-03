@@ -1,6 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import apiClient from '../apis/authApi';
 
+export const TIER_WEIGHTS = {
+  FREE: 0,
+  BASIC: 1,
+  PREMIUM: 2,
+  ELITE: 3,
+};
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -52,8 +59,10 @@ export const AuthProvider = ({ children }) => {
     setUserTier('FREE');
   }, []);
 
+  const userWeight = TIER_WEIGHTS[userTier] || 0;
+
   return (
-    <AuthContext.Provider value={{ user, loading, userTier, setUserTier, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, userTier, userWeight, setUserTier, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

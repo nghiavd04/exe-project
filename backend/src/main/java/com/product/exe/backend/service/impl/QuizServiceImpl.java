@@ -51,7 +51,7 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public QuizDetailResponse getQuizDetail(Long quizId) {
         Quiz quiz = quizRepository.findByIdAndStatus(quizId, QuizStatus.PUBLISHED)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
         return mapToDetail(quiz, null);
     }
 
@@ -59,15 +59,15 @@ public class QuizServiceImpl implements QuizService {
     @Transactional
     public QuizDetailResponse startQuiz(Long quizId, Long userId) {
         Quiz quiz = quizRepository.findByIdAndStatus(quizId, QuizStatus.PUBLISHED)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
 
         Customer customer = customerRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin khách hàng"));
 
         // Generate a unique temporary attempt ID from Redis sequence
         Long tempAttemptId = redisTemplate.opsForValue().increment("quiz:attempt:id:seq");
         if (tempAttemptId == null) {
-            throw new BadRequestException("Failed to generate temporary quiz attempt ID");
+            throw new BadRequestException("Không thể tạo ID phiên làm bài trắc nghiệm tạm thời");
         }
 
         // Create temporary attempt state
@@ -85,7 +85,7 @@ public class QuizServiceImpl implements QuizService {
             redisTemplate.opsForValue().set("quiz:attempt:" + tempAttemptId, json, Duration.ofHours(2));
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize RedisQuizAttempt", e);
-            throw new BadRequestException("Error initializing quiz attempt");
+            throw new BadRequestException("Lỗi khi khởi tạo phiên làm bài trắc nghiệm");
         }
 
         return mapToDetail(quiz, tempAttemptId);
@@ -98,7 +98,7 @@ public class QuizServiceImpl implements QuizService {
         String json = redisTemplate.opsForValue().get(key);
         if (json == null) {
             log.warn("Redis quiz attempt not found or expired for ID: {}", attemptId);
-            throw new BadRequestException("This attempt has expired or does not exist");
+            throw new BadRequestException("Phiên làm bài này đã hết hạn hoặc không tồn tại");
         }
 
         RedisQuizAttempt tempAttempt;
@@ -106,47 +106,47 @@ public class QuizServiceImpl implements QuizService {
             tempAttempt = objectMapper.readValue(json, RedisQuizAttempt.class);
         } catch (JsonProcessingException e) {
             log.error("Failed to deserialize RedisQuizAttempt", e);
-            throw new BadRequestException("Error processing quiz attempt data");
+            throw new BadRequestException("Lỗi khi xử lý dữ liệu phiên làm bài trắc nghiệm");
         }
 
         Customer customer = customerRepository.findById(tempAttempt.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
 
         if (!customer.getUser().getId().equals(userId)) {
             log.warn("Permission denied for user {} on attempt {}", userId, attemptId);
-            throw new BadRequestException("You do not have permission to access this attempt");
+            throw new BadRequestException("Bạn không có quyền truy cập phiên làm bài này");
         }
 
         Question question = questionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy câu hỏi"));
 
         if (!question.getQuiz().getId().equals(tempAttempt.getQuizId())) {
             log.warn("Question {} does not belong to quiz {}", question.getId(), tempAttempt.getQuizId());
-            throw new BadRequestException("Question does not belong to this quiz");
+            throw new BadRequestException("Câu hỏi không thuộc về bài trắc nghiệm này");
         }
 
         if (request.getSelectedAnswerIds() == null || request.getSelectedAnswerIds().isEmpty()) {
             log.warn("No answers selected for question {} in attempt {}", question.getId(), attemptId);
-            throw new BadRequestException("At least one answer must be selected");
+            throw new BadRequestException("Phải chọn ít nhất một câu trả lời");
         }
 
         List<Answer> selectedAnswers = answerRepository.findAllById(request.getSelectedAnswerIds());
         if (selectedAnswers.size() != request.getSelectedAnswerIds().size()) {
             log.warn("Some answer IDs not found: expected {}, found {}", request.getSelectedAnswerIds().size(), selectedAnswers.size());
-            throw new ResourceNotFoundException("One or more answers not found");
+            throw new ResourceNotFoundException("Không tìm thấy một hoặc nhiều câu trả lời");
         }
 
         // Validate all answers belong to the question
         for (Answer a : selectedAnswers) {
             if (!a.getQuestion().getId().equals(question.getId())) {
                 log.warn("Answer {} does not belong to question {}", a.getId(), question.getId());
-                throw new BadRequestException("Answer ID " + a.getId() + " does not belong to this question");
+                throw new BadRequestException("Mã câu trả lời " + a.getId() + " không thuộc về câu hỏi này");
             }
         }
 
         if (question.getType() == QuestionType.SINGLE_CHOICE && selectedAnswers.size() > 1) {
             log.warn("Multiple answers submitted for single choice question {}", question.getId());
-            throw new BadRequestException("Single choice questions only accept one answer");
+            throw new BadRequestException("Câu hỏi lựa chọn đơn chỉ chấp nhận một câu trả lời");
         }
 
         // Save selected answers in the map
@@ -158,7 +158,7 @@ public class QuizServiceImpl implements QuizService {
             redisTemplate.opsForValue().set(key, updatedJson, Duration.ofHours(2));
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize updated RedisQuizAttempt", e);
-            throw new BadRequestException("Error saving answer");
+            throw new BadRequestException("Lỗi khi lưu câu trả lời");
         }
     }
 
@@ -181,14 +181,14 @@ public class QuizServiceImpl implements QuizService {
         }
 
         Customer customer = customerRepository.findById(tempAttempt.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
 
         if (!customer.getUser().getId().equals(userId)) {
-            throw new BadRequestException("You do not have permission to access this attempt");
+            throw new BadRequestException("Bạn không có quyền truy cập phiên làm bài này");
         }
 
         Quiz quiz = quizRepository.findById(tempAttempt.getQuizId())
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
 
         // 1. Create a permanent QuizAttempt in MySQL
         QuizAttempt attempt = QuizAttempt.builder()
@@ -205,7 +205,7 @@ public class QuizServiceImpl implements QuizService {
         for (Map.Entry<Long, List<Long>> entry : tempAttempt.getAnswers().entrySet()) {
             Long questionId = entry.getKey();
             Question question = questionRepository.findById(questionId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy câu hỏi"));
 
             List<Answer> selectedAnswers = answerRepository.findAllById(entry.getValue());
             for (Answer a : selectedAnswers) {

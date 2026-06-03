@@ -37,13 +37,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public ArticleDetailResponse getArticleDetail(String slug, Long currentUserId) {
         Article article = articleRepository.findBySlugAndStatus(slug, ArticleStatus.PUBLISHED)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found with slug: " + slug));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết với slug: " + slug));
 
         // Articles are free completely now, paid features are for future development.
         /*
         SubscriptionTier userTier = subscriptionService.getUserHighestTier(currentUserId);
         if (userTier.getWeight() < article.getRequiredTier().getWeight()) {
-            throw new SubscriptionRequiredException("This article requires a " + article.getRequiredTier().getDisplayName() + " subscription.");
+            throw new SubscriptionRequiredException("Bài viết này yêu cầu gói dịch vụ " + article.getRequiredTier().getDisplayName() + ".");
         }
         */
 
@@ -54,7 +54,7 @@ public class ArticleServiceImpl implements ArticleService {
     @org.springframework.transaction.annotation.Transactional
     public void incrementViewCount(Long articleId) {
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found with id: " + articleId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết với mã id: " + articleId));
         
         Long currentViews = article.getViewCount();
         article.setViewCount(currentViews == null ? 1L : currentViews + 1);

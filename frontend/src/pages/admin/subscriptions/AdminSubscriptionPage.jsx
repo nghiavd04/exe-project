@@ -104,7 +104,7 @@ export default function AdminSubscriptionPage() {
   return (
     <div className="admin-page">
       <div className="subscription-breadcrumb">
-        <Link to="/admin">ADMIN</Link>
+        <Link to="/admin">QUẢN TRỊ</Link>
         <ChevronRight size={14} style={{ opacity: 0.5 }} />
         <span>QUẢN LÝ GÓI DỊCH VỤ</span>
       </div>

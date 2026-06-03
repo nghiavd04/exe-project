@@ -78,15 +78,15 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new BadRequestException("Email already exists!");
+            throw new BadRequestException("Email đã tồn tại!");
         }
 
         // Check if email is verified
         EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(registerRequest.getEmail())
-                .orElseThrow(() -> new BadRequestException("Email not verified! Please request a code first."));
+                .orElseThrow(() -> new BadRequestException("Email chưa được xác thực! Vui lòng yêu cầu mã xác thực trước."));
         
         if (!verification.isVerified()) {
-            throw new BadRequestException("Email not verified! Please enter the code received.");
+            throw new BadRequestException("Email chưa được xác thực! Vui lòng nhập mã đã nhận.");
         }
 
         User user = User.builder()
@@ -120,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
                 .fullName(registerRequest.getFullName())
-                .message("Registration successful! Please login to continue.")
+                .message("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.")
                 .build();
     }
 
@@ -128,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void sendVerificationCode(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new BadRequestException("Email already exists!");
+            throw new BadRequestException("Email đã tồn tại!");
         }
 
         String code = String.format("%06d", new Random().nextInt(999999));
@@ -148,14 +148,14 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void verifyCode(String email, String code) {
         EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(email)
-                .orElseThrow(() -> new BadRequestException("Verification code not found! Please request a new one."));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy mã xác thực! Vui lòng yêu cầu mã mới."));
         
         if (verification.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Verification code expired!");
+            throw new BadRequestException("Mã xác thực đã hết hạn!");
         }
         
         if (!verification.getCode().equals(code)) {
-            throw new BadRequestException("Invalid verification code!");
+            throw new BadRequestException("Mã xác thực không hợp lệ!");
         }
         
         verification.setVerified(true);

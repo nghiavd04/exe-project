@@ -147,7 +147,9 @@ export default function SubscriptionPlansPage() {
               {isPopular && <div className="popular-ribbon">PHỔ BIẾN NHẤT</div>}
               
               <div className="plan-card-header">
-                <span className="plan-tier-label">{plan.tier}</span>
+                <span className="plan-tier-label">
+                  {plan.tier === 'FREE' ? 'MIỄN PHÍ' : plan.tier === 'BASIC' ? 'CƠ BẢN' : plan.tier === 'PREMIUM' ? 'CAO CẤP' : plan.tier === 'ELITE' ? 'THƯỢNG HẠNG' : plan.tier}
+                </span>
                 <div className="plan-price-row">
                   <span className="price-number">{formatPrice(plan.price)}</span>
                   <span className="price-period">

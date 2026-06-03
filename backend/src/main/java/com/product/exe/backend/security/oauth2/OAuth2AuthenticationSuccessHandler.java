@@ -47,7 +47,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication) {
         OAuth2UserPrincipal principal = (OAuth2UserPrincipal) authentication.getPrincipal();
         User user = userRepository.findByEmail(principal.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found: " + principal.getEmail()));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + principal.getEmail()));
 
         String token = tokenProvider.generateToken(user);
 

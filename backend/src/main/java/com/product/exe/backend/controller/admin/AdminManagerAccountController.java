@@ -35,7 +35,7 @@ public class AdminManagerAccountController {
     @PatchMapping("/{id}/toggle-status")
     public ResponseEntity<ApiResponse<String>> toggleUserStatus(@PathVariable Long id) {
         adminManagerAccountService.toggleUserStatus(id);
-        return ResponseEntity.ok(ApiResponse.success("User status updated successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái người dùng thành công"));
     }
 
     @PostMapping("/admins")

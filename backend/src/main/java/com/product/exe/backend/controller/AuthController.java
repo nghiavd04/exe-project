@@ -23,37 +23,37 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
-        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
+        return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công", response));
     }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         RegisterResponse response = authService.register(registerRequest);
-        return ResponseEntity.ok(ApiResponse.success("Registration successful", response));
+        return ResponseEntity.ok(ApiResponse.success("Đăng ký thành công", response));
     }
 
     @PostMapping("/send-code")
     public ResponseEntity<ApiResponse<String>> sendCode(@RequestParam String email) {
         authService.sendVerificationCode(email);
-        return ResponseEntity.ok(ApiResponse.success("Verification code sent to your email", "Success"));
+        return ResponseEntity.ok(ApiResponse.success("Mã xác thực đã được gửi đến email của bạn", "Thành công"));
     }
 
     @PostMapping("/verify-code")
     public ResponseEntity<ApiResponse<String>> verifyCode(@RequestParam String email, @RequestParam String code) {
         authService.verifyCode(email, code);
-        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", "Success"));
+        return ResponseEntity.ok(ApiResponse.success("Xác thực email thành công", "Thành công"));
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestParam String email) {
         authService.forgotPassword(email);
-        return ResponseEntity.ok(ApiResponse.success("Mã xác thực đã được gửi để đặt lại mật khẩu", "Success"));
+        return ResponseEntity.ok(ApiResponse.success("Mã xác thực đã được gửi để đặt lại mật khẩu", "Thành công"));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request.getEmail(), request.getCode(), request.getNewPassword());
-        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công", "Success"));
+        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công", "Thành công"));
     }
 }
 

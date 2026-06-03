@@ -53,7 +53,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional(readOnly = true)
     public AdminArticleDetailResponse getArticleDetail(Long id) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
         return mapToDetailResponse(article);
     }
 
@@ -61,7 +61,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void createArticle(ArticleCreateRequest request, Long userId) {
         Admin admin = adminRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Admin user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản quản trị viên"));
 
         Article article = Article.builder()
                 .title(request.getTitle())
@@ -82,10 +82,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void updateArticle(Long id, ArticleCreateRequest request) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
 
         if (article.getStatus() == ArticleStatus.PUBLISHED) {
-            throw new BadRequestException("Cannot edit a published article. Please archive it first.");
+            throw new BadRequestException("Không thể chỉnh sửa bài viết đã xuất bản. Vui lòng lưu trữ trước.");
         }
 
         article.setTitle(request.getTitle());
@@ -105,9 +105,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void publishArticle(Long id) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
         if (article.getStatus() != ArticleStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT articles can be published");
+            throw new IllegalStateException("Chỉ những bài viết nháp (DRAFT) mới có thể được xuất bản");
         }
         article.setStatus(ArticleStatus.PUBLISHED);
         article.setPublishedAt(LocalDateTime.now());
@@ -118,9 +118,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void archiveArticle(Long id) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
         if (article.getStatus() != ArticleStatus.PUBLISHED) {
-            throw new IllegalStateException("Only PUBLISHED articles can be archived");
+            throw new IllegalStateException("Chỉ những bài viết đã xuất bản (PUBLISHED) mới có thể được lưu trữ");
         }
         article.setStatus(ArticleStatus.ARCHIVED);
         articleRepository.save(article);
@@ -130,9 +130,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void unarchiveArticle(Long id) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
         if (article.getStatus() != ArticleStatus.ARCHIVED) {
-            throw new IllegalStateException("Only ARCHIVED articles can be unarchived");
+            throw new IllegalStateException("Chỉ những bài viết đã lưu trữ (ARCHIVED) mới có thể hủy lưu trữ");
         }
         article.setStatus(ArticleStatus.PUBLISHED);
         articleRepository.save(article);
@@ -142,9 +142,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional
     public void deleteArticle(Long id) {
         Article article = articleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài viết"));
         if (article.getStatus() != ArticleStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT articles can be deleted. Please archive others instead.");
+            throw new IllegalStateException("Chỉ những bài viết nháp (DRAFT) mới có thể bị xóa. Vui lòng lưu trữ các bài khác thay thế.");
         }
         articleRepository.delete(article);
     }

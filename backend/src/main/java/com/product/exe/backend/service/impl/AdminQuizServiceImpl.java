@@ -82,10 +82,10 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void publishQuiz(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
         
         if (quiz.getStatus() != QuizStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT quizzes can be published");
+            throw new IllegalStateException("Chỉ những bài trắc nghiệm nháp (DRAFT) mới có thể được xuất bản");
         }
         
         quiz.setStatus(QuizStatus.PUBLISHED);
@@ -96,10 +96,10 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void archiveQuiz(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
         
         if (quiz.getStatus() != QuizStatus.PUBLISHED) {
-            throw new IllegalStateException("Only PUBLISHED quizzes can be archived");
+            throw new IllegalStateException("Chỉ những bài trắc nghiệm đã xuất bản (PUBLISHED) mới có thể được lưu trữ");
         }
         
         quiz.setStatus(QuizStatus.ARCHIVED);
@@ -110,10 +110,10 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void unarchiveQuiz(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
         
         if (quiz.getStatus() != QuizStatus.ARCHIVED) {
-            throw new IllegalStateException("Only ARCHIVED quizzes can be unarchived");
+            throw new IllegalStateException("Chỉ những bài trắc nghiệm đã lưu trữ (ARCHIVED) mới có thể hủy lưu trữ");
         }
         
         quiz.setStatus(QuizStatus.PUBLISHED);
@@ -124,10 +124,10 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void deleteQuiz(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
         
         if (quiz.getStatus() != QuizStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT quizzes can be deleted. Please archive others instead.");
+            throw new IllegalStateException("Chỉ những bài trắc nghiệm nháp (DRAFT) mới có thể bị xóa. Vui lòng lưu trữ các bài khác thay thế.");
         }
         
         // Soft delete
@@ -146,7 +146,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional(readOnly = true)
     public AdminQuizDetailResponse getQuizDetail(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
 
         List<AdminQuestionResponse> questionDtos = List.of();
         if (quiz.getQuestions() != null) {
@@ -205,7 +205,7 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void createQuiz(QuizCreateRequest request, Long userId) {
         Admin admin = adminRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Admin profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin quản trị viên"));
 
         Quiz quiz = Quiz.builder()
                 .admin(admin)
@@ -227,10 +227,10 @@ public class AdminQuizServiceImpl implements AdminQuizService {
     @Transactional
     public void updateQuiz(Long id, QuizCreateRequest request) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài trắc nghiệm"));
 
         if (quiz.getStatus() == QuizStatus.PUBLISHED) {
-            throw new BadRequestException("Cannot edit a published quiz. Please archive it first.");
+            throw new BadRequestException("Không thể chỉnh sửa bài trắc nghiệm đã xuất bản. Vui lòng lưu trữ trước.");
         }
 
         quiz.setTitle(request.getTitle());

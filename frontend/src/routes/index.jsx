@@ -3,6 +3,7 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import OAuth2RedirectPage from '../pages/auth/OAuth2RedirectPage';
 import ProtectedRoute from '../components/ProtectedRoute';
+import TierRoute from '../components/TierRoute';
 
 import AdminRoute from './AdminRoute';
 import AdminLayout from '../layouts/admin/AdminLayout';
@@ -22,7 +23,9 @@ import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
 import SubscriptionPlansPage from '../pages/customer/plans/SubscriptionPlansPage';
 import PaymentSuccessPage from '../pages/customer/plans/PaymentSuccessPage';
 import PaymentCancelPage from '../pages/customer/plans/PaymentCancelPage';
-import ProgramDashboardPage from '../pages/customer/program/ProgramDashboardPage';
+import ProgramLayout from '../pages/customer/program/ProgramLayout';
+import ProgramRoadmapPage from '../pages/customer/program/ProgramRoadmapPage';
+import ProgramDetailPage from '../pages/customer/program/ProgramDetailPage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -78,17 +81,13 @@ export const router = createBrowserRouter([
         path: 'phac-do',
         element: (
           <ProtectedRoute>
-            <ProgramDashboardPage />
+            <ProgramLayout />
           </ProtectedRoute>
-        )
-      },
-      {
-        path: 'phac-do/chi-tiet',
-        element: (
-          <ProtectedRoute>
-            <ProgramDashboardPage />
-          </ProtectedRoute>
-        )
+        ),
+        children: [
+          { path: '', element: <ProgramRoadmapPage /> },
+          { path: 'chi-tiet', element: <ProgramDetailPage /> }
+        ]
       },
       { path: 'dieu-khoan-dich-vu', element: <TermsAndPrivacyPage /> },
       { 

@@ -3,14 +3,16 @@ package com.product.exe.backend.config;
 import com.product.exe.backend.entity.SubscriptionPlan;
 import com.product.exe.backend.enums.SubscriptionTier;
 import com.product.exe.backend.repository.SubscriptionPlanRepository;
+import com.product.exe.backend.repository.ProgramPhaseMetadataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
-
 
 @Component
 @RequiredArgsConstructor
@@ -18,6 +20,8 @@ import java.math.BigDecimal;
 public class DataInitializer implements CommandLineRunner {
 
     private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final ProgramPhaseMetadataRepository programPhaseMetadataRepository;
+    private final DataSource dataSource;
 
     @Override
     public void run(String... args) throws Exception {
@@ -38,5 +42,21 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             log.info("FREE subscription plan already exists. Skipping initialization.");
         }
+
+        if (programPhaseMetadataRepository.count() == 0) {
+            log.info("Initializing Dopamine Detox Program metadata from dml_program_metadata.sql...");
+            try {
+                ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
+                        false, false, "UTF-8", new ClassPathResource("dml_program_metadata.sql")
+                );
+                populator.execute(dataSource);
+                log.info("Program metadata initialized successfully.");
+            } catch (Exception e) {
+                log.error("Failed to initialize Program metadata: ", e);
+            }
+        } else {
+            log.info("Program metadata already exists. Skipping initialization.");
+        }
     }
 }
+

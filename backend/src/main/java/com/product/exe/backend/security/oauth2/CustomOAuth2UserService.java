@@ -54,7 +54,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String sub = (String) attributes.get("sub");
 
         if (email == null) {
-            throw new InternalAuthenticationServiceException("Email not found from OAuth2 provider");
+            throw new InternalAuthenticationServiceException("Không tìm thấy email từ nhà cung cấp OAuth2");
         }
 
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -64,7 +64,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userOptional.get();
             if (!provider.equals(user.getProvider())) {
                 throw new InternalAuthenticationServiceException(
-                        "Email already registered with " + user.getProvider() + " provider");
+                        "Email đã được đăng ký bằng nhà cung cấp " + user.getProvider());
             }
             user.setProviderId(sub);
             user = userRepository.save(user);

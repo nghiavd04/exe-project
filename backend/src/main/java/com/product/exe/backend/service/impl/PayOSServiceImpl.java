@@ -60,13 +60,13 @@ public class PayOSServiceImpl implements PayOSService {
     @Transactional
     public PayOSResponse createPaymentLink(Long planId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         Customer customer = customerRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new BadRequestException("Customer profile not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
 
         if (Boolean.FALSE.equals(plan.getIsActive())) {
             throw new BadRequestException("Gói dịch vụ này hiện đã bị ngừng hoạt động");
@@ -155,7 +155,7 @@ public class PayOSServiceImpl implements PayOSService {
 
         Long orderCode = webhookBody.getData().getOrderCode();
         Payment payment = paymentRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment transaction not found for orderCode " + orderCode));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giao dịch thanh toán cho mã đơn hàng " + orderCode));
 
         if (payment.getStatus() != PaymentStatus.PENDING) {
             log.info("Payment for orderCode {} already processed with status: {}", orderCode, payment.getStatus());
@@ -173,7 +173,7 @@ public class PayOSServiceImpl implements PayOSService {
     @Transactional
     public PayOSResponse syncPaymentStatus(Long orderCode) {
         Payment payment = paymentRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment transaction not found for orderCode " + orderCode));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giao dịch thanh toán cho mã đơn hàng " + orderCode));
 
         if (payment.getStatus() != PaymentStatus.PENDING) {
             return PayOSResponse.builder()

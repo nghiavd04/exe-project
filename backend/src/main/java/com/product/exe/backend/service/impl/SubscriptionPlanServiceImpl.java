@@ -55,7 +55,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     @Transactional
     public SubscriptionPlan updatePlan(Long id, SubscriptionPlanRequest request) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
         
         if (Boolean.TRUE.equals(plan.getIsActive())) {
             throw new BadRequestException("Không thể chỉnh sửa gói đang ở trạng thái kích hoạt. Vui lòng ngừng kích hoạt trước.");
@@ -78,7 +78,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     @Transactional
     public void deletePlan(Long id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
         
         if (com.product.exe.backend.enums.SubscriptionTier.FREE.equals(plan.getTier())) {
             throw new BadRequestException("Không thể xóa gói mặc định (FREE).");
@@ -103,7 +103,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     @Transactional
     public void togglePlanStatus(Long id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
         boolean currentStatus = plan.getIsActive() != null ? plan.getIsActive() : false;
         plan.setIsActive(!currentStatus);
         subscriptionPlanRepository.save(plan);

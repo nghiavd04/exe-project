@@ -24,7 +24,7 @@ public class CustomerProfileController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(Authentication authentication) {
         String email = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success("Profile fetched successfully", profileService.getProfile(email)));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin cá nhân thành công", profileService.getProfile(email)));
     }
 
     @PutMapping
@@ -33,7 +33,7 @@ public class CustomerProfileController {
             Authentication authentication,
             @Valid @RequestBody UpdateProfileRequest request) {
         String email = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", profileService.updateProfile(email, request)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin cá nhân thành công", profileService.updateProfile(email, request)));
     }
 
     @PatchMapping("/password")
@@ -43,7 +43,7 @@ public class CustomerProfileController {
             @Valid @RequestBody ChangePasswordRequest request) {
         String email = authentication.getName();
         profileService.changePassword(email, request);
-        return ResponseEntity.ok(ApiResponse.success("Password changed successfully", "Please login again with your new password"));
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", "Vui lòng đăng nhập lại bằng mật khẩu mới của bạn"));
     }
 
     @PatchMapping("/email")
@@ -53,7 +53,7 @@ public class CustomerProfileController {
             @Valid @RequestBody ChangeEmailRequest request) {
         String currentEmail = authentication.getName();
         profileService.changeEmail(currentEmail, request.getNewEmail(), request.getCode());
-        return ResponseEntity.ok(ApiResponse.success("Email changed successfully", "Please login again with your new email"));
+        return ResponseEntity.ok(ApiResponse.success("Thay đổi email thành công", "Vui lòng đăng nhập lại bằng email mới của bạn"));
     }
 
     @PatchMapping("/avatar")
@@ -63,6 +63,6 @@ public class CustomerProfileController {
             @RequestParam String avatarUrl,
             @RequestParam String publicId) {
         String email = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success("Avatar updated successfully", profileService.updateAvatar(email, avatarUrl, publicId)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật ảnh đại diện thành công", profileService.updateAvatar(email, avatarUrl, publicId)));
     }
 }

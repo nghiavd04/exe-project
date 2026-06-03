@@ -187,7 +187,9 @@ export default function PaymentSuccessPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px' }}>
                 <span style={{ color: '#64748b' }}>Cấp độ tài khoản:</span>
-                <span style={{ color: '#818cf8', fontWeight: '700' }}>{planTier}</span>
+                <span style={{ color: '#818cf8', fontWeight: '700' }}>
+                  {planTier === 'FREE' ? 'MIỄN PHÍ' : planTier === 'BASIC' ? 'CƠ BẢN' : planTier === 'PREMIUM' ? 'CAO CẤP' : planTier === 'ELITE' ? 'THƯỢNG HẠNG' : planTier}
+                </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: '#64748b' }}>Tổng số tiền:</span>

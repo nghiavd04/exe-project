@@ -35,7 +35,7 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
     @Transactional
     public void toggleUserStatus(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với mã id: " + userId));
         
         boolean newStatus = !user.getIsActive();
         user.setIsActive(newStatus);
@@ -86,7 +86,7 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
             // Lấy thông tin gói dịch vụ
             subscriptionPlan = userSubscriptionRepository.findActiveSubscriptionByUserId(user.getId())
                     .map(sub -> sub.getPlan().getName())
-                    .orElse("FREE");
+                    .orElse("Miễn phí");
         } else if (user.getRole() == Role.ADMIN && user.getAdmin() != null) {
             fullName = user.getAdmin().getFullName();
             avatarUrl = user.getAdmin().getAvatarUrl();

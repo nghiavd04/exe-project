@@ -42,12 +42,12 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     @Transactional
     public UserProfileResponse updateProfile(String currentEmail, UpdateProfileRequest request) {
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         // If email is changing, check if new email exists
         if (!currentEmail.equals(request.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
-                throw new BadRequestException("Email already in use");
+                throw new BadRequestException("Email đã được sử dụng");
             }
             user.setEmail(request.getEmail());
         }
@@ -75,10 +75,10 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     @Transactional
     public void changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new BadRequestException("Incorrect old password");
+            throw new BadRequestException("Mật khẩu cũ không chính xác");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -89,23 +89,23 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     @Transactional
     public void changeEmail(String currentEmail, String newEmail, String code) {
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         // Verify OTP for NEW email
         EmailVerification verification = verificationRepository.findTopByEmailOrderByExpiryDateDesc(newEmail)
-                .orElseThrow(() -> new BadRequestException("Verification code not found for new email"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy mã xác thực cho email mới"));
 
         if (!verification.getCode().equals(code)) {
-            throw new BadRequestException("Invalid verification code");
+            throw new BadRequestException("Mã xác thực không hợp lệ");
         }
 
         if (verification.getExpiryDate().isBefore(java.time.LocalDateTime.now())) {
-            throw new BadRequestException("Verification code expired");
+            throw new BadRequestException("Mã xác thực đã hết hạn");
         }
 
         // Check if new email is already in use by another user
         if (userRepository.existsByEmail(newEmail)) {
-            throw new BadRequestException("Email already in use");
+            throw new BadRequestException("Email đã được sử dụng");
         }
 
         user.setEmail(newEmail);
@@ -120,7 +120,7 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
     @Transactional
     public UserProfileResponse updateAvatar(String email, String avatarUrl, String publicId) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         if (user.getCustomer() != null) {
             Customer customer = user.getCustomer();

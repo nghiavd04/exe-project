@@ -49,37 +49,37 @@ public class AdminArticleController {
     public ResponseEntity<ApiResponse<String>> createArticle(@Valid @RequestBody ArticleCreateRequest request) {
         Long userId = getCurrentUserId();
         adminArticleService.createArticle(request, userId);
-        return ResponseEntity.ok(ApiResponse.success("Article created successfully as DRAFT"));
+        return ResponseEntity.ok(ApiResponse.success("Tạo bài viết nháp thành công"));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> updateArticle(@PathVariable Long id, @Valid @RequestBody ArticleCreateRequest request) {
         adminArticleService.updateArticle(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Article updated successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật bài viết thành công"));
     }
 
     @PatchMapping("/{id}/publish")
     public ResponseEntity<ApiResponse<String>> publishArticle(@PathVariable Long id) {
         adminArticleService.publishArticle(id);
-        return ResponseEntity.ok(ApiResponse.success("Article published successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Xuất bản bài viết thành công"));
     }
 
     @PatchMapping("/{id}/archive")
     public ResponseEntity<ApiResponse<String>> archiveArticle(@PathVariable Long id) {
         adminArticleService.archiveArticle(id);
-        return ResponseEntity.ok(ApiResponse.success("Article archived successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Lưu trữ bài viết thành công"));
     }
 
     @PatchMapping("/{id}/unarchive")
     public ResponseEntity<ApiResponse<String>> unarchiveArticle(@PathVariable Long id) {
         adminArticleService.unarchiveArticle(id);
-        return ResponseEntity.ok(ApiResponse.success("Article unarchived successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Hủy lưu trữ bài viết thành công"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteArticle(@PathVariable Long id) {
         adminArticleService.deleteArticle(id);
-        return ResponseEntity.ok(ApiResponse.success("Article deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success("Xóa bài viết thành công"));
     }
 
     private Long getCurrentUserId() {

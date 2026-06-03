@@ -38,7 +38,7 @@ public class EmailServiceImpl implements EmailService {
                     "</div>" +
                     "<p style='color: #64748b; font-size: 14px;'>Mã này sẽ hết hạn trong vòng 10 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>" +
                     "<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;'>" +
-                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>© 2024 EXE Project. All rights reserved.</p>" +
+                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>© 2024 EXE Project. Bảo lưu mọi quyền.</p>" +
                     "</div>";
 
             helper.setText(htmlContent, true);

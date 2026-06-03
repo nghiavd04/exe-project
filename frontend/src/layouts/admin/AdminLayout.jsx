@@ -61,7 +61,7 @@ export default function AdminLayout() {
             EXE<span className="admin-logo-accent">Admin.</span>
           </h2>
           <p className="admin-logo-subtext">
-            Management Portal
+            Cổng quản trị
           </p>
         </Link>
 

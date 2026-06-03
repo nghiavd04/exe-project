@@ -55,13 +55,13 @@ public class CustomerSubscriptionPlanController {
         
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
         
         Customer customer = customerRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new BadRequestException("Customer profile not found"));
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription plan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
 
         if (Boolean.FALSE.equals(plan.getIsActive())) {
             throw new BadRequestException("Gói dịch vụ này hiện đã bị ngừng hoạt động");

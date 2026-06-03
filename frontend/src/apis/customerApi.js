@@ -73,6 +73,20 @@ export const subscriptionApi = {
   syncPayOSPayment: (orderCode) => apiClient.post(`/subscription-plans/payos/sync/${orderCode}`),
 };
 
+export const programApi = {
+  enroll: () => apiClient.post('/program/enroll'),
+  getProgress: () => apiClient.get('/program/progress'),
+  getDayDetail: (dayNumber) => apiClient.get(`/program/day/${dayNumber}`),
+  getWeekDetail: (weekNumber) => apiClient.get(`/program/week/${weekNumber}`),
+  toggleTask: (dayNumber, weekNumber, taskIndex, isCompleted) => 
+    apiClient.post('/program/toggle-task', null, { params: { dayNumber, weekNumber, taskIndex, isCompleted } }),
+  saveDailyLog: (dayNumber, data) => apiClient.post(`/program/day/${dayNumber}/log`, data),
+  saveWeeklyLog: (weekNumber, data) => apiClient.post(`/program/week/${weekNumber}/log`, data),
+  getAnalytics: () => apiClient.get('/program/analytics'),
+  getMetadata: () => apiClient.get('/program/metadata'),
+  advanceDay: () => apiClient.post('/program/advance-day'),
+};
+
 export const notificationApi = {
   getNotifications: () => apiClient.get('/notifications'),
   getUnreadCount: () => apiClient.get('/notifications/unread-count'),
