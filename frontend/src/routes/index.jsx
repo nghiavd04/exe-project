@@ -23,13 +23,9 @@ import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
 import SubscriptionPlansPage from '../pages/customer/plans/SubscriptionPlansPage';
 import PaymentSuccessPage from '../pages/customer/plans/PaymentSuccessPage';
 import PaymentCancelPage from '../pages/customer/plans/PaymentCancelPage';
-<<<<<<< HEAD
 import ProgramLayout from '../pages/customer/program/ProgramLayout';
 import ProgramRoadmapPage from '../pages/customer/program/ProgramRoadmapPage';
 import ProgramDetailPage from '../pages/customer/program/ProgramDetailPage';
-=======
-import ProgramDashboardPage from '../pages/customer/program/ProgramDashboardPage';
->>>>>>> f7e766ed9b5911ac235408ab5bf798c033b4bf60
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
