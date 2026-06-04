@@ -243,3 +243,60 @@
   border: none;
   box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
 }
+
+/* Tabs UI for Subscription page */
+.subscription-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 1px;
+}
+
+.subscription-tab-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.subscription-tab-btn:hover {
+  color: var(--teal-dark);
+}
+
+.subscription-tab-btn.active {
+  color: var(--teal-dark);
+}
+
+.subscription-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--teal-dark);
+  border-radius: 3px 3px 0 0;
+}
+
+.payment-filter-select {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 0.95rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border 0.2s;
+  min-width: 180px;
+}
+
+.payment-filter-select:focus {
+  border-color: var(--teal-dark);
+}
+

@@ -71,6 +71,7 @@ export const subscriptionApi = {
   subscribeToPlan: (planId, paymentMethod) => apiClient.post(`/subscription-plans/${planId}/subscribe`, { paymentMethod }),
   createPayOSPayment: (planId) => apiClient.post('/subscription-plans/payos/create-link', { planId }),
   syncPayOSPayment: (orderCode) => apiClient.post(`/subscription-plans/payos/sync/${orderCode}`),
+  getUpgradePreview: (targetPlanId) => apiClient.get('/subscription-plans/upgrade-preview', { params: { targetPlanId } }),
 };
 
 export const programApi = {
@@ -85,6 +86,7 @@ export const programApi = {
   getAnalytics: () => apiClient.get('/program/analytics'),
   getMetadata: () => apiClient.get('/program/metadata'),
   advanceDay: () => apiClient.post('/program/advance-day'),
+  getProgramMedias: () => apiClient.get('/program/medias'),
 };
 
 export const notificationApi = {

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,6 +26,15 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             @Param("now") LocalDateTime now);
 
     long countByPlanIdAndStatus(Long planId, SubscriptionStatus status);
+
+    boolean existsByPlanId(Long planId);
+
+    @Query("SELECT us FROM UserSubscription us " +
+           "WHERE us.customer.id = :customerId " +
+           "AND us.status = :status")
+    List<UserSubscription> findAllByCustomerIdAndStatus(
+            @Param("customerId") Long customerId,
+            @Param("status") SubscriptionStatus status);
 
     default Optional<UserSubscription> findActiveSubscriptionByUserId(Long userId) {
         return findFirstByUserIdAndStatusAndEndDateAfter(userId, SubscriptionStatus.ACTIVE, LocalDateTime.now());

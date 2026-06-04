@@ -18,13 +18,13 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     @Override
     public Map upload(MultipartFile file) throws IOException {
-        return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
     }
 
     @Override
     public Map upload(MultipartFile file, String folder) throws IOException {
         return cloudinary.uploader().upload(file.getBytes(), 
-                ObjectUtils.asMap("folder", folder));
+                ObjectUtils.asMap("folder", folder, "resource_type", "auto"));
     }
 
     @Override

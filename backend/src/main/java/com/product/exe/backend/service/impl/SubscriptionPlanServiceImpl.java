@@ -61,6 +61,15 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
             throw new BadRequestException("Không thể chỉnh sửa gói đang ở trạng thái kích hoạt. Vui lòng ngừng kích hoạt trước.");
         }
 
+        boolean hasSubscribers = userSubscriptionRepository.existsByPlanId(id);
+        if (hasSubscribers) {
+            if (!plan.getTier().equals(request.getTier()) ||
+                plan.getPrice().compareTo(request.getPrice()) != 0 ||
+                !plan.getDurationDays().equals(request.getDurationDays())) {
+                throw new BadRequestException("Không thể thay đổi Cấp độ (tier), Giá (price) hoặc Thời hạn (duration) của gói đã có người đăng ký. Vui lòng tạo gói mới.");
+            }
+        }
+
         plan.setName(request.getName());
         plan.setPrice(request.getPrice());
         plan.setDurationDays(request.getDurationDays());

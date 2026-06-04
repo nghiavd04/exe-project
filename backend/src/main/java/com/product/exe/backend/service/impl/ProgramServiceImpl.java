@@ -411,9 +411,9 @@ public class ProgramServiceImpl implements ProgramService {
 
                 // Advance day
                 progress.setCurrentDay(currentDay + 1);
-                if (progress.getCurrentDay() > 120) {
+                if (progress.getCurrentDay() > getMaxProgramDays()) {
                     progress.setStatus(UserProgramStatus.COMPLETED);
-                    log.info("Customer ID {} successfully completed the 120-day program!", customerId);
+                    log.info("Customer ID {} successfully completed the program!", customerId);
                 }
 
                 progressRepository.save(progress);
@@ -549,7 +549,7 @@ public class ProgramServiceImpl implements ProgramService {
 
         // Advance day
         progress.setCurrentDay(currentDay + 1);
-        if (progress.getCurrentDay() > 120) {
+        if (progress.getCurrentDay() > getMaxProgramDays()) {
             progress.setStatus(UserProgramStatus.COMPLETED);
         }
 
@@ -557,5 +557,14 @@ public class ProgramServiceImpl implements ProgramService {
         progressRepository.save(progress);
 
         return mapToProgressResponse(progress);
+    }
+
+    private int getMaxProgramDays() {
+        int maxDay = dayMetadataRepository.findMaxDayNumber();
+        if (maxDay > 0) {
+            return maxDay;
+        }
+        int maxWeek = weekMetadataRepository.findMaxWeekNumber();
+        return maxWeek * 7;
     }
 }

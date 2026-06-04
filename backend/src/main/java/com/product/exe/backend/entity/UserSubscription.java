@@ -1,6 +1,7 @@
 package com.product.exe.backend.entity;
 
 import com.product.exe.backend.enums.SubscriptionStatus;
+import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,6 +39,10 @@ public class UserSubscription {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private SubscriptionStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier")
+    private SubscriptionTier tier;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

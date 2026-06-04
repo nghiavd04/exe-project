@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +29,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Safe dynamic drop of old metadata foreign keys from user logging tables
+        dropForeignKeyIfExists("user_daily_logs", "day_number");
+        dropForeignKeyIfExists("user_weekly_logs", "week_number");
+        dropForeignKeyIfExists("user_program_tasks", "week_number");
 
         if (!subscriptionPlanRepository.existsByTier(SubscriptionTier.FREE)) {
             log.info("Creating default FREE subscription plan...");
@@ -56,6 +64,31 @@ public class DataInitializer implements CommandLineRunner {
             }
         } else {
             log.info("Program metadata already exists. Skipping initialization.");
+        }
+    }
+
+    private void dropForeignKeyIfExists(String tableName, String columnName) {
+        String query = "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? " +
+                "AND REFERENCED_TABLE_NAME IS NOT NULL";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, tableName);
+            stmt.setString(2, columnName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String constraintName = rs.getString("CONSTRAINT_NAME");
+                    log.info("Found foreign key constraint {} on table {} column {}. Dropping it...", constraintName, tableName, columnName);
+                    try (Statement dropStmt = conn.createStatement()) {
+                        dropStmt.executeUpdate("ALTER TABLE " + tableName + " DROP FOREIGN KEY " + constraintName);
+                        log.info("Dropped foreign key constraint {} successfully.", constraintName);
+                    } catch (Exception dropEx) {
+                        log.error("Failed to drop foreign key constraint {}: {}", constraintName, dropEx.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not check/drop foreign key for table {} column {}: {}", tableName, columnName, e.getMessage());
         }
     }
 }

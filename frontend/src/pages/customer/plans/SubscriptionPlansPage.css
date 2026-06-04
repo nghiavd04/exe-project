@@ -642,6 +642,74 @@
   100% { transform: rotate(360deg); }
 }
 
+/* ── Highlighted active current plan card ── */
+.plan-pricing-card.current-active-plan {
+  border-color: #10b981;
+  background: var(--white);
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.12);
+  transform: scale(1.02);
+}
+
+.plan-pricing-card.current-active-plan:hover {
+  transform: scale(1.02) translateY(-2px);
+  border-color: #059669;
+  box-shadow: 0 20px 45px rgba(16, 185, 129, 0.18);
+}
+
+.current-plan-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: var(--white);
+  padding: 6px 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 999px;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+  white-space: nowrap;
+}
+
+/* ── Upgrade button styling ── */
+.btn-select-plan.upgrade-btn {
+  background: linear-gradient(135deg, var(--accent), #f97316);
+  color: var(--white);
+  border: none;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
+}
+
+.btn-select-plan.upgrade-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ea580c, var(--accent));
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+}
+
+/* ── Modal Upgrade Pricing styling ── */
+.upgrade-loading-spinner-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.summary-row.current-plan-info {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.summary-row.discount {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.discount-amount {
+  color: #ef4444;
+  font-weight: 700;
+}
+
 /* ── Responsiveness ── */
 @media (max-width: 768px) {
   .plans-hero-header {

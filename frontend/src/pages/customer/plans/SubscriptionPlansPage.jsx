@@ -15,6 +15,8 @@ export default function SubscriptionPlansPage() {
   const [paymentMethod, setPaymentMethod] = useState('PAYOS');
   const [submitting, setSubmitting] = useState(false);
   const [expandedPlans, setExpandedPlans] = useState({});
+  const [upgradePreview, setUpgradePreview] = useState(null);
+  const [loadingUpgrade, setLoadingUpgrade] = useState(false);
 
   const tierWeights = { FREE: 0, BASIC: 1, PREMIUM: 2, ELITE: 3 };
 
@@ -42,7 +44,7 @@ export default function SubscriptionPlansPage() {
     }
   };
 
-  const handleSelectPlan = (plan) => {
+  const handleSelectPlan = async (plan) => {
     if (!user) {
       toast.error('Vui lòng đăng nhập để đăng ký gói dịch vụ');
       navigate('/dang-nhap');
@@ -61,6 +63,25 @@ export default function SubscriptionPlansPage() {
     }
 
     setSelectedPlan(plan);
+
+    const isUpgrade = userTier && userTier !== 'FREE' && (tierWeights[plan.tier] || 0) > (tierWeights[userTier] || 0);
+    if (isUpgrade) {
+      try {
+        setLoadingUpgrade(true);
+        setUpgradePreview(null);
+        const res = await subscriptionApi.getUpgradePreview(plan.id);
+        if (res.data.success) {
+          setUpgradePreview(res.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching upgrade preview:', error);
+        toast.error('Không thể tính toán chi phí nâng cấp');
+      } finally {
+        setLoadingUpgrade(false);
+      }
+    } else {
+      setUpgradePreview(null);
+    }
   };
 
   const handleConfirmMockPayment = async () => {
@@ -85,6 +106,7 @@ export default function SubscriptionPlansPage() {
           updateUser(updatedUser);
           
           setSelectedPlan(null);
+          setUpgradePreview(null);
           navigate('/ho-so');
         }
       }
@@ -137,14 +159,16 @@ export default function SubscriptionPlansPage() {
 
           const isCurrentTier = userTier === plan.tier;
           const isHigherTier = (tierWeights[userTier] || 0) > (tierWeights[plan.tier] || 0);
+          const isUpgradeOption = !isCurrentTier && !isHigherTier && userTier && userTier !== 'FREE';
           const isPopular = plan.tier === 'PREMIUM';
 
           return (
             <div 
               key={plan.id} 
-              className={`plan-pricing-card ${isPopular ? 'popular' : ''} ${plan.tier.toLowerCase()}-card`}
+              className={`plan-pricing-card ${isPopular ? 'popular' : ''} ${plan.tier.toLowerCase()}-card ${isCurrentTier ? 'current-active-plan' : ''}`}
             >
-              {isPopular && <div className="popular-ribbon">PHỔ BIẾN NHẤT</div>}
+              {isCurrentTier && <div className="current-plan-badge">Gói đang sử dụng</div>}
+              {isPopular && !isCurrentTier && <div className="popular-ribbon">PHỔ BIẾN NHẤT</div>}
               
               <div className="plan-card-header">
                 <span className="plan-tier-label">
@@ -197,9 +221,17 @@ export default function SubscriptionPlansPage() {
                 <button
                   onClick={() => handleSelectPlan(plan)}
                   disabled={isCurrentTier || isHigherTier}
-                  className={`btn-select-plan ${isPopular ? 'popular-btn' : ''} ${isCurrentTier ? 'active-btn' : ''}`}
+                  className={`btn-select-plan ${isPopular ? 'popular-btn' : ''} ${isCurrentTier ? 'active-btn' : ''} ${isUpgradeOption ? 'upgrade-btn' : ''}`}
                 >
-                  {isCurrentTier ? 'Gói hiện tại' : isHigherTier ? 'Đã sở hữu gói cao hơn' : plan.price === 0 ? 'Bắt đầu miễn phí' : 'Mua ngay'}
+                  {isCurrentTier 
+                    ? 'Đang sử dụng' 
+                    : isHigherTier 
+                      ? 'Đã sở hữu gói cao hơn' 
+                      : isUpgradeOption 
+                        ? 'Nâng cấp ngay' 
+                        : plan.price === 0 
+                          ? 'Bắt đầu miễn phí' 
+                          : 'Mua ngay'}
                 </button>
               </div>
             </div>
@@ -209,30 +241,66 @@ export default function SubscriptionPlansPage() {
 
       {/* Mock Checkout Modal */}
       {selectedPlan && (
-        <div className="plans-modal-overlay" onClick={() => setSelectedPlan(null)}>
+        <div className="plans-modal-overlay" onClick={() => { setSelectedPlan(null); setUpgradePreview(null); }}>
           <div className="plans-modal-card animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="plans-modal-header">
-              <h3>Đăng ký nâng cấp tài khoản</h3>
-              <button className="plans-modal-close" onClick={() => setSelectedPlan(null)}>
+              <h3>{upgradePreview ? 'Nâng cấp tài khoản thành viên' : 'Đăng ký gói thành viên'}</h3>
+              <button className="plans-modal-close" onClick={() => { setSelectedPlan(null); setUpgradePreview(null); }}>
                 <X size={24} />
               </button>
             </div>
 
             <div className="plans-modal-body">
-              <div className="checkout-summary-box">
-                <div className="summary-row">
-                  <span>Gói đăng ký:</span>
-                  <strong>{selectedPlan.name}</strong>
+              {loadingUpgrade ? (
+                <div className="upgrade-loading-spinner-box">
+                  <div className="plans-loader"></div>
+                  <p style={{ marginTop: '16px', color: '#6b7280', fontSize: '14px' }}>
+                    Đang tính toán chi phí nâng cấp tối ưu...
+                  </p>
                 </div>
-                <div className="summary-row">
-                  <span>Thời hạn:</span>
-                  <span>{selectedPlan.durationDays} ngày</span>
+              ) : upgradePreview && upgradePreview.upgrade ? (
+                <div className="checkout-summary-box">
+                  <div className="summary-row">
+                    <span>Gói nâng cấp mục tiêu:</span>
+                    <strong>{selectedPlan.name}</strong>
+                  </div>
+                  <div className="summary-row">
+                    <span>Thời hạn mới:</span>
+                    <span>{selectedPlan.durationDays} ngày</span>
+                  </div>
+                  <div className="summary-row current-plan-info">
+                    <span>Gói hiện tại:</span>
+                    <span>{upgradePreview.currentPlanName} (Còn {upgradePreview.remainingDays} ngày)</span>
+                  </div>
+                  <div className="summary-row discount">
+                    <span>Khấu trừ gói cũ:</span>
+                    <span className="discount-amount">
+                      -{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(upgradePreview.remainingValue)}
+                    </span>
+                  </div>
+                  <div className="summary-row total">
+                    <span>Số tiền cần trả thêm:</span>
+                    <span className="price-total">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(upgradePreview.upgradeAmount)}
+                    </span>
+                  </div>
                 </div>
-                <div className="summary-row total">
-                  <span>Tổng tiền thanh toán:</span>
-                  <span className="price-total">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPlan.price)}</span>
+              ) : (
+                <div className="checkout-summary-box">
+                  <div className="summary-row">
+                    <span>Gói đăng ký:</span>
+                    <strong>{selectedPlan.name}</strong>
+                  </div>
+                  <div className="summary-row">
+                    <span>Thời hạn:</span>
+                    <span>{selectedPlan.durationDays} ngày</span>
+                  </div>
+                  <div className="summary-row total">
+                    <span>Tổng tiền thanh toán:</span>
+                    <span className="price-total">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPlan.price)}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="payment-methods-select">
                 <label className="checkout-label">Phương thức thanh toán</label>
@@ -259,7 +327,7 @@ export default function SubscriptionPlansPage() {
             <div className="plans-modal-footer">
               <button 
                 className="btn-checkout-cancel" 
-                onClick={() => setSelectedPlan(null)}
+                onClick={() => { setSelectedPlan(null); setUpgradePreview(null); }}
                 disabled={submitting}
               >
                 Hủy bỏ
@@ -267,7 +335,7 @@ export default function SubscriptionPlansPage() {
               <button 
                 className="btn-checkout-submit" 
                 onClick={handleConfirmMockPayment}
-                disabled={submitting}
+                disabled={submitting || loadingUpgrade}
               >
                 {submitting ? 'Đang xử lý...' : 'Xác nhận & kích hoạt'}
               </button>

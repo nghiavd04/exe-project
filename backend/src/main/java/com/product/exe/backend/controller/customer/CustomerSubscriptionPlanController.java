@@ -25,8 +25,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -74,8 +78,18 @@ public class CustomerSubscriptionPlanController {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(plan.getDurationDays()))
                 .status(SubscriptionStatus.ACTIVE)
+                .tier(plan.getTier())
                 .build();
         UserSubscription savedSubscription = userSubscriptionRepository.save(subscription);
+
+        // Cancel previous active subscriptions for upgrade logic
+        List<UserSubscription> activeSubs = userSubscriptionRepository.findAllByCustomerIdAndStatus(customer.getId(), SubscriptionStatus.ACTIVE);
+        for (UserSubscription oldSub : activeSubs) {
+            if (!oldSub.getId().equals(savedSubscription.getId())) {
+                oldSub.setStatus(SubscriptionStatus.CANCELLED);
+                userSubscriptionRepository.save(oldSub);
+            }
+        }
 
         // Parse payment method from request
         PaymentMethod method;
@@ -103,8 +117,96 @@ public class CustomerSubscriptionPlanController {
         return ResponseEntity.ok(ApiResponse.success("Đăng ký gói dịch vụ thành công! Cấp độ tài khoản đã được nâng cấp."));
     }
 
+    @GetMapping("/upgrade-preview")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<UpgradePreviewResponse>> getUpgradePreview(
+            @RequestParam("targetPlanId") Long targetPlanId,
+            Authentication authentication) {
+        
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
+        
+        Customer customer = customerRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        SubscriptionPlan targetPlan = subscriptionPlanRepository.findById(targetPlanId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ mục tiêu"));
+
+        // Tìm gói đăng ký đang hoạt động
+        Optional<UserSubscription> activeSubOpt = userSubscriptionRepository.findActiveSubscriptionByUserId(user.getId());
+        
+        UpgradePreviewResponse response = new UpgradePreviewResponse();
+        response.setTargetPlanId(targetPlanId);
+        response.setTargetPlanName(targetPlan.getName());
+        response.setTargetPlanPrice(targetPlan.getPrice());
+        
+        if (activeSubOpt.isPresent()) {
+            UserSubscription activeSub = activeSubOpt.get();
+            SubscriptionPlan currentPlan = activeSub.getPlan();
+            
+            if (targetPlan.getTier().getWeight() <= currentPlan.getTier().getWeight()) {
+                throw new BadRequestException("Gói mục tiêu phải có thứ hạng cao hơn gói dịch vụ hiện tại");
+            }
+            
+            response.setCurrentPlanName(currentPlan.getName());
+            response.setCurrentPlanPrice(currentPlan.getPrice());
+            
+            long remainingDays = 0;
+            if (activeSub.getEndDate().isAfter(LocalDateTime.now())) {
+                remainingDays = Duration.between(LocalDateTime.now(), activeSub.getEndDate()).toDays();
+                int totalDays = currentPlan.getDurationDays() > 0 ? currentPlan.getDurationDays() : 30;
+                if (remainingDays > totalDays) {
+                    remainingDays = totalDays;
+                }
+            }
+            response.setRemainingDays(remainingDays);
+            
+            // Tính toán giá trị còn lại
+            BigDecimal remainingValue = BigDecimal.ZERO;
+            if (remainingDays > 0 && currentPlan.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal totalDaysBd = BigDecimal.valueOf(currentPlan.getDurationDays() > 0 ? currentPlan.getDurationDays() : 30);
+                BigDecimal remainingDaysBd = BigDecimal.valueOf(remainingDays);
+                remainingValue = currentPlan.getPrice()
+                        .multiply(remainingDaysBd)
+                        .divide(totalDaysBd, 2, RoundingMode.HALF_UP);
+            }
+            response.setRemainingValue(remainingValue);
+            
+            // Số tiền nâng cấp = giá gói mới - giá trị còn lại
+            BigDecimal upgradeAmount = targetPlan.getPrice().subtract(remainingValue);
+            if (upgradeAmount.compareTo(BigDecimal.ZERO) < 0) {
+                upgradeAmount = BigDecimal.ZERO;
+            }
+            response.setUpgradeAmount(upgradeAmount);
+            response.setUpgrade(true);
+        } else {
+            response.setCurrentPlanName("Không có");
+            response.setCurrentPlanPrice(BigDecimal.ZERO);
+            response.setRemainingDays(0L);
+            response.setRemainingValue(BigDecimal.ZERO);
+            response.setUpgradeAmount(targetPlan.getPrice());
+            response.setUpgrade(false);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Data
     public static class SubscribeRequest {
         private String paymentMethod;
+    }
+
+    @Data
+    public static class UpgradePreviewResponse {
+        private Long targetPlanId;
+        private String targetPlanName;
+        private BigDecimal targetPlanPrice;
+        private String currentPlanName;
+        private BigDecimal currentPlanPrice;
+        private long remainingDays;
+        private BigDecimal remainingValue;
+        private BigDecimal upgradeAmount;
+        private boolean isUpgrade;
     }
 }

@@ -49,4 +49,32 @@ export const adminApi = {
   markContactMessageRead: (id) => apiClient.patch(`/v1/admin/contact-messages/${id}/read`),
   getUnreadContactMessagesCount: () => apiClient.get('/v1/admin/contact-messages/unread-count'),
   deleteContactMessage: (id) => apiClient.delete(`/v1/admin/contact-messages/${id}`),
+
+  // Program Medias
+  getMedias: () => apiClient.get('/v1/admin/medias'),
+  getMediaDetail: (id) => apiClient.get(`/v1/admin/medias/${id}`),
+  createMedia: (data) => apiClient.post('/v1/admin/medias', data),
+  updateMedia: (id, data) => apiClient.put(`/v1/admin/medias/${id}`, data),
+  deleteMedia: (id) => apiClient.delete(`/v1/admin/medias/${id}`),
+  uploadMediaFile: (formData, onUploadProgress) => apiClient.post('/v1/admin/medias/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress
+  }),
+
+  // Admin Subscriptions History
+  getPayments: (params) => apiClient.get('/v1/admin/subscriptions/payments', { params }),
+
+  // Admin Program Metadata
+  getProgramMetadata: () => apiClient.get('/v1/admin/program/metadata'),
+  createProgramPhase: (data) => apiClient.post('/v1/admin/program/phases', data),
+  deleteProgramPhase: (phaseNum) => apiClient.delete(`/v1/admin/program/phases/${phaseNum}`),
+  updateProgramPhase: (phaseNum, data) => apiClient.put(`/v1/admin/program/phases/${phaseNum}`, data),
+  updateProgramWeek: (weekNum, data) => apiClient.put(`/v1/admin/program/weeks/${weekNum}`, data),
+  createProgramTask: (data) => apiClient.post('/v1/admin/program/tasks', data),
+  updateProgramTask: (id, data) => apiClient.put(`/v1/admin/program/tasks/${id}`, data),
+  deleteProgramTask: (id) => apiClient.delete(`/v1/admin/program/tasks/${id}`),
+  createProgramMetric: (data) => apiClient.post('/v1/admin/program/metrics', data),
+  updateProgramMetric: (id, data) => apiClient.put(`/v1/admin/program/metrics/${id}`, data),
+  deleteProgramMetric: (id) => apiClient.delete(`/v1/admin/program/metrics/${id}`),
 };
+

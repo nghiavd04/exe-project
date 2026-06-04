@@ -25,8 +25,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return SubscriptionTier.FREE;
         }
         return userSubscriptionRepository.findActiveSubscriptionByUserId(userId)
-                .map(UserSubscription::getPlan)
-                .map(plan -> plan.getTier())
+                .map(sub -> sub.getTier() != null ? sub.getTier() : (sub.getPlan() != null ? sub.getPlan().getTier() : SubscriptionTier.FREE))
                 .orElse(SubscriptionTier.FREE);
     }
 }

@@ -2,6 +2,7 @@ package com.product.exe.backend.repository;
 
 import com.product.exe.backend.entity.ProgramWeekMetadata;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,4 +10,7 @@ import java.util.List;
 @Repository
 public interface ProgramWeekMetadataRepository extends JpaRepository<ProgramWeekMetadata, Integer> {
     List<ProgramWeekMetadata> findByPhasePhaseNumberOrderByWeekNumberAsc(Integer phaseNumber);
+
+    @Query("SELECT COALESCE(MAX(w.weekNumber), 0) FROM ProgramWeekMetadata w")
+    int findMaxWeekNumber();
 }

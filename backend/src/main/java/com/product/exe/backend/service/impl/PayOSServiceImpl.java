@@ -30,6 +30,7 @@ import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.v2.paymentRequests.PaymentLink;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -79,12 +80,52 @@ public class PayOSServiceImpl implements PayOSService {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(plan.getDurationDays()))
                 .status(SubscriptionStatus.PENDING)
+                .tier(plan.getTier())
                 .build();
         UserSubscription savedSubscription = userSubscriptionRepository.save(subscription);
 
         // 2. Tạo đơn hàng gửi PayOS
         Long orderCode = System.currentTimeMillis();
         long amount = plan.getPrice().longValue();
+
+        // Kiểm tra nâng cấp gói dịch vụ chênh lệch
+        Optional<UserSubscription> activeSubOpt = userSubscriptionRepository.findActiveSubscriptionByUserId(user.getId());
+        if (activeSubOpt.isPresent()) {
+            UserSubscription activeSub = activeSubOpt.get();
+            SubscriptionPlan currentPlan = activeSub.getPlan();
+            
+            if (plan.getTier().getWeight() > currentPlan.getTier().getWeight()) {
+                long remainingDays = 0;
+                if (activeSub.getEndDate().isAfter(LocalDateTime.now())) {
+                    remainingDays = Duration.between(LocalDateTime.now(), activeSub.getEndDate()).toDays();
+                    int totalDays = currentPlan.getDurationDays() > 0 ? currentPlan.getDurationDays() : 30;
+                    if (remainingDays > totalDays) {
+                        remainingDays = totalDays;
+                    }
+                }
+                
+                if (remainingDays > 0 && currentPlan.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal totalDaysBd = BigDecimal.valueOf(currentPlan.getDurationDays() > 0 ? currentPlan.getDurationDays() : 30);
+                    BigDecimal remainingDaysBd = BigDecimal.valueOf(remainingDays);
+                    BigDecimal remainingValue = currentPlan.getPrice()
+                            .multiply(remainingDaysBd)
+                            .divide(totalDaysBd, 2, java.math.RoundingMode.HALF_UP);
+                    
+                    BigDecimal upgradeAmount = plan.getPrice().subtract(remainingValue);
+                    if (upgradeAmount.compareTo(BigDecimal.ZERO) < 0) {
+                        upgradeAmount = BigDecimal.ZERO;
+                    }
+                    amount = upgradeAmount.longValue();
+                }
+            } else {
+                throw new BadRequestException("Bạn đã đăng ký sử dụng gói cao hơn hoặc tương đương gói này");
+            }
+        }
+
+        // Đảm bảo số tiền tối thiểu của PayOS là 2000đ (nếu lớn hơn 0)
+        if (amount < 2000 && amount > 0) {
+            amount = 2000;
+        }
 
         // Giới hạn độ dài mô tả của PayOS (tối đa 25 ký tự)
         String description = "Mua gói " + plan.getTier();
@@ -119,7 +160,7 @@ public class PayOSServiceImpl implements PayOSService {
                     .customer(customer)
                     .subscription(savedSubscription)
                     .plan(plan)
-                    .amount(plan.getPrice())
+                    .amount(BigDecimal.valueOf(amount))
                     .currency("VND")
                     .paymentMethod(PaymentMethod.PAYOS)
                     .status(PaymentStatus.PENDING)
@@ -134,7 +175,7 @@ public class PayOSServiceImpl implements PayOSService {
             return PayOSResponse.builder()
                     .checkoutUrl(payosResponse.getCheckoutUrl())
                     .orderCode(orderCode)
-                    .amount(plan.getPrice())
+                    .amount(BigDecimal.valueOf(amount))
                     .status(PaymentStatus.PENDING.name())
                     .planTier(plan.getTier().name())
                     .build();
@@ -223,7 +264,18 @@ public class PayOSServiceImpl implements PayOSService {
         subscription.setStartDate(LocalDateTime.now());
         subscription.setEndDate(LocalDateTime.now().plusDays(payment.getPlan().getDurationDays()));
         subscription.setStatus(SubscriptionStatus.ACTIVE);
-        userSubscriptionRepository.save(subscription);
+        UserSubscription savedSubscription = userSubscriptionRepository.save(subscription);
+
+        // 3. Hủy bỏ (CANCELLED) bất kỳ gói nào đang ACTIVE trước đó của khách hàng này
+        List<UserSubscription> activeSubs = userSubscriptionRepository.findAllByCustomerIdAndStatus(
+                payment.getCustomer().getId(), SubscriptionStatus.ACTIVE);
+        for (UserSubscription oldSub : activeSubs) {
+            if (!oldSub.getId().equals(savedSubscription.getId())) {
+                oldSub.setStatus(SubscriptionStatus.CANCELLED);
+                userSubscriptionRepository.save(oldSub);
+                log.info("Cancelled old active subscription ID {} for upgrade", oldSub.getId());
+            }
+        }
 
         log.info("Payment SUCCESS: Activated subscription tier {} for customer {}", 
                 payment.getPlan().getTier(), payment.getCustomer().getId());

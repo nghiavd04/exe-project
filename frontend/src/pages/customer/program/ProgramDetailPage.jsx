@@ -732,6 +732,41 @@ export default function ProgramDetailPage() {
               Ngày {currentDayNum % 7}/7
             </div>
           </div>
+
+          <div 
+            className="pd-roadmap-progress-card media-library-card"
+            style={{ 
+              marginTop: '1.5rem', 
+              cursor: 'pointer', 
+              background: 'linear-gradient(135deg, var(--teal-pale), #e0f2fe)',
+              borderColor: 'rgba(13, 122, 110, 0.15)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              navigate('/phac-do/tai-nguyen');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <div className="pd-roadmap-progress-header">
+              <span className="pd-roadmap-progress-icon" style={{ background: 'var(--teal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🎧</span>
+              <div>
+                <span className="pd-roadmap-progress-title" style={{ color: 'var(--teal-dark)', fontSize: '0.92rem', fontWeight: 700 }}>Thư viện Thiền & Podcast</span>
+                <span className="pd-roadmap-progress-sub">Kho âm thanh chánh niệm & dopamine</span>
+              </div>
+            </div>
+            <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 650 }}>
+              <span>Khám phá ngay</span>
+              <span style={{ fontSize: '1rem' }}>→</span>
+            </div>
+          </div>
         </div>
       </div>
 

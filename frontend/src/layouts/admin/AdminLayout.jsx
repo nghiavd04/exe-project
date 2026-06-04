@@ -9,7 +9,9 @@ import {
   LogOut,
   ChevronRight,
   CreditCard,
-  MessageSquare
+  MessageSquare,
+  Music,
+  Milestone
 } from 'lucide-react';
 import { adminApi } from '../../apis/adminApi';
 import './AdminLayout.css';
@@ -47,7 +49,9 @@ export default function AdminLayout() {
     { name: 'Người dùng', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Quản lý Quizzes', path: '/admin/quizzes', icon: <ClipboardList size={20} /> },
     { name: 'Quản lý Bài viết', path: '/admin/articles', icon: <BookOpen size={20} /> },
+    { name: 'Quản lý Media', path: '/admin/medias', icon: <Music size={20} /> },
     { name: 'Gói dịch vụ', path: '/admin/subscriptions', icon: <CreditCard size={20} /> },
+    { name: 'Quản lý Phác đồ', path: '/admin/program', icon: <Milestone size={20} /> },
     { name: 'Lời nhắn liên hệ', path: '/admin/contact-messages', icon: <MessageSquare size={20} /> },
     { name: 'Cài đặt', path: '/admin/settings', icon: <Settings size={20} /> },
   ];

@@ -26,6 +26,7 @@ import PaymentCancelPage from '../pages/customer/plans/PaymentCancelPage';
 import ProgramLayout from '../pages/customer/program/ProgramLayout';
 import ProgramRoadmapPage from '../pages/customer/program/ProgramRoadmapPage';
 import ProgramDetailPage from '../pages/customer/program/ProgramDetailPage';
+import ProgramMediaPage from '../pages/customer/program/ProgramMediaPage';
 
 import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
 import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
@@ -34,6 +35,8 @@ import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
 import AdminManagerAccountPage from '../pages/admin/accounts/AdminManagerAccountPage';
 import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptionPage';
 import AdminContactMessagesPage from '../pages/admin/contact/AdminContactMessagesPage';
+import AdminMediaListPage from '../pages/admin/medias/AdminMediaListPage';
+import AdminProgramPage from '../pages/admin/program/AdminProgramPage';
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +50,31 @@ export const router = createBrowserRouter([
   {
     path: '/oauth2/redirect',
     element: <OAuth2RedirectPage />,
+  },
+  {
+    path: '/admin',
+    element: <AdminRoute />,
+    children: [
+      {
+        path: '',
+        element: <AdminLayout />,
+        children: [
+          { path: '', element: <DashboardPage /> },
+          { path: 'quizzes', element: <AdminQuizListPage /> },
+          { path: 'quizzes/create', element: <CreateQuizPage /> },
+          { path: 'quizzes/edit/:id', element: <CreateQuizPage /> },
+          { path: 'articles', element: <AdminArticleListPage /> },
+          { path: 'articles/create', element: <CreateArticlePage /> },
+          { path: 'articles/edit/:id', element: <CreateArticlePage /> },
+          { path: 'users', element: <AdminManagerAccountPage /> },
+          { path: 'subscriptions', element: <AdminSubscriptionPage /> },
+          { path: 'contact-messages', element: <AdminContactMessagesPage /> },
+          { path: 'medias', element: <AdminMediaListPage /> },
+          { path: 'program', element: <AdminProgramPage /> },
+          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
+        ]
+      }
+    ]
   },
   {
     path: '/',
@@ -86,7 +114,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <ProgramRoadmapPage /> },
-          { path: 'chi-tiet', element: <ProgramDetailPage /> }
+          { path: 'chi-tiet', element: <ProgramDetailPage /> },
+          { path: 'tai-nguyen', element: <ProgramMediaPage /> }
         ]
       },
       { path: 'dieu-khoan-dich-vu', element: <TermsAndPrivacyPage /> },
@@ -97,29 +126,6 @@ export const router = createBrowserRouter([
           emoji="🔍" 
           description="Trang bạn đang tìm kiếm không tồn tại." 
         /> 
-      }
-    ]
-  },
-  {
-    path: '/admin',
-    element: <AdminRoute />,
-    children: [
-      {
-        path: '',
-        element: <AdminLayout />,
-        children: [
-          { path: '', element: <DashboardPage /> },
-          { path: 'quizzes', element: <AdminQuizListPage /> },
-          { path: 'quizzes/create', element: <CreateQuizPage /> },
-          { path: 'quizzes/edit/:id', element: <CreateQuizPage /> },
-          { path: 'articles', element: <AdminArticleListPage /> },
-          { path: 'articles/create', element: <CreateArticlePage /> },
-          { path: 'articles/edit/:id', element: <CreateArticlePage /> },
-          { path: 'users', element: <AdminManagerAccountPage /> },
-          { path: 'subscriptions', element: <AdminSubscriptionPage /> },
-          { path: 'contact-messages', element: <AdminContactMessagesPage /> },
-          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
-        ]
       }
     ]
   }
