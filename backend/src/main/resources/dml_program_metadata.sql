@@ -1,4 +1,5 @@
-USE `exe_db`;
+-- USE `exe_db`;
+USE `dopaless_db`;
 
 DELETE FROM `program_tasks_metadata`;
 DELETE FROM `program_metrics_metadata`;

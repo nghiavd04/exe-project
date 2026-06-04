@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
     status ENUM('ACTIVE', 'EXPIRED', 'CANCELLED') NOT NULL,
+    tier VARCHAR(50) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE
@@ -310,8 +311,7 @@ CREATE TABLE IF NOT EXISTS user_program_tasks (
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
     completed_at TIMESTAMP NULL,
     UNIQUE KEY unique_user_day_task (customer_id, day_number, week_number, task_index),
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-    FOREIGN KEY (week_number) REFERENCES program_weeks(week_number) ON DELETE CASCADE
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 -- 25. User Daily Logs Table (For Month 1: Days 1-30)
@@ -330,8 +330,7 @@ CREATE TABLE IF NOT EXISTS user_daily_logs (
     journal_text TEXT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_user_daily_log (customer_id, day_number),
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-    FOREIGN KEY (day_number) REFERENCES program_days(day_number) ON DELETE CASCADE
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 -- 26. User Weekly Logs Table (For Months 2-4: Weeks 5-16)
@@ -348,7 +347,6 @@ CREATE TABLE IF NOT EXISTS user_weekly_logs (
     relationship_satisfaction INT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_user_weekly_log (customer_id, week_number),
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-    FOREIGN KEY (week_number) REFERENCES program_weeks(week_number) ON DELETE CASCADE
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
