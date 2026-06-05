@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  User, Shield, Mail, CreditCard, UserX, UserCheck, MoreVertical, ShieldCheck
+  User, Shield, Mail, CreditCard, UserX, UserCheck, MoreVertical, ShieldCheck, TrendingUp
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import AdminCreateModal from './AdminCreateModal';
+import AdminUserProgressModal from './AdminUserProgressModal';
 import './AdminManagerAccountPage.css';
 
 export default function AdminManagerAccountPage() {
@@ -21,6 +22,8 @@ export default function AdminManagerAccountPage() {
   const [isActive, setIsActive] = useState('');
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedProgressUser, setSelectedProgressUser] = useState(null);
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
 
   const tabs = [
     { label: 'Khách hàng (Customer)', value: 'CUSTOMER' },
@@ -169,6 +172,7 @@ export default function AdminManagerAccountPage() {
               <th style={{ width: '60px' }}>STT</th>
               <th>Người dùng</th>
               {role === 'CUSTOMER' && <th>Gói dịch vụ</th>}
+              {role === 'CUSTOMER' && <th>Tiến độ lộ trình</th>}
               <th>Trạng thái</th>
               <th style={{ textAlign: 'right' }}>Thao tác</th>
             </tr>
@@ -188,13 +192,14 @@ export default function AdminManagerAccountPage() {
                     </div>
                   </td>
                   {role === 'CUSTOMER' && <td><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>}
+                  {role === 'CUSTOMER' && <td><div className="skeleton" style={{ height: '20px', width: '100px' }}></div></td>}
                   <td><div className="skeleton" style={{ height: '24px', width: '100px', borderRadius: '20px' }}></div></td>
                   <td style={{ textAlign: 'right' }}><div className="skeleton" style={{ height: '32px', width: '32px', marginLeft: 'auto' }}></div></td>
                 </tr>
               ))
             ) : (!users || users.length === 0) ? (
               <tr>
-                <td colSpan={role === 'CUSTOMER' ? 5 : 4} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
+                <td colSpan={role === 'CUSTOMER' ? 6 : 4} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
                   <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👥</div>
                   Không tìm thấy {role.toLowerCase()} nào.
                 </td>
@@ -221,10 +226,28 @@ export default function AdminManagerAccountPage() {
                 </td>
                 {role === 'CUSTOMER' && (
                   <td>
-                    <div className={`plan-badge ${user.subscriptionPlan === 'FREE' ? 'free' : 'paid'}`}>
+                    <div className={`plan-badge ${user.subscriptionPlan === 'FREE' ? 'free' : 'paid' || user.subscriptionPlan === 'Miễn phí'}`}>
                       <CreditCard size={14} />
                       {user.subscriptionPlan}
                     </div>
+                  </td>
+                )}
+                {role === 'CUSTOMER' && (
+                  <td>
+                    {user.currentDay ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--teal)' }}>
+                          Ngày {user.currentDay}/120
+                        </span>
+                        {user.streakCount > 0 && (
+                          <span style={{ fontSize: '0.72rem', color: '#f97316', fontWeight: 600 }}>
+                            🔥 {user.streakCount} ngày liên tục
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chưa bắt đầu</span>
+                    )}
                   </td>
                 )}
                 <td>
@@ -248,6 +271,19 @@ export default function AdminManagerAccountPage() {
                         marginTop: users.length - index <= 2 && users.length > 3 ? '0' : '0.5rem',
                         marginBottom: users.length - index <= 2 && users.length > 3 ? '0.5rem' : '0'
                       }}>
+                        {role === 'CUSTOMER' && (
+                          <button
+                            onClick={() => {
+                              setSelectedProgressUser(user);
+                              setIsProgressModalOpen(true);
+                              setActiveMenuId(null);
+                            }}
+                            className="action-dropdown-btn"
+                            style={{ color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          >
+                            <TrendingUp size={16} /> Xem tiến trình chỉ số
+                          </button>
+                        )}
                         <button
                           onClick={() => handleToggleStatus(user)}
                           className={`action-dropdown-btn ${user.isActive ? 'danger' : 'success'}`}
@@ -310,6 +346,11 @@ export default function AdminManagerAccountPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={fetchUsers}
+      />
+      <AdminUserProgressModal
+        isOpen={isProgressModalOpen}
+        onClose={() => { setIsProgressModalOpen(false); setSelectedProgressUser(null); }}
+        user={selectedProgressUser}
       />
     </div>
   );

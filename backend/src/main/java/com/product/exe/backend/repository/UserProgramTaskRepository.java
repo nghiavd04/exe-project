@@ -20,4 +20,6 @@ public interface UserProgramTaskRepository extends JpaRepository<UserProgramTask
     long countByCustomerIdAndWeekNumberAndDayNumberIsNullAndIsCompletedTrue(Long customerId, Integer weekNumber);
     // For overall analytics
     long countByCustomerIdAndIsCompletedTrue(Long customerId);
+
+    void deleteByCustomerId(Long customerId);
 }

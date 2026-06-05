@@ -23,6 +23,10 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "plan_tier")
+    private com.product.exe.backend.enums.SubscriptionTier planTier;
+
     @Column(name = "title", nullable = false, length = 255)
     private String title;
 

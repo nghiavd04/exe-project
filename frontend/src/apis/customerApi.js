@@ -87,6 +87,8 @@ export const programApi = {
   getMetadata: () => apiClient.get('/program/metadata'),
   advanceDay: () => apiClient.post('/program/advance-day'),
   getProgramMedias: () => apiClient.get('/program/medias'),
+  resume: () => apiClient.post('/program/resume'),
+  restart: () => apiClient.post('/program/restart'),
 };
 
 export const notificationApi = {

@@ -8,6 +8,7 @@ import java.util.List;
 public interface NotificationService {
     void createNotification(User user, String title, String content);
     void createBroadcastNotification(String title, String content);
+    void createTargetedNotification(String title, String content, String targetEmail, com.product.exe.backend.enums.SubscriptionTier targetPlanTier);
     List<NotificationResponse> getNotificationsForUser(Long userId);
     void markAsRead(Long notificationId, Long userId);
     void markAllAsRead(Long userId);

@@ -2,6 +2,7 @@ import apiClient from './authApi';
 
 export const adminApi = {
   getDashboardStats: (period) => apiClient.get(`/v1/admin/dashboard/stats?period=${period || '7d'}`),
+  sendNotification: (data) => apiClient.post('/v1/admin/notifications', data),
   
   // Future methods
   getQuizzes: (params) => apiClient.get('/v1/admin/quizzes', { params }),
@@ -35,6 +36,7 @@ export const adminApi = {
   getUsers: (params) => apiClient.get('/v1/admin/users', { params }),
   toggleUserStatus: (id) => apiClient.patch(`/v1/admin/users/${id}/toggle-status`),
   createAdmin: (data) => apiClient.post('/v1/admin/users/admins', data),
+  getUserProgressDetails: (id) => apiClient.get(`/v1/admin/users/${id}/progress-details`),
 
   // Subscription Plans
   getSubscriptionPlans: (params) => apiClient.get('/v1/admin/subscription-plans', { params }),

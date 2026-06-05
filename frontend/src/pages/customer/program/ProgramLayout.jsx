@@ -35,6 +35,7 @@ export default function ProgramLayout() {
   const [analytics, setAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   const [tasks, setTasks] = useState([]);
   const [metrics, setMetrics] = useState({ screenTime: 80, mood: 7, sleep: 7, urge: 3, focus: 7, unconsciousOpenCount: 0, sleepHours: 7 });
@@ -162,6 +163,35 @@ export default function ProgramLayout() {
     }
   };
 
+  const handleResumeProgram = async () => {
+    try {
+      const res = await programApi.resume();
+      if (res.data && res.data.success) {
+        showToastMessage('Chào mừng bạn quay trở lại phác đồ!', 'success');
+        await loadProgramData();
+      }
+    } catch (err) {
+      console.error("Error resuming program:", err);
+      const errMsg = err.response?.data?.message || 'Không thể tiếp tục lộ trình.';
+      showToastMessage(errMsg, 'error');
+    }
+  };
+
+  const handleRestartProgram = async () => {
+    try {
+      const res = await programApi.restart();
+      if (res.data && res.data.success) {
+        showToastMessage('Đã bắt đầu lại lộ trình từ ngày 1.', 'success');
+        setShowRestartConfirm(false);
+        await loadProgramData();
+      }
+    } catch (err) {
+      console.error("Error restarting program:", err);
+      const errMsg = err.response?.data?.message || 'Không thể bắt đầu lại lộ trình.';
+      showToastMessage(errMsg, 'error');
+    }
+  };
+
   const handleToggleTask = async (taskIndex, isCompleted) => {
     if (!isEnrolled || !userProgress || !dayDetail) return;
     const dayNum = userProgress.currentDay;
@@ -262,7 +292,137 @@ export default function ProgramLayout() {
       <div className="pd-loading-container">
         <div className="pd-loading-spinner" />
         <div style={{ color: 'var(--teal-dark)', fontSize: '1.05rem', fontWeight: 600, fontFamily: 'Outfit', letterSpacing: '0.5px' }}>
-          Đang tải thông tin lộ trình...
+          Đang tải thông tin lộ trình
+        </div>
+      </div>
+    );
+  }
+
+  if (userProgress && userProgress.status === 'PAUSED') {
+    return (
+      <div className="pd-page pd-locked-page">
+        <div className="pd-locked-overlay">
+          {!showRestartConfirm ? (
+            <div className="pd-locked-card" style={{ maxWidth: '540px' }}>
+              <span className="pd-lock-icon" style={{ animation: 'none', transform: 'none' }}>⏸️</span>
+              <h2 className="pd-lock-title">Lộ trình đang tạm dừng</h2>
+              <p className="pd-lock-desc" style={{ marginBottom: '1.8rem' }}>
+                Chào mừng bạn quay trở lại! Gói dịch vụ của bạn đã được kích hoạt lại. Bạn có một lộ trình phác đồ đang tạm dừng ở <strong>Ngày {userProgress.currentDay}</strong>. Hãy chọn cách tiếp tục:
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', marginBottom: '1.2rem' }}>
+                <button 
+                  onClick={handleResumeProgram}
+                  style={{
+                    background: 'linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%)',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '1.1rem 1rem',
+                    borderRadius: 'var(--radius)',
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    transition: 'all 0.2s',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(13, 122, 110, 0.25)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem' }}>🔥 Tiếp tục lộ trình</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '400', opacity: 0.9 }}>
+                    Tiếp tục từ Ngày {userProgress.currentDay} và bảo toàn chuỗi ngày streak
+                  </span>
+                </button>
+
+                <button 
+                  onClick={() => setShowRestartConfirm(true)}
+                  style={{
+                    background: '#fff',
+                    color: 'var(--muted)',
+                    border: '1.5px solid rgba(13, 122, 110, 0.2)',
+                    padding: '1.1rem 1rem',
+                    borderRadius: 'var(--radius)',
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'var(--teal-pale)';
+                    e.currentTarget.style.borderColor = 'var(--teal)';
+                    e.currentTarget.style.color = 'var(--teal)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.borderColor = 'rgba(13, 122, 110, 0.2)';
+                    e.currentTarget.style.color = 'var(--muted)';
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem' }}>🔄 Bắt đầu lại từ đầu</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '400', opacity: 0.9 }}>
+                    Reset tiến trình về Ngày 1 và xóa tất cả nhật ký/nhiệm vụ cũ
+                  </span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="pd-locked-card" style={{ maxWidth: '480px' }}>
+              <span className="pd-lock-icon">⚠️</span>
+              <h2 className="pd-lock-title" style={{ color: '#e03131' }}>Xác nhận bắt đầu lại?</h2>
+              <p className="pd-lock-desc">
+                Hành động này sẽ <strong>xóa toàn bộ lịch sử</strong> nhiệm vụ và nhật ký ghi nhận của lộ trình trước đó. Bạn sẽ bắt đầu lại từ <strong>Ngày 1</strong> và không thể hoàn tác hành động này.
+              </p>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', width: '100%' }}>
+                <button
+                  onClick={() => setShowRestartConfirm(false)}
+                  style={{
+                    flex: 1,
+                    background: '#e9ecef',
+                    color: '#495057',
+                    border: 'none',
+                    padding: '0.8rem',
+                    borderRadius: 'var(--radius)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleRestartProgram}
+                  style={{
+                    flex: 1,
+                    background: '#e03131',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '0.8rem',
+                    borderRadius: 'var(--radius)',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  Đồng ý Restart
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

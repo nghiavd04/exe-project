@@ -6,6 +6,7 @@ import com.product.exe.backend.dto.response.ProgramAnalyticsResponse;
 import com.product.exe.backend.dto.response.ProgramDayDetailResponse;
 import com.product.exe.backend.dto.response.ProgramProgressResponse;
 import com.product.exe.backend.dto.response.ProgramWeekDetailResponse;
+import com.product.exe.backend.dto.response.ProgramMetadataResponse;
 
 public interface ProgramService {
     ProgramProgressResponse enroll(Long userId);
@@ -18,5 +19,7 @@ public interface ProgramService {
     ProgramAnalyticsResponse getAnalytics(Long userId);
     void advanceDayForAllActivePrograms();
     ProgramProgressResponse advanceDayForUser(Long userId);
-    com.product.exe.backend.dto.response.ProgramMetadataResponse getProgramMetadata();
+    ProgramMetadataResponse getProgramMetadata();
+    ProgramProgressResponse resumeProgram(Long userId);
+    ProgramProgressResponse restartProgram(Long userId);
 }

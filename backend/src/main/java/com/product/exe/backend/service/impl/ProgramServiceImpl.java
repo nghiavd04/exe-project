@@ -11,6 +11,8 @@ import com.product.exe.backend.enums.UserProgramStatus;
 import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.ProgramService;
+import com.product.exe.backend.service.SubscriptionService;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class ProgramServiceImpl implements ProgramService {
     private final UserProgramTaskRepository userProgramTaskRepository;
     private final UserDailyLogRepository userDailyLogRepository;
     private final UserWeeklyLogRepository userWeeklyLogRepository;
+    private final SubscriptionService subscriptionService;
 
     @Override
     @Transactional
@@ -387,6 +390,16 @@ public class ProgramServiceImpl implements ProgramService {
         for (UserProgramProgress progress : activePrograms) {
             try {
                 Long customerId = progress.getCustomer().getId();
+                Long userId = progress.getCustomer().getUser().getId();
+
+                SubscriptionTier tier = subscriptionService.getUserHighestTier(userId);
+                if (tier == null || tier == SubscriptionTier.FREE) {
+                    progress.setStatus(UserProgramStatus.PAUSED);
+                    progressRepository.save(progress);
+                    log.info("Customer ID {} subscription expired. Paused program progress.", customerId);
+                    continue;
+                }
+
                 Integer currentDay = progress.getCurrentDay();
 
                 boolean allCompleted = false;
@@ -566,5 +579,55 @@ public class ProgramServiceImpl implements ProgramService {
         }
         int maxWeek = weekMetadataRepository.findMaxWeekNumber();
         return maxWeek * 7;
+    }
+
+    @Override
+    @Transactional
+    public ProgramProgressResponse resumeProgram(Long userId) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        UserProgramProgress progress = progressRepository.findByCustomerId(customer.getId())
+                .orElseThrow(() -> new BadRequestException("Bạn chưa tham gia lộ trình phác đồ"));
+
+        if (progress.getStatus() != UserProgramStatus.PAUSED) {
+            throw new BadRequestException("Lộ trình của bạn không ở trạng thái tạm dừng");
+        }
+
+        progress.setStatus(UserProgramStatus.ACTIVE);
+        progressRepository.save(progress);
+        log.info("Customer ID {} resumed program progress.", customer.getId());
+
+        return mapToProgressResponse(progress);
+    }
+
+    @Override
+    @Transactional
+    public ProgramProgressResponse restartProgram(Long userId) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        UserProgramProgress progress = progressRepository.findByCustomerId(customer.getId())
+                .orElseThrow(() -> new BadRequestException("Bạn chưa tham gia lộ trình phác đồ"));
+
+        // Delete all tasks, daily logs, and weekly logs for this customer
+        userProgramTaskRepository.deleteByCustomerId(customer.getId());
+        userDailyLogRepository.deleteByCustomerId(customer.getId());
+        userWeeklyLogRepository.deleteByCustomerId(customer.getId());
+
+        // Since startedAt is marked updatable = false, delete and recreate UserProgramProgress
+        progressRepository.delete(progress);
+        progressRepository.flush();
+
+        UserProgramProgress newProgress = UserProgramProgress.builder()
+                .customer(customer)
+                .currentDay(1)
+                .streakCount(0)
+                .status(UserProgramStatus.ACTIVE)
+                .build();
+        newProgress = progressRepository.save(newProgress);
+        log.info("Customer ID {} restarted program progress.", customer.getId());
+
+        return mapToProgressResponse(newProgress);
     }
 }

@@ -39,7 +39,7 @@ services:
 
   # Spring Boot Backend
   backend:
-    image: tungtq123/dopaless-backend:latest
+    image: nghiavd914/dopaless-backend:latest
     container_name: dopaless-backend
     restart: unless-stopped
     environment:
@@ -71,7 +71,7 @@ services:
 
   # React Frontend
   frontend:
-    image: tungtq123/dopaless-frontend:latest
+    image: nghiavd914/dopaless-frontend:latest
     container_name: dopaless-frontend
     restart: unless-stopped
     expose:

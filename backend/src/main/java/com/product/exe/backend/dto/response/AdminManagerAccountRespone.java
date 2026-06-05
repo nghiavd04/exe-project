@@ -20,4 +20,7 @@ public class AdminManagerAccountRespone {
     private String avatarUrl;
     private Boolean isActive;
     private String subscriptionPlan;
+    private Integer currentDay;
+    private Integer streakCount;
+    private String programStatus;
 }
