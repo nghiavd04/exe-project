@@ -26,18 +26,31 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Query("SELECT n FROM Notification n " +
            "WHERE (n.user.id = :userId) " +
-           "OR (n.user IS NULL AND :userCreatedAt <= n.createdAt) " +
+           "OR (n.planTier = :userTier AND :userCreatedAt <= n.createdAt) " +
+           "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt) " +
            "ORDER BY n.createdAt DESC")
-    List<Notification> findAllForUser(@Param("userId") Long userId, @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
+    List<Notification> findAllForUser(
+            @Param("userId") Long userId, 
+            @Param("userTier") com.product.exe.backend.enums.SubscriptionTier userTier, 
+            @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
 
     @Query("SELECT count(n) FROM Notification n " +
            "WHERE (n.user.id = :userId AND n.isRead = false) " +
-           "OR (n.user IS NULL AND :userCreatedAt <= n.createdAt AND " +
+           "OR (n.planTier = :userTier AND :userCreatedAt <= n.createdAt AND " +
+           "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)) " +
+           "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt AND " +
            "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id))")
-    long countUnreadForUser(@Param("userId") Long userId, @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
+    long countUnreadForUser(
+            @Param("userId") Long userId, 
+            @Param("userTier") com.product.exe.backend.enums.SubscriptionTier userTier, 
+            @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
 
     @Query("SELECT n FROM Notification n " +
-           "WHERE n.user IS NULL AND :userCreatedAt <= n.createdAt AND " +
-           "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)")
-    List<Notification> findUnreadGlobalNotificationsForUser(@Param("userId") Long userId, @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
+           "WHERE (:userCreatedAt <= n.createdAt) " +
+           "AND (n.planTier = :userTier OR (n.user IS NULL AND n.planTier IS NULL)) " +
+           "AND NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)")
+    List<Notification> findUnreadGlobalAndGroupNotificationsForUser(
+            @Param("userId") Long userId, 
+            @Param("userTier") com.product.exe.backend.enums.SubscriptionTier userTier, 
+            @Param("userCreatedAt") java.time.LocalDateTime userCreatedAt);
 }

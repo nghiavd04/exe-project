@@ -39,7 +39,7 @@ services:
 
   # Spring Boot Backend
   backend:
-    image: tungtq123/dopaless-backend:latest
+    image: nghiavd914/dopaless-backend:latest
     container_name: dopaless-backend
     restart: unless-stopped
     environment:
@@ -63,6 +63,8 @@ services:
       PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
       PAYMENT_RETURN_URL: ${PAYMENT_RETURN_URL}
       PAYMENT_CANCEL_URL: ${PAYMENT_CANCEL_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL}
     expose:
       - "8080"
     depends_on:
@@ -71,7 +73,7 @@ services:
 
   # React Frontend
   frontend:
-    image: tungtq123/dopaless-frontend:latest
+    image: nghiavd914/dopaless-frontend:latest
     container_name: dopaless-frontend
     restart: unless-stopped
     expose:

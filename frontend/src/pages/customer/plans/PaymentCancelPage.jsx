@@ -167,7 +167,7 @@ export default function PaymentCancelPage() {
               }}>
                 <HelpCircle size={20} style={{ color: 'var(--teal)', flexShrink: 0, marginTop: '2px' }} />
                 <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: '1.45' }}>
-                  Nếu bạn vô tình nhấn hủy, mã QR thanh toán hết hiệu lực (sau 15 phút) hoặc gặp sự cố đường truyền, bạn hoàn toàn có thể quay lại trang Gói dịch vụ để bắt đầu một giao dịch mới.
+                  Nếu bạn vô tình nhấn hủy, mã QR thanh toán hết hiệu lực (sau 5 phút) hoặc gặp sự cố đường truyền, bạn hoàn toàn có thể quay lại trang Gói dịch vụ để bắt đầu một giao dịch mới.
                 </span>
               </div>
 
@@ -202,8 +202,8 @@ export default function PaymentCancelPage() {
 
               {/* Action Buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button 
-                  onClick={() => navigate('/goi-dich-vu')} 
+                <button
+                  onClick={() => navigate('/goi-dich-vu')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -226,8 +226,8 @@ export default function PaymentCancelPage() {
                   Thực hiện thanh toán lại
                 </button>
 
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   style={{
                     display: 'flex',
                     alignItems: 'center',

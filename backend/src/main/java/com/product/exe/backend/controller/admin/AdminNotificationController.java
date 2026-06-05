@@ -21,8 +21,13 @@ public class AdminNotificationController {
     public ResponseEntity<ApiResponse<String>> sendBroadcastNotification(
             @Valid @RequestBody BroadcastNotificationRequest request) {
         try {
-            notificationService.createBroadcastNotification(request.getTitle(), request.getContent());
-            return ResponseEntity.ok(ApiResponse.success("Gửi thông báo hệ thống thành công!"));
+            notificationService.createTargetedNotification(
+                    request.getTitle(),
+                    request.getContent(),
+                    request.getTargetEmail(),
+                    request.getTargetPlanTier()
+            );
+            return ResponseEntity.ok(ApiResponse.success("Gửi thông báo thành công!"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Lỗi hệ thống: " + e.getMessage()));
         }

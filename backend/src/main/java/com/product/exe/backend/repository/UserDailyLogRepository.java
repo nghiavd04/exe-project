@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface UserDailyLogRepository extends JpaRepository<UserDailyLog, Long> {
     Optional<UserDailyLog> findByCustomerIdAndDayNumber(Long customerId, Integer dayNumber);
     List<UserDailyLog> findByCustomerIdOrderByDayNumberAsc(Long customerId);
+
+    void deleteByCustomerId(Long customerId);
 }

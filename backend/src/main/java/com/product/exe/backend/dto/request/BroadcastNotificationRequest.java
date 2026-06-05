@@ -12,4 +12,8 @@ public class BroadcastNotificationRequest {
 
     @NotBlank(message = "Nội dung thông báo không được để trống")
     private String content;
+
+    private String targetEmail;
+
+    private com.product.exe.backend.enums.SubscriptionTier targetPlanTier;
 }

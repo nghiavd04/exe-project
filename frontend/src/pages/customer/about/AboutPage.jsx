@@ -218,9 +218,6 @@ export default function AboutPage() {
                 <div className="cta-buttons">
                     <Link to="/trac-nghiem" className="about-banner-cta">Làm bài test ngay — miễn phí →</Link>
                 </div>
-                <div className="about-legal-note" style={{ marginTop: '2.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
-                    Bằng việc tham gia, bạn đồng ý với các <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', fontWeight: '600', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của chúng tôi.
-                </div>
             </section>
         </main>
     );

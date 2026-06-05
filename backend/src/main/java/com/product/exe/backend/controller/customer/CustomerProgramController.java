@@ -142,4 +142,20 @@ public class CustomerProgramController {
         checkProgramAccess(authentication);
         return ResponseEntity.ok(ApiResponse.success("Lấy cấu trúc lộ trình thành công", programService.getProgramMetadata()));
     }
+
+    @PostMapping("/resume")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<ProgramProgressResponse>> resumeProgram(Authentication authentication) {
+        checkProgramAccess(authentication);
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Đã tiếp tục lộ trình phác đồ thành công", programService.resumeProgram(userId)));
+    }
+
+    @PostMapping("/restart")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<ProgramProgressResponse>> restartProgram(Authentication authentication) {
+        checkProgramAccess(authentication);
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Đã bắt đầu lại lộ trình phác đồ thành công", programService.restartProgram(userId)));
+    }
 }

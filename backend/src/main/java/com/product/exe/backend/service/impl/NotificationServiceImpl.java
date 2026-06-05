@@ -8,6 +8,8 @@ import com.product.exe.backend.repository.NotificationRepository;
 import com.product.exe.backend.repository.UserRepository;
 import com.product.exe.backend.repository.UserNotificationReadRepository;
 import com.product.exe.backend.service.NotificationService;
+import com.product.exe.backend.service.SubscriptionService;
+import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final UserNotificationReadRepository userNotificationReadRepository;
+    private final SubscriptionService subscriptionService;
 
     @Override
     @Transactional
@@ -49,13 +52,34 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
+    public void createTargetedNotification(String title, String content, String targetEmail, com.product.exe.backend.enums.SubscriptionTier targetPlanTier) {
+        User targetUser = null;
+        if (targetEmail != null && !targetEmail.trim().isEmpty()) {
+            targetUser = userRepository.findByEmail(targetEmail.trim())
+                    .orElseThrow(() -> new com.product.exe.backend.exception.ResourceNotFoundException("Không tìm thấy người dùng với email: " + targetEmail));
+        }
+
+        Notification notification = Notification.builder()
+                .user(targetUser)
+                .planTier(targetPlanTier)
+                .title(title)
+                .content(content)
+                .isRead(false)
+                .build();
+        notificationRepository.save(notification);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NotificationResponse> getNotificationsForUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
 
-        // Lấy danh sách thông báo hợp lệ của user (cá nhân hoặc thông báo chung tạo sau ngày tạo tài khoản của user)
-        List<Notification> notifications = notificationRepository.findAllForUser(userId, user.getCreatedAt());
+        SubscriptionTier userTier = subscriptionService.getUserHighestTier(userId);
+
+        // Lấy danh sách thông báo hợp lệ của user (cá nhân hoặc thông báo chung/theo nhóm gói tạo sau ngày tạo tài khoản của user)
+        List<Notification> notifications = notificationRepository.findAllForUser(userId, userTier, user.getCreatedAt());
 
         // Lấy tất cả ID thông báo chung đã đọc của user này
         List<Long> readGlobalNotificationIds = userNotificationReadRepository.findReadNotificationIdsByUserId(userId);
@@ -93,13 +117,21 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setIsRead(true);
             notificationRepository.save(notification);
         } else {
-            // Thông báo chung
+            // Thông báo chung hoặc theo gói dịch vụ
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
             
             // Đảm bảo user này đủ điều kiện nhận thông báo chung (đăng ký trước khi thông báo được tạo)
             if (user.getCreatedAt().isAfter(notification.getCreatedAt())) {
                 throw new SecurityException("Không có quyền truy cập thông báo này");
+            }
+
+            // Nếu là thông báo theo gói dịch vụ, kiểm tra gói của user
+            if (notification.getPlanTier() != null) {
+                SubscriptionTier userTier = subscriptionService.getUserHighestTier(userId);
+                if (userTier != notification.getPlanTier()) {
+                    throw new SecurityException("Không có quyền truy cập thông báo này");
+                }
             }
 
             if (!userNotificationReadRepository.existsByUserIdAndNotificationId(userId, notificationId)) {
@@ -118,11 +150,13 @@ public class NotificationServiceImpl implements NotificationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
 
+        SubscriptionTier userTier = subscriptionService.getUserHighestTier(userId);
+
         // 1. Đánh dấu đọc tất cả thông báo cá nhân
         notificationRepository.markAllAsReadForUser(userId);
 
-        // 2. Đánh dấu đọc tất cả thông báo chung chưa đọc
-        List<Notification> unreadGlobalNotifications = notificationRepository.findUnreadGlobalNotificationsForUser(userId, user.getCreatedAt());
+        // 2. Đánh dấu đọc tất cả thông báo chung & nhóm gói chưa đọc
+        List<Notification> unreadGlobalNotifications = notificationRepository.findUnreadGlobalAndGroupNotificationsForUser(userId, userTier, user.getCreatedAt());
         for (Notification n : unreadGlobalNotifications) {
             if (!userNotificationReadRepository.existsByUserIdAndNotificationId(userId, n.getId())) {
                 UserNotificationRead readRecord = UserNotificationRead.builder()
@@ -140,6 +174,8 @@ public class NotificationServiceImpl implements NotificationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
 
-        return notificationRepository.countUnreadForUser(userId, user.getCreatedAt());
+        SubscriptionTier userTier = subscriptionService.getUserHighestTier(userId);
+
+        return notificationRepository.countUnreadForUser(userId, userTier, user.getCreatedAt());
     }
 }

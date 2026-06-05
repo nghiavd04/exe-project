@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, ChevronRight, ChevronLeft, Mail, MessageSquare, 
-  Trash2, Eye, Send, FileText, CheckCircle2, AlertCircle, HelpCircle
+  Trash2, Eye, Send, FileText, CheckCircle2, AlertCircle, HelpCircle, Bell
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
+import AdminSendNotificationModal from './AdminSendNotificationModal';
 import './AdminContactMessagesPage.css';
 
 export default function AdminContactMessagesPage() {
@@ -23,6 +24,7 @@ export default function AdminContactMessagesPage() {
   const [replyText, setReplyText] = useState('');
   const [notesText, setNotesText] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   // Modal State for Delete Confirmation
   const [deleteModalConfig, setDeleteModalConfig] = useState({
@@ -204,11 +206,33 @@ export default function AdminContactMessagesPage() {
         <span>QUẢN LÝ LỜI NHẮN</span>
       </div>
 
-      <header className="account-header">
+      <header className="account-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Lời nhắn liên hệ</h1>
           <p>Xem, quản lý và gửi phản hồi thông báo trực tiếp cho các tin nhắn hỗ trợ từ khách hàng.</p>
         </div>
+        <button
+          onClick={() => setIsNotificationModalOpen(true)}
+          className="btn-add-admin"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--teal)',
+            color: '#fff',
+            border: 'none',
+            padding: '0.65rem 1.25rem',
+            borderRadius: '8px',
+            fontWeight: '600',
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--teal-dark)'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--teal)'}
+        >
+          <Bell size={18} /> Gửi thông báo nhắm mục tiêu
+        </button>
       </header>
 
       {/* Tabs UI */}
@@ -477,6 +501,10 @@ export default function AdminContactMessagesPage() {
         cancelText="Hủy bỏ"
         onClose={() => setDeleteModalConfig({ ...deleteModalConfig, isOpen: false })}
         onConfirm={handleConfirmDelete}
+      />
+      <AdminSendNotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
       />
     </div>
   );

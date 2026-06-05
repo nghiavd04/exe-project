@@ -3,6 +3,7 @@ package com.product.exe.backend.controller.admin;
 import com.product.exe.backend.dto.request.AdminCreateRequest;
 import com.product.exe.backend.dto.response.AdminManagerAccountRespone;
 import com.product.exe.backend.dto.response.ApiResponse;
+import com.product.exe.backend.dto.response.AdminUserProgressDetailsResponse;
 import com.product.exe.backend.enums.Role;
 import com.product.exe.backend.service.AdminManagerAccountService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,12 @@ public class AdminManagerAccountController {
             @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(
                 adminManagerAccountService.getAllUsers(search, role, isActive, pageable)));
+    }
+
+    @GetMapping("/{id}/progress-details")
+    public ResponseEntity<ApiResponse<AdminUserProgressDetailsResponse>> getUserProgressDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(
+                adminManagerAccountService.getUserProgressDetails(id)));
     }
 
     @PatchMapping("/{id}/toggle-status")
