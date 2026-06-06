@@ -17,4 +17,5 @@ public class BroadcastNotificationRequest {
     private String targetEmail;
 
     private SubscriptionTier targetPlanTier;
+
 }

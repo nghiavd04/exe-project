@@ -33,7 +33,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
            "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt) " +
            "ORDER BY n.createdAt DESC")
     List<Notification> findAllForUser(
-            @Param("userId") Long userId, 
+            @Param("userId") Long userId,
             @Param("userTier") SubscriptionTier userTier, 
             @Param("userCreatedAt") LocalDateTime userCreatedAt);
 
@@ -44,7 +44,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
            "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt AND " +
            "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id))")
     long countUnreadForUser(
-            @Param("userId") Long userId, 
+            @Param("userId") Long userId,
             @Param("userTier") SubscriptionTier userTier, 
             @Param("userCreatedAt") LocalDateTime userCreatedAt);
 
@@ -53,7 +53,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
            "AND (n.planTier = :userTier OR (n.user IS NULL AND n.planTier IS NULL)) " +
            "AND NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)")
     List<Notification> findUnreadGlobalAndGroupNotificationsForUser(
-            @Param("userId") Long userId, 
+            @Param("userId") Long userId,
             @Param("userTier") SubscriptionTier userTier, 
             @Param("userCreatedAt") LocalDateTime userCreatedAt);
 }

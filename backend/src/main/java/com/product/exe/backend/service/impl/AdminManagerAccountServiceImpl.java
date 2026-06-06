@@ -16,11 +16,16 @@ import com.product.exe.backend.repository.UserDailyLogRepository;
 import com.product.exe.backend.repository.UserWeeklyLogRepository;
 import com.product.exe.backend.service.AdminManagerAccountService;
 import com.product.exe.backend.dto.response.AdminUserProgressDetailsResponse;
+import com.product.exe.backend.entity.Customer;
+import com.product.exe.backend.entity.UserDailyLog;
+import com.product.exe.backend.entity.UserWeeklyLog;
+import com.product.exe.backend.entity.UserProgramProgress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.stream.Collectors;
