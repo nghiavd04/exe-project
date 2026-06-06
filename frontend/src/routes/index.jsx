@@ -37,6 +37,8 @@ import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptio
 import AdminContactMessagesPage from '../pages/admin/contact/AdminContactMessagesPage';
 import AdminMediaListPage from '../pages/admin/medias/AdminMediaListPage';
 import AdminProgramPage from '../pages/admin/program/AdminProgramPage';
+import AdminAiChatConfig from '../pages/admin/ai-chat/AdminAiChatConfig';
+import AdminAiChatLogs from '../pages/admin/ai-chat/AdminAiChatLogs';
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +73,8 @@ export const router = createBrowserRouter([
           { path: 'contact-messages', element: <AdminContactMessagesPage /> },
           { path: 'medias', element: <AdminMediaListPage /> },
           { path: 'program', element: <AdminProgramPage /> },
+          { path: 'ai-chat/prompt', element: <AdminAiChatConfig /> },
+          { path: 'ai-chat/logs', element: <AdminAiChatLogs /> },
           { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
         ]
       }

@@ -1,5 +1,6 @@
 package com.product.exe.backend.dto.request;
 
+import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -15,5 +16,5 @@ public class BroadcastNotificationRequest {
 
     private String targetEmail;
 
-    private com.product.exe.backend.enums.SubscriptionTier targetPlanTier;
+    private SubscriptionTier targetPlanTier;
 }

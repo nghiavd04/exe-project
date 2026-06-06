@@ -1,8 +1,11 @@
 package com.product.exe.backend.service.impl;
 
+import com.product.exe.backend.dto.request.AdminCreateRequest;
 import com.product.exe.backend.dto.response.AdminManagerAccountRespone;
-import com.product.exe.backend.entity.User;
+import com.product.exe.backend.entity.*;
+import com.product.exe.backend.enums.AuthProvider;
 import com.product.exe.backend.enums.Role;
+import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
 
 import com.product.exe.backend.repository.AdminRepository;
@@ -13,15 +16,13 @@ import com.product.exe.backend.repository.UserDailyLogRepository;
 import com.product.exe.backend.repository.UserWeeklyLogRepository;
 import com.product.exe.backend.service.AdminManagerAccountService;
 import com.product.exe.backend.dto.response.AdminUserProgressDetailsResponse;
-import com.product.exe.backend.entity.Customer;
-import com.product.exe.backend.entity.UserDailyLog;
-import com.product.exe.backend.entity.UserWeeklyLog;
-import com.product.exe.backend.entity.UserProgramProgress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,21 +65,21 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
 
     @Override
     @Transactional
-    public void createAdmin(com.product.exe.backend.dto.request.AdminCreateRequest request) {
+    public void createAdmin(AdminCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new com.product.exe.backend.exception.BadRequestException("Email đã được sử dụng!");
+            throw new BadRequestException("Email đã được sử dụng!");
         }
 
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ADMIN)
-                .provider(com.product.exe.backend.enums.AuthProvider.LOCAL)
+                .provider(AuthProvider.LOCAL)
                 .isActive(true)
                 .build();
         User savedUser = userRepository.save(user);
 
-        com.product.exe.backend.entity.Admin admin = com.product.exe.backend.entity.Admin.builder()
+        Admin admin = Admin.builder()
                 .user(savedUser)
                 .fullName(request.getFullName())
                 .isActive(true)
@@ -137,7 +138,7 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với mã id: " + userId));
 
         if (user.getRole() != Role.CUSTOMER || user.getCustomer() == null) {
-            throw new com.product.exe.backend.exception.BadRequestException("Người dùng này không phải là khách hàng!");
+            throw new BadRequestException("Người dùng này không phải là khách hàng!");
         }
 
         Customer customer = user.getCustomer();
@@ -149,14 +150,14 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
 
         // Lấy thông tin tiến độ
         UserProgramProgress progress = userProgramProgressRepository.findByCustomerId(customer.getId())
-                .orElseThrow(() -> new com.product.exe.backend.exception.BadRequestException("Khách hàng chưa bắt đầu lộ trình phác đồ!"));
+                .orElseThrow(() -> new BadRequestException("Khách hàng chưa bắt đầu lộ trình phác đồ!"));
 
         // Lấy danh sách Daily Logs và Weekly Logs
-        java.util.List<UserDailyLog> dailyLogs = userDailyLogRepository.findByCustomerIdOrderByDayNumberAsc(customer.getId());
-        java.util.List<UserWeeklyLog> weeklyLogs = userWeeklyLogRepository.findByCustomerIdOrderByWeekNumberAsc(customer.getId());
+        List<UserDailyLog> dailyLogs = userDailyLogRepository.findByCustomerIdOrderByDayNumberAsc(customer.getId());
+        List<UserWeeklyLog> weeklyLogs = userWeeklyLogRepository.findByCustomerIdOrderByWeekNumberAsc(customer.getId());
 
         // Map Daily Logs
-        java.util.List<AdminUserProgressDetailsResponse.DailyLogDto> dailyLogDtos = dailyLogs.stream()
+        List<AdminUserProgressDetailsResponse.DailyLogDto> dailyLogDtos = dailyLogs.stream()
                 .map(dl -> AdminUserProgressDetailsResponse.DailyLogDto.builder()
                         .dayNumber(dl.getDayNumber())
                         .screenTimeMinutes(dl.getScreenTimeMinutes())
@@ -172,7 +173,7 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
                 .collect(Collectors.toList());
 
         // Map Weekly Logs
-        java.util.List<AdminUserProgressDetailsResponse.WeeklyLogDto> weeklyLogDtos = weeklyLogs.stream()
+        List<AdminUserProgressDetailsResponse.WeeklyLogDto> weeklyLogDtos = weeklyLogs.stream()
                 .map(wl -> AdminUserProgressDetailsResponse.WeeklyLogDto.builder()
                         .weekNumber(wl.getWeekNumber())
                         .screenTimeAvgMinutes(wl.getScreenTimeAvgMinutes())

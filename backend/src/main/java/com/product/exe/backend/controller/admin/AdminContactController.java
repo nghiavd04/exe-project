@@ -18,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/admin/contact-messages")
 @RequiredArgsConstructor
@@ -38,9 +40,9 @@ public class AdminContactController {
     }
 
     @GetMapping("/unread-count")
-    public ResponseEntity<ApiResponse<java.util.Map<String, Long>>> getUnreadCount() {
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUnreadCount() {
         long count = contactMessageService.getUnreadCount();
-        return ResponseEntity.ok(ApiResponse.success(java.util.Map.of("count", count)));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("count", count)));
     }
 
     @PostMapping("/{id}/reply")

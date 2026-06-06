@@ -13,6 +13,8 @@ import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.product.exe.backend.exception.ResourceNotFoundException;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
         User targetUser = null;
         if (targetEmail != null && !targetEmail.trim().isEmpty()) {
             targetUser = userRepository.findByEmail(targetEmail.trim())
-                    .orElseThrow(() -> new com.product.exe.backend.exception.ResourceNotFoundException("Không tìm thấy người dùng với email: " + targetEmail));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + targetEmail));
         }
 
         Notification notification = Notification.builder()

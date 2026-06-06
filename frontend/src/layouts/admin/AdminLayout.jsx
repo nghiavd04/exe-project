@@ -11,7 +11,8 @@ import {
   CreditCard,
   MessageSquare,
   Music,
-  Milestone
+  Milestone,
+  Bot
 } from 'lucide-react';
 import { adminApi } from '../../apis/adminApi';
 import './AdminLayout.css';
@@ -53,6 +54,8 @@ export default function AdminLayout() {
     { name: 'Gói dịch vụ', path: '/admin/subscriptions', icon: <CreditCard size={20} /> },
     { name: 'Quản lý Phác đồ', path: '/admin/program', icon: <Milestone size={20} /> },
     { name: 'Lời nhắn liên hệ', path: '/admin/contact-messages', icon: <MessageSquare size={20} /> },
+    { name: 'Cấu hình AI Chat', path: '/admin/ai-chat/prompt', icon: <Bot size={20} /> },
+    { name: 'Lịch sử AI Chat', path: '/admin/ai-chat/logs', icon: <MessageSquare size={20} /> },
     { name: 'Cài đặt', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 

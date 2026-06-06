@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,8 +47,8 @@ public class AdminQuizServiceImpl implements AdminQuizService {
         return rawResults.map(row -> {
             LocalDateTime createdAt = null;
             Object dateObj = row[3];
-            if (dateObj instanceof java.sql.Timestamp) {
-                createdAt = ((java.sql.Timestamp) dateObj).toLocalDateTime();
+            if (dateObj instanceof Timestamp) {
+                createdAt = ((Timestamp) dateObj).toLocalDateTime();
             } else if (dateObj instanceof LocalDateTime) {
                 createdAt = (LocalDateTime) dateObj;
             }

@@ -932,21 +932,8 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-            {/* ── FLOATING CONTACT BUTTONS ── */}
-            <div className="floating-contact">
-                <a href="https://zalo.me" target="_blank" rel="noreferrer" className="contact-blob zalo-blob">
-                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21.1 12.1a9 9 0 1 0-14 7.6l-3.3 1.1 1.2-3.2a9 9 0 0 0 16.1-5.5Z" />
-                        <text x="50%" y="58%" textAnchor="middle" fontSize="9" fontWeight="800" fill="currentColor" stroke="none">Z</text>
-                    </svg>
-                </a>
-                <a href="https://messenger.com" target="_blank" rel="noreferrer" className="contact-blob mess-blob">
-                    <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.477 2 2 6.145 2 11.26c0 2.923 1.487 5.513 3.824 7.184.22.158.423.447.453.717.062.532-.15 1.517-.358 2.214-.076.257.085.467.315.367 2.216-.963 3.63-2.003 4.298-2.553.155-.125.334-.145.514-.112C11.332 19.165 11.66 19.19 12 19.19c5.523 0 10-4.145 10-9.26S17.523 2 12 2zM8.36 13.56c-.63 1.01-2.022 1.272-2.924.55-.9-.723-.935-2.046-.076-2.82l2.646-2.385c.63-1.01 2.022-1.272 2.924-.55.9.723.935 2.045.076 2.82l-2.646 2.385zm3.684.288l-2.13-2.384L15.64 8.44c.63-1.01 2.022-1.272 2.924-.55.9.723.935 2.045.076 2.82L15.994 13.1c-.63 1.01-2.022 1.272-2.924.55l-1.026-1.182-2.484 2.19c-.38.334-.9.23-.996-.24-.096-.47.168-.962.616-1.14l2.864-1.134z" />
-                    </svg>
-                </a>
-            </div>
         </main>
     );
 }
+
 

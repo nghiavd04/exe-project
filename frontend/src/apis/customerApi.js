@@ -98,4 +98,14 @@ export const notificationApi = {
   markAllAsRead: () => apiClient.patch('/notifications/read-all'),
 };
 
+export const aiChatApi = {
+  getSessions: (page = 0, size = 5, type = 'AI') => apiClient.get('/ai-chat/sessions', { params: { page, size, type } }),
+  getSessionMessages: (sessionId, limit) => apiClient.get(`/ai-chat/sessions/${sessionId}/messages`, { params: { limit } }),
+
+  createSession: (title, type = 'AI') => apiClient.post('/ai-chat/sessions', { title, type }),
+  sendMessage: (sessionId, content) => apiClient.post(`/ai-chat/sessions/${sessionId}/message`, { content }),
+  deleteSession: (sessionId) => apiClient.delete(`/ai-chat/sessions/${sessionId}`),
+};
+
 export default apiClient;
+

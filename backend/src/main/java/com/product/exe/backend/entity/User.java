@@ -1,5 +1,6 @@
 package com.product.exe.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.product.exe.backend.enums.AuthProvider;
 import com.product.exe.backend.enums.Role;
 import jakarta.persistence.*;
@@ -26,6 +27,7 @@ public class User {
     private String email;
 
     @Column(name = "password", columnDefinition = "TEXT")
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -46,9 +48,11 @@ public class User {
     private Boolean isActive = true;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Customer customer;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Admin admin;
 
     @CreationTimestamp

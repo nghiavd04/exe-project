@@ -312,58 +312,6 @@ export default function PaymentSuccessPage() {
               </div>
             </div>
 
-            {/* Unlocked Benefits list */}
-            <div style={{
-              textAlign: 'left',
-              marginBottom: '35px'
-            }}>
-              <h4 style={{
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: '14px',
-                fontWeight: '750',
-                color: 'var(--text)',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <Sparkles size={16} style={{ color: 'var(--teal)' }} /> Quyền lợi tài khoản của bạn:
-              </h4>
-              <ul style={{
-                listStyle: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                {getFeaturesForTier(planTier).map((feat, index) => (
-                  <li key={index} style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                    fontSize: '14.5px',
-                    color: 'var(--text)',
-                    lineHeight: '1.4'
-                  }}>
-                    <span style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--teal-pale)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      marginTop: '1px'
-                    }}>
-                      <Check size={12} style={{ color: 'var(--teal)', strokeWidth: '3px' }} />
-                    </span>
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
 
             {/* CTA Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

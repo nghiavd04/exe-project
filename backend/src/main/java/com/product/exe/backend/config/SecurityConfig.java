@@ -97,7 +97,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/api/v1/customer/articles/**",
                                 "/api/v1/customer/quizzes/**",
-                                "/api/v1/customer/subscription-plans/**"
+                                "/api/v1/customer/subscription-plans/**",
+                                "/api/ws-chat",
+                                "/api/ws-chat/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

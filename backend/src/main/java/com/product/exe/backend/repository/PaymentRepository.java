@@ -9,11 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByOrderCode(Long orderCode);
+
+    List<Payment> findAllByStatusInAndCreatedAtBefore(List<PaymentStatus> statuses, LocalDateTime threshold);
 
     @Query("SELECT p FROM Payment p JOIN p.customer c JOIN c.user u WHERE " +
            "(:status IS NULL OR p.status = :status) AND " +

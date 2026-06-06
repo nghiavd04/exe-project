@@ -78,5 +78,14 @@ export const adminApi = {
   createProgramMetric: (data) => apiClient.post('/v1/admin/program/metrics', data),
   updateProgramMetric: (id, data) => apiClient.put(`/v1/admin/program/metrics/${id}`, data),
   deleteProgramMetric: (id) => apiClient.delete(`/v1/admin/program/metrics/${id}`),
+
+  // Admin AI Chat Configurations & Logs
+  getAiPrompt: () => apiClient.get('/v1/admin/ai-chat/prompt'),
+  updateAiPrompt: (promptText) => apiClient.put('/v1/admin/ai-chat/prompt', { prompt: promptText }),
+  getAiChatSessions: (params) => apiClient.get('/v1/admin/ai-chat/sessions', { params }),
+  getAiChatMessages: (sessionId) => apiClient.get(`/v1/admin/ai-chat/sessions/${sessionId}/messages`),
+  claimSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/claim`),
+  takeoverSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/takeover`),
+  sendAdminMessage: (sessionId, content) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/message`, { content }),
 };
 

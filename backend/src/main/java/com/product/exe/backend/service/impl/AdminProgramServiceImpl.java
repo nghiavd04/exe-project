@@ -3,6 +3,7 @@ package com.product.exe.backend.service.impl;
 import com.product.exe.backend.dto.request.*;
 import com.product.exe.backend.dto.response.AdminProgramMetadataResponse;
 import com.product.exe.backend.entity.*;
+import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
 import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.AdminProgramService;
@@ -115,7 +116,7 @@ public class AdminProgramServiceImpl implements AdminProgramService {
     @Transactional
     public ProgramPhaseMetadata createPhase(AdminPhaseCreateRequest request) {
         if (phaseMetadataRepository.existsById(request.getPhaseNumber())) {
-            throw new com.product.exe.backend.exception.BadRequestException("Giai đoạn số " + request.getPhaseNumber() + " đã tồn tại");
+            throw new BadRequestException("Giai đoạn số " + request.getPhaseNumber() + " đã tồn tại");
         }
         ProgramPhaseMetadata phase = ProgramPhaseMetadata.builder()
                 .phaseNumber(request.getPhaseNumber())
