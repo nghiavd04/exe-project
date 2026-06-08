@@ -62,6 +62,15 @@ export const imageApi = {
   }),
 };
 
+export const screenTimeApi = {
+  uploadScreenTime: (formData) => axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/screen-time/upload`, formData, {
+    headers: { 
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }),
+};
+
 export const contactApi = {
   submitContact: (data) => apiClient.post('/contact', data),
 };

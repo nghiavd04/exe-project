@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useProgram } from './ProgramLayout';
+import UploadScreenTime from '../../../components/UploadScreenTime';
 
 const WEEKLY_SCREEN = [
   { day: 'T2', val: 210, max: 300 },
@@ -445,6 +446,11 @@ export default function ProgramDetailPage() {
                   </span>
                   <span className="pd-metric-max">Mục tiêu: &lt;120 phút</span>
                 </div>
+                {isEditing && (
+                  <UploadScreenTime 
+                    onSuccess={(mins) => handleMetric('screenTime', mins)} 
+                  />
+                )}
               </div>
 
               <div className="pd-metric-card">
