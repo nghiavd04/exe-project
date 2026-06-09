@@ -97,8 +97,11 @@ export default function ContactPage() {
                                 </div>
                                 <div className="info-text">
                                     <h3>Email</h3>
-                                    <p>hello@dopaless.com</p>
-                                    <p>support@dopaless.com</p>
+                                    <p>
+                                        <a href="mailto:tcoc24500@gmail.com" style={{ color: 'var(--teal)', textDecoration: 'none' }}>
+                                            tcoc24500@gmail.com
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
 
@@ -111,8 +114,8 @@ export default function ContactPage() {
                                 </div>
                                 <div className="info-text">
                                     <h3>Địa chỉ</h3>
-                                    <p>Tòa nhà Innovation Plaza, Quận 1</p>
-                                    <p>Thành phố Hồ Chí Minh</p>
+                                    <p>Khu Công Nghệ Cao Hòa Lạc, CT03, Hòa Lạc</p>
+                                    <p>Hà Nội, Việt Nam, Hanoi, Vietnam</p>
                                 </div>
                             </div>
 
@@ -124,8 +127,7 @@ export default function ContactPage() {
                                 </div>
                                 <div className="info-text">
                                     <h3>Hotline</h3>
-                                    <p>+84 987 654 321</p>
-                                    <span>Thứ 2 - Thứ 6: 09:00 - 18:00</span>
+                                    <p>033 308 6210</p>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +136,13 @@ export default function ContactPage() {
                         <div className="social-links mt-4">
                             <p>Theo dõi chúng tôi:</p>
                             <div className="social-icons">
-                                <a href="#" className="social-icon" aria-label="Facebook">
+                                <a 
+                                    href="https://www.facebook.com/profile.php?id=61590101353841" 
+                                    className="social-icon" 
+                                    aria-label="Facebook"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                                     </svg>

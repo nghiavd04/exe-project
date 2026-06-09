@@ -15,13 +15,13 @@ const supportLinks = [
     { label: 'Tham gia thử thách', to: '#' },
     { label: 'Liên hệ chuyên gia', to: '/lien-he' },
     { label: 'Cộng đồng Discord', to: '#' },
-    { label: 'hello@dopaless.com', to: 'mailto:hello@dopaless.com' },
+    { label: 'tcoc24500@gmail.com', to: 'mailto:tcoc24500@gmail.com' },
 ];
 
 const socialLinks = [
     { label: '𝕏', title: 'Twitter', href: '#' },
     { label: '📷', title: 'Instagram', href: '#' },
-    { label: 'f', title: 'Facebook', href: '#' },
+    { label: 'f', title: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61590101353841' },
     { label: '▶', title: 'YouTube', href: '#' },
 ];
 
@@ -50,7 +50,15 @@ export default function Footer() {
                     </p>
                     <div className="footer-social">
                         {socialLinks.map(({ label, title, href }) => (
-                            <a key={title} className="social-btn" href={href} title={title} aria-label={title}>
+                            <a 
+                                key={title} 
+                                className="social-btn" 
+                                href={href} 
+                                title={title} 
+                                aria-label={title}
+                                target={href !== '#' ? '_blank' : undefined}
+                                rel={href !== '#' ? 'noopener noreferrer' : undefined}
+                            >
                                 {label}
                             </a>
                         ))}
