@@ -5,7 +5,7 @@
 # {
 #     auto_https off
 # }
-# :80 {
+# :80 
 
 dopaless.cloud {
     # Reverse proxy cho API backend (JavaSpring)

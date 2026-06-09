@@ -16,6 +16,7 @@ import net.sourceforge.tess4j.TesseractException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 @Service
 @RequiredArgsConstructor
@@ -108,21 +111,7 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
 
         // Save File Locally
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-        String newFilename = UUID.randomUUID().toString() + fileExtension;
-        File destFile = new File(UPLOADS_DIR, newFilename);
-
-        try {
-            file.transferTo(destFile);
-            log.info("Saved screen time screenshot to: {}", destFile.getAbsolutePath());
-        } catch (IOException e) {
-            log.error("Failed to save uploaded screenshot file", e);
-            throw new BadRequestException("Lỗi lưu file: " + e.getMessage());
-        }
+        
 
         // Run OCR using Tess4J
         Tesseract tesseract = new Tesseract();
@@ -131,10 +120,22 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
 
         String extractedText;
         try {
-            log.info("Starting OCR extraction on file: {}", destFile.getAbsolutePath());
-            extractedText = tesseract.doOCR(destFile);
+            BufferedImage image = ImageIO.read(file.getInputStream());
+
+            if (image == null) {
+                throw new BadRequestException("File tải lên không phải là ảnh hợp lệ.");
+            }
+
+            log.info("Starting OCR extraction from uploaded image");
+
+            extractedText = tesseract.doOCR(image);
+
             log.info("OCR completed. Character length: {}", extractedText.length());
             log.debug("OCR Extracted Text:\n{}", extractedText);
+
+        } catch (IOException e) {
+            log.error("Failed to read uploaded image", e);
+            throw new BadRequestException("Không thể đọc file ảnh.");
         } catch (TesseractException e) {
             log.error("Tess4J OCR operation failed", e);
             throw new BadRequestException("Không thể nhận diện văn bản từ ảnh: " + e.getMessage());
@@ -153,7 +154,7 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
         // Save ScreenTimeRecord to MySQL database
         ScreenTimeRecord record = ScreenTimeRecord.builder()
                 .userId(user.getId())
-                .imagePath(destFile.getPath().replace("\\", "/"))
+                .imagePath("uploaded-image")
                 .extractedText(extractedText)
                 .screenTimeMinutes(minutes)
                 .captureDate(today)
