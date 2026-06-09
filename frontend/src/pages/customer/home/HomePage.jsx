@@ -42,7 +42,12 @@ export default function HomePage() {
                             <a href="#test-section" className="btn-primary">
                                 Bắt đầu kiểm tra ngay →
                             </a>
-                            <a href="#" className="btn-secondary">
+                            <a 
+                                href="https://www.facebook.com/profile.php?id=61590101353841" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="btn-secondary"
+                            >
                                 Tham gia cộng đồng
                             </a>
                         </div>
