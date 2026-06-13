@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -40,4 +41,16 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     Long countByCreatedAtAfter(java.time.LocalDateTime date);
 
     Optional<Quiz> findByIdAndStatus(Long id, QuizStatus status);
+
+    /**
+     * Tìm tối đa N bài kiểm tra đã xuất bản có tiêu đề chứa từ khóa (dùng cho AI suggestion).
+     */
+    @Query("SELECT q FROM Quiz q " +
+           "WHERE q.status = :status AND q.isActive = true " +
+           "AND LOWER(q.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "ORDER BY q.updatedAt DESC")
+    List<Quiz> findTopByKeyword(
+            @Param("keyword") String keyword,
+            @Param("status") QuizStatus status,
+            Pageable pageable);
 }

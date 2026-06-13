@@ -1,0 +1,22 @@
+# Root-level gitignore for the repository
+
+# Ignore environment files (secrets)
+.env
+.env.local
+.env.*
+
+# Ignore environment files in subprojects explicitly
+backend/.env
+frontend/.env
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist
+
+# Java / backend
+backend/target/
+
+# IDE/editor
+.idea/
+.vscode/
+

@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.product.exe.backend.dto.response.AiChatResponseDto;
 
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,7 @@ public class CustomerAiChatController {
     }
 
     @PostMapping("/sessions/{sessionId}/message")
-    public ResponseEntity<ApiResponse<ChatMessage>> sendMessage(@PathVariable(name = "sessionId") Long sessionId, @RequestBody Map<String, String> body) {
+    public ResponseEntity<ApiResponse<AiChatResponseDto>> sendMessage(@PathVariable(name = "sessionId") Long sessionId, @RequestBody Map<String, String> body) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
@@ -113,7 +114,7 @@ public class CustomerAiChatController {
 
         String content = body.get("content");
         try {
-            ChatMessage message = aiChatService.sendMessage(userId, sessionId, content);
+            AiChatResponseDto message = aiChatService.sendMessage(userId, sessionId, content);
             return ResponseEntity.ok(ApiResponse.success(message));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));

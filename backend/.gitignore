@@ -37,4 +37,4 @@ build/
 .agent/*
 
 # Environment secrets
-src/main/resources/.env
+.env

@@ -44,10 +44,16 @@ export default function AiChatWidget() {
 
   useEffect(() => {
     if (activeSessionId && chatType === 'SUPPORT') {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
-      const host = baseUrl.replace(/^https?:\/\//, '');
-      const brokerURL = `${wsProto}://${host}/ws-chat`;
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+      let brokerURL = '';
+      if (baseUrl.startsWith('http')) {
+        const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
+        const host = baseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        brokerURL = `${wsProto}://${host}/ws-chat`;
+      } else {
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        brokerURL = `${wsProto}://${window.location.host}${baseUrl}/ws-chat`;
+      }
 
       const client = new Client({
         brokerURL,
@@ -57,13 +63,9 @@ export default function AiChatWidget() {
       });
 
       client.onConnect = () => {
-        console.log('User WebSocket connected successfully!');
         client.subscribe(`/topic/chat/${activeSessionId}`, (message) => {
           const body = JSON.parse(message.body);
-          if (body.eventType === 'ASSIGNMENT_UPDATE') {
-            console.log('Session assignment updated:', body);
-            // Optionally we can reload the session details to see assignedTo
-          } else {
+          if (body.eventType !== 'ASSIGNMENT_UPDATE') {
             setMessages(prev => {
               if (prev.some(m => m.id === body.id)) {
                 return prev;
@@ -84,7 +86,6 @@ export default function AiChatWidget() {
       return () => {
         if (stompClientRef.current) {
           stompClientRef.current.deactivate();
-          console.log('WebSocket connection deactivated.');
         }
       };
     }
@@ -99,28 +100,20 @@ export default function AiChatWidget() {
   };
 
   const loadOrCreateSupportSession = async () => {
-    console.log("loadOrCreateSupportSession: Bắt đầu tải/tạo session...");
     try {
       setIsLoading(true);
       setChatError(null);
       const res = await aiChatApi.getSessions(0, 1, 'SUPPORT');
-      console.log("loadOrCreateSupportSession: Lấy danh sách session thành công:", res.data);
       if (res.data.success && res.data.data.content && res.data.data.content.length > 0) {
         const supportSession = res.data.data.content[0];
-        console.log("loadOrCreateSupportSession: Tìm thấy session cũ:", supportSession);
         setActiveSessionId(supportSession.id);
         loadSupportMessages(supportSession.id);
       } else {
-        console.log("loadOrCreateSupportSession: Chưa có session, tiến hành tạo mới...");
         const createRes = await aiChatApi.createSession('Hỗ trợ trực tuyến', 'SUPPORT');
-        console.log("loadOrCreateSupportSession: Phản hồi tạo session:", createRes.data);
         if (createRes.data.success) {
           const newSession = createRes.data.data;
-          console.log("loadOrCreateSupportSession: Tạo session thành công, set active id:", newSession.id);
           setActiveSessionId(newSession.id);
           loadSupportMessages(newSession.id);
-        } else {
-          console.warn("loadOrCreateSupportSession: Tạo session thất bại (success = false)");
         }
       }
     } catch (err) {
@@ -226,21 +219,32 @@ export default function AiChatWidget() {
     try {
       const res = await aiChatApi.sendMessage(activeSessionId, textToSend);
       if (res.data.success) {
-        const returnedMsg = res.data.data;
+        const returnedDto = res.data.data;
         if (chatType === 'SUPPORT') {
-          // Đối với SUPPORT, REST trả về chính tin nhắn User vừa gửi. 
-          // Ta thay thế tin tạm bằng tin chính thức của DB (đã có ID).
+          // Đối với SUPPORT, REST trả về AiChatResponseDto nhưng chỉ chứa nội dung user vừa gửi
+          const supportMsg = {
+            id: returnedDto.messageId,
+            role: 'user',
+            content: returnedDto.aiText,
+            createdAt: new Date().toISOString()
+          };
           setMessages(prev => {
             const filtered = prev.filter(m => m.id !== tempUserMsg.id);
-            if (filtered.some(m => m.id === returnedMsg.id)) {
+            if (filtered.some(m => m.id === supportMsg.id)) {
               return filtered;
             }
-            return [...filtered, returnedMsg];
+            return [...filtered, supportMsg];
           });
         } else {
-          // Đối với AI, REST trả về tin nhắn phản hồi của Bot (model).
-          // Ta đổi ID của tin tạm thành ID ngẫu nhiên thực tế (nếu cần) và append tin bot.
-          setMessages(prev => [...prev, returnedMsg]);
+          // Đối với AI, REST trả về AiChatResponseDto gồm aiText và suggestions
+          const aiMsg = {
+            id: returnedDto.messageId,
+            role: 'model',
+            content: returnedDto.aiText,
+            suggestions: returnedDto.suggestions,
+            createdAt: new Date().toISOString()
+          };
+          setMessages(prev => [...prev, aiMsg]);
           fetchSessions(0, false);
         }
       }
@@ -500,6 +504,27 @@ export default function AiChatWidget() {
                       )}
                       <div className="message-bubble-content">
                         {formatMessageContent(msg.content)}
+                        {msg.suggestions && msg.suggestions.length > 0 && (
+                          <div className="suggestion-cards-container">
+                            <div className="suggestion-cards-title">Gợi ý nội dung:</div>
+                            <div className="suggestion-cards-scroll">
+                              {msg.suggestions.map((item, idx) => (
+                                <a 
+                                  key={idx} 
+                                  href={item.type === 'ARTICLE' ? `/bai-viet/${item.slug}` : `/trac-nghiem/${item.id}/bat-dau`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className={`suggestion-card suggestion-card-${item.type.toLowerCase()}`}
+                                >
+                                  <div className="suggestion-card-type">
+                                    {item.type === 'ARTICLE' ? 'Bài viết' : 'Bài kiểm tra'}
+                                  </div>
+                                  <div className="suggestion-card-title">{item.title}</div>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

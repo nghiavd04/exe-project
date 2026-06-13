@@ -52,10 +52,16 @@ export default function AdminAiChatLogs() {
   // WebSocket connection effect for support chat room
   useEffect(() => {
     if (selectedSession && activeTab === 'SUPPORT') {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-      const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
-      const host = baseUrl.replace(/^https?:\/\//, '');
-      const brokerURL = `${wsProto}://${host}/ws-chat`;
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+      let brokerURL = '';
+      if (baseUrl.startsWith('http')) {
+        const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
+        const host = baseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        brokerURL = `${wsProto}://${host}/ws-chat`;
+      } else {
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        brokerURL = `${wsProto}://${window.location.host}${baseUrl}/ws-chat`;
+      }
 
       const client = new Client({
         brokerURL,
@@ -65,14 +71,10 @@ export default function AdminAiChatLogs() {
       });
 
       client.onConnect = () => {
-        console.log('Admin WebSocket connected successfully to room:', selectedSession.id);
-        
         client.subscribe(`/topic/chat/${selectedSession.id}`, (message) => {
           const body = JSON.parse(message.body);
           
           if (body.eventType === 'ASSIGNMENT_UPDATE') {
-            console.log('Assignment change event received:', body.assignedTo);
-            
             // Cập nhật session đang chọn
             setSelectedSession(prev => {
               if (prev && prev.id === body.sessionId) {
@@ -95,7 +97,6 @@ export default function AdminAiChatLogs() {
               return s;
             }));
           } else {
-            // Tin nhắn hỗ trợ mới nhận được
             setSupportMessages(prev => {
               if (prev.some(m => m.id === body.id)) {
                 return prev;
@@ -116,7 +117,6 @@ export default function AdminAiChatLogs() {
       return () => {
         if (stompClientRef.current) {
           stompClientRef.current.deactivate();
-          console.log('Admin WebSocket connection deactivated.');
         }
       };
     }

@@ -1,6 +1,6 @@
 import React from 'react';
+import 'react-quill-new/dist/quill.snow.css';
 import './ArticleRenderer.css';
-
 
 const ArticleRenderer = ({ article, isPreview = false }) => {
   if (!article) return null;
@@ -40,7 +40,11 @@ const ArticleRenderer = ({ article, isPreview = false }) => {
       <div className="article-body-container">
         <div 
           className="article-content ql-editor" 
-          dangerouslySetInnerHTML={{ __html: article.content || '<p>Chưa có nội dung...</p>' }}
+          dangerouslySetInnerHTML={{ 
+            __html: article.content 
+              ? article.content.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ') 
+              : '<p>Chưa có nội dung...</p>' 
+          }}
         ></div>
       </div>
     </article>

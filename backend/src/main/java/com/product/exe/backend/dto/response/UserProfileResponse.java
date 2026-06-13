@@ -17,4 +17,5 @@ public class UserProfileResponse {
     private String role;
     private String token;
     private String subscriptionTier;
+    private String provider;
 }

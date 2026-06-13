@@ -151,6 +151,7 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
                 .avatarUrl(avatarUrl)
                 .role(user.getRole().name())
                 .subscriptionTier(tier)
+                .provider(user.getProvider().name())
                 .build();
     }
 }

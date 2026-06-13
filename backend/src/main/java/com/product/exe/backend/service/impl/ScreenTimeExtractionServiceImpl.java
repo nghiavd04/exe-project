@@ -39,8 +39,31 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
     private final UserRepository userRepository;
     private final ScreenTimeRecordRepository screenTimeRecordRepository;
 
-    private static final String TESSDATA_DIR = "tessdata";
     private static final String UPLOADS_DIR = "uploads";
+
+    private String getTessDataPath() {
+        String envPath = System.getenv("TESSDATA_PREFIX");
+        if (envPath != null && !envPath.isEmpty()) {
+            return envPath;
+        }
+        
+        String[] possiblePaths = {
+            "tessdata",
+            "/usr/share/tesseract-ocr/4.00/tessdata",
+            "/usr/share/tesseract-ocr/5.00/tessdata"
+        };
+        
+        for (String path : possiblePaths) {
+            File dir = new File(path);
+            if (dir.exists() && dir.isDirectory()) {
+                File vieData = new File(dir, "vie.traineddata");
+                if (vieData.exists()) {
+                    return dir.getAbsolutePath();
+                }
+            }
+        }
+        return new File("tessdata").getAbsolutePath();
+    }
 
     @PostConstruct
     public void init() {
@@ -52,7 +75,7 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
             }
         }
 
-        File tessDataDir = new File(TESSDATA_DIR);
+        File tessDataDir = new File(getTessDataPath());
         if (!tessDataDir.exists()) {
             if (tessDataDir.mkdirs()) {
                 log.info("Created tessdata directory: {}", tessDataDir.getAbsolutePath());
@@ -65,7 +88,7 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
     }
 
     private void downloadTrainedDataIfMissing(String lang) {
-        File dataFile = new File(TESSDATA_DIR, lang + ".traineddata");
+        File dataFile = new File(getTessDataPath(), lang + ".traineddata");
         if (!dataFile.exists()) {
             String downloadUrl = "https://github.com/tesseract-ocr/tessdata_fast/raw/main/" + lang + ".traineddata";
             log.info("Trained data for language '{}' is missing. Downloading from: {}", lang, downloadUrl);
@@ -111,11 +134,25 @@ public class ScreenTimeExtractionServiceImpl implements ScreenTimeExtractionServ
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
 
         // Save File Locally
-        
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String newFilename = UUID.randomUUID().toString() + fileExtension;
+        File destFile = new File(UPLOADS_DIR, newFilename).getAbsoluteFile();
+
+        try {
+            file.transferTo(destFile);
+            log.info("Saved screen time screenshot to: {}", destFile.getAbsolutePath());
+        } catch (IOException e) {
+            log.error("Failed to save uploaded screenshot file", e);
+            throw new BadRequestException("Lỗi lưu file: " + e.getMessage());
+        }
 
         // Run OCR using Tess4J
         Tesseract tesseract = new Tesseract();
-        tesseract.setDatapath(new File(TESSDATA_DIR).getAbsolutePath());
+        tesseract.setDatapath(getTessDataPath());
         tesseract.setLanguage("eng+vie"); // Support both English and Vietnamese
 
         String extractedText;

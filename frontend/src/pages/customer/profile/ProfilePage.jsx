@@ -392,72 +392,78 @@ export default function ProfilePage() {
 
                         {activeTab === 'security' && (
                             <div className="tab-content">
-                                <h3>Đổi mật khẩu</h3>
-                                <form onSubmit={handleChangePassword}>
-                                    <div className="form-group">
-                                        <label>Mật khẩu hiện tại</label>
-                                        <div className="password-input-wrapper">
-                                            <input
-                                                type={showOldPassword ? 'text' : 'password'}
-                                                value={oldPassword}
-                                                onChange={(e) => setOldPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                                required
-                                            />
-                                            <button
-                                                type="button"
-                                                className="password-toggle-btn"
-                                                onClick={() => setShowOldPassword(!showOldPassword)}
-                                                tabIndex="-1"
-                                            >
-                                                {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                            </button>
-                                        </div>
+                                <h3>Bảo mật tài khoản</h3>
+                                {user?.provider === 'GOOGLE' ? (
+                                    <div className="security-google-msg" style={{ padding: '20px', background: '#f8fafc', borderRadius: '8px', borderLeft: '4px solid #4285f4', color: '#334155' }}>
+                                        <p style={{ margin: 0, fontWeight: '500' }}>Tài khoản của bạn được liên kết với Google.</p>
                                     </div>
-                                    <div className="form-group">
-                                        <label>Mật khẩu mới</label>
-                                        <div className="password-input-wrapper">
-                                            <input
-                                                type={showNewPassword ? 'text' : 'password'}
-                                                value={newPassword}
-                                                onChange={(e) => setNewPassword(e.target.value)}
-                                                placeholder="Tối thiểu 6 ký tự"
-                                                required
-                                            />
-                                            <button
-                                                type="button"
-                                                className="password-toggle-btn"
-                                                onClick={() => setShowNewPassword(!showNewPassword)}
-                                                tabIndex="-1"
-                                            >
-                                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                            </button>
+                                ) : (
+                                    <form onSubmit={handleChangePassword}>
+                                        <div className="form-group">
+                                            <label>Mật khẩu hiện tại</label>
+                                            <div className="password-input-wrapper">
+                                                <input
+                                                    type={showOldPassword ? 'text' : 'password'}
+                                                    value={oldPassword}
+                                                    onChange={(e) => setOldPassword(e.target.value)}
+                                                    placeholder="••••••••"
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle-btn"
+                                                    onClick={() => setShowOldPassword(!showOldPassword)}
+                                                    tabIndex="-1"
+                                                >
+                                                    {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Xác nhận mật khẩu mới</label>
-                                        <div className="password-input-wrapper">
-                                            <input
-                                                type={showConfirmPassword ? 'text' : 'password'}
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                                required
-                                            />
-                                            <button
-                                                type="button"
-                                                className="password-toggle-btn"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                tabIndex="-1"
-                                            >
-                                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                            </button>
+                                        <div className="form-group">
+                                            <label>Mật khẩu mới</label>
+                                            <div className="password-input-wrapper">
+                                                <input
+                                                    type={showNewPassword ? 'text' : 'password'}
+                                                    value={newPassword}
+                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                    placeholder="Tối thiểu 6 ký tự"
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle-btn"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    tabIndex="-1"
+                                                >
+                                                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button type="submit" className="btn-save" disabled={saving}>
-                                        {saving ? 'Đang lưu...' : 'Cập nhật mật khẩu'}
-                                    </button>
-                                </form>
+                                        <div className="form-group">
+                                            <label>Xác nhận mật khẩu mới</label>
+                                            <div className="password-input-wrapper">
+                                                <input
+                                                    type={showConfirmPassword ? 'text' : 'password'}
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    placeholder="••••••••"
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle-btn"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    tabIndex="-1"
+                                                >
+                                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button type="submit" className="btn-save" disabled={saving}>
+                                            {saving ? 'Đang lưu...' : 'Cập nhật mật khẩu'}
+                                        </button>
+                                    </form>
+                                )}
                             </div>
                         )}
                     </div>

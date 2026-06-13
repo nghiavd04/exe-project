@@ -65,6 +65,8 @@ export default function CreateQuizPage() {
     ]
   });
 
+  const draftRestoredRef = useRef(false);
+
   useEffect(() => {
     if (isEdit) {
       fetchQuizDetail();
@@ -76,7 +78,10 @@ export default function CreateQuizPage() {
           const parsed = JSON.parse(savedDraft);
           setQuizData(prev => ({ ...prev, ...parsed }));
           setTimeout(() => setInitialLoaded(true), 500);
-          toast.success('Đã khôi phục bản nháp chưa lưu');
+          if (!draftRestoredRef.current) {
+            toast.success('Đã khôi phục bản nháp chưa lưu');
+            draftRestoredRef.current = true;
+          }
         } catch (e) {
           console.error("Error loading draft", e);
           setInitialLoaded(true);

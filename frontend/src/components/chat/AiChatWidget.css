@@ -805,3 +805,86 @@
   color: #1e293b;
 }
 
+/* ── Suggestion Cards ── */
+.suggestion-cards-container {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(13, 122, 110, 0.2);
+}
+
+.suggestion-cards-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--teal-dark);
+  margin-bottom: 8px;
+}
+
+.suggestion-cards-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 6px;
+  /* Scrollbar ẩn hoặc nhỏ cho x-axis */
+}
+
+.suggestion-cards-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.suggestion-cards-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.suggestion-cards-scroll::-webkit-scrollbar-thumb {
+  background: rgba(13, 122, 110, 0.2);
+  border-radius: 4px;
+}
+
+.suggestion-card {
+  flex: 0 0 160px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--white);
+  border: 1px solid rgba(13, 122, 110, 0.1);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.suggestion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.suggestion-card-type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.suggestion-card-article .suggestion-card-type {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.suggestion-card-quiz .suggestion-card-type {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.suggestion-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
