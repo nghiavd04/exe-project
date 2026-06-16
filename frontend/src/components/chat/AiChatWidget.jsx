@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/AuthContext';
 import { aiChatApi } from '../../apis/customerApi';
 import { Client } from '@stomp/stompjs';
-import { 
-  MessageSquare, Bot, Send, Plus, Trash2, X, 
+import {
+  MessageSquare, Bot, Send, Plus, Trash2, X,
   ChevronLeft, Sparkles, AlertCircle, User
 } from 'lucide-react';
 import './AiChatWidget.css';
@@ -17,9 +17,13 @@ export default function AiChatWidget() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  
+
   const [chatType, setChatType] = useState('AI'); // 'AI' hoặc 'SUPPORT'
   const stompClientRef = useRef(null);
+  const globalStompClientRef = useRef(null);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasUnreadSupport, setHasUnreadSupport] = useState(false);
 
   // Thêm các state cho modal xóa và phân trang hội thoại từ backend
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -31,9 +35,78 @@ export default function AiChatWidget() {
   const messagesEndRef = useRef(null);
   const chatBodyRef = useRef(null);
 
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await aiChatApi.getUnreadCount();
+      if (res.data.success) {
+        setUnreadCount(res.data.data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Lỗi khi lấy số tin nhắn chưa đọc:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user && userWeight >= 2) {
+      fetchUnreadCount();
+      
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+      let brokerURL = '';
+      if (baseUrl.startsWith('http')) {
+        const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
+        const host = baseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        brokerURL = `${wsProto}://${host}/ws-chat`;
+      } else {
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        brokerURL = `${wsProto}://${window.location.host}${baseUrl}/ws-chat`;
+      }
+
+      const globalClient = new Client({
+        brokerURL,
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      globalClient.onConnect = () => {
+        globalClient.subscribe(`/topic/user/chat/alerts/${user.id}`, (message) => {
+          // Increment immediately
+          setUnreadCount(prev => prev + 1);
+          // Fetch exact after 1s
+          setTimeout(() => {
+            fetchUnreadCount();
+          }, 1000);
+        });
+      };
+
+      globalClient.activate();
+      globalStompClientRef.current = globalClient;
+
+      return () => {
+        if (globalStompClientRef.current) {
+          globalStompClientRef.current.deactivate();
+        }
+      };
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (unreadCount > 0) {
+      setHasUnreadSupport(true);
+    }
+  }, [unreadCount]);
+
   useEffect(() => {
     if (isOpen && user && userWeight >= 2) {
       setChatError(null);
+      // Đánh dấu đã đọc khi mở chat
+      if (unreadCount > 0) {
+        aiChatApi.markAllAsRead().then(() => setUnreadCount(0)).catch(console.error);
+      }
+      if (chatType === 'SUPPORT') {
+        setHasUnreadSupport(false);
+      }
+
       if (chatType === 'AI') {
         fetchSessions(0, false);
       } else {
@@ -252,13 +325,13 @@ export default function AiChatWidget() {
       console.error('Lỗi khi gửi tin nhắn:', err);
       // Xóa tin nhắn tạm
       setMessages(prev => prev.filter(m => m.id !== tempUserMsg.id));
-      
+
       const tempErrorMsg = {
         id: 'error-' + Date.now(),
         role: 'model',
         isSystemError: true,
-        content: chatType === 'SUPPORT' 
-          ? 'Không thể gửi tin nhắn hỗ trợ. Vui lòng kiểm tra kết nối mạng!' 
+        content: chatType === 'SUPPORT'
+          ? 'Không thể gửi tin nhắn hỗ trợ. Vui lòng kiểm tra kết nối mạng!'
           : 'Xin lỗi, đã xảy ra lỗi kết nối với trợ lý AI. Vui lòng thử lại sau giây lát!',
         createdAt: new Date().toISOString()
       };
@@ -311,7 +384,7 @@ export default function AiChatWidget() {
         isBullet = true;
         content = line.trim().substring(2);
       }
-      
+
       const parts = content.split(/(\*\*.*?\*\*)/g);
       const formattedContent = parts.map((part, partIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -343,12 +416,15 @@ export default function AiChatWidget() {
   return (
     <div className={`ai-chat-widget-wrapper ${isOpen ? 'widget-open' : ''}`}>
       {/* Nút tròn Chat nổi */}
-      <button 
+      <button
         className="ai-chat-trigger-btn"
         onClick={() => setIsOpen(!isOpen)}
         title="Trợ lý ảo DOPA LESS"
       >
         {isOpen ? <X size={26} /> : <Bot size={26} />}
+        {!isOpen && unreadCount > 0 && (
+          <span className="chat-unread-badge">{unreadCount}</span>
+        )}
         <span className="pulse-ring"></span>
       </button>
 
@@ -357,7 +433,7 @@ export default function AiChatWidget() {
         {/* Header */}
         <div className="ai-chat-header">
           {activeSessionId !== null && (
-            <button 
+            <button
               className="chat-back-btn"
               onClick={() => {
                 if (chatType === 'SUPPORT') {
@@ -396,26 +472,29 @@ export default function AiChatWidget() {
               )}
               {userWeight >= 3 && (
                 <div className="chat-type-toggle-container">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`chat-type-toggle-btn ${chatType === 'AI' ? 'active' : ''}`}
                     onClick={() => { setChatType('AI'); setChatError(null); }}
                   >
                     <Bot size={14} />
                     <span>Trợ lý AI</span>
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`chat-type-toggle-btn ${chatType === 'SUPPORT' ? 'active' : ''}`}
-                    onClick={() => { setChatType('SUPPORT'); setChatError(null); }}
+                    onClick={() => { setChatType('SUPPORT'); setChatError(null); setHasUnreadSupport(false); }}
                   >
                     <User size={14} />
                     <span>Hỗ trợ trực tuyến</span>
+                    {hasUnreadSupport && chatType !== 'SUPPORT' && (
+                      <span className="chat-support-dot"></span>
+                    )}
                   </button>
                 </div>
               )}
               {chatType === 'AI' && (
-                <button 
+                <button
                   className="new-session-btn"
                   onClick={handleCreateSession}
                 >
@@ -439,14 +518,14 @@ export default function AiChatWidget() {
                 ) : (
                   <>
                     {sessions.map((session) => (
-                      <div 
-                        key={session.id} 
+                      <div
+                        key={session.id}
                         className="session-list-item"
                         onClick={() => selectSession(session.id)}
                       >
                         <MessageSquare size={16} className="session-icon" />
                         <span className="session-item-title" title={session.title}>{session.title}</span>
-                        <button 
+                        <button
                           className="session-delete-btn"
                           onClick={(e) => handleDeleteSessionClick(e, session.id)}
                           title="Xóa cuộc trò chuyện"
@@ -455,9 +534,9 @@ export default function AiChatWidget() {
                         </button>
                       </div>
                     ))}
-                    
+
                     {hasMore && (
-                      <button 
+                      <button
                         type="button"
                         className="load-more-sessions-btn"
                         disabled={isLoading}
@@ -493,8 +572,8 @@ export default function AiChatWidget() {
               ) : (
                 <div className="messages-list">
                   {messages.map((msg) => (
-                    <div 
-                      key={msg.id} 
+                    <div
+                      key={msg.id}
                       className={`message-bubble-wrapper ${msg.role === 'user' ? 'msg-user' : 'msg-ai'} ${msg.isSystemError ? 'msg-error' : ''}`}
                     >
                       {msg.role !== 'user' && (
@@ -509,10 +588,10 @@ export default function AiChatWidget() {
                             <div className="suggestion-cards-title">Gợi ý nội dung:</div>
                             <div className="suggestion-cards-scroll">
                               {msg.suggestions.map((item, idx) => (
-                                <a 
-                                  key={idx} 
-                                  href={item.type === 'ARTICLE' ? `/bai-viet/${item.slug}` : `/trac-nghiem/${item.id}/bat-dau`} 
-                                  target="_blank" 
+                                <a
+                                  key={idx}
+                                  href={item.type === 'ARTICLE' ? `/bai-viet/${item.slug}` : `/trac-nghiem/${item.id}/bat-dau`}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className={`suggestion-card suggestion-card-${item.type.toLowerCase()}`}
                                 >
@@ -552,16 +631,16 @@ export default function AiChatWidget() {
         {/* Footer input (chỉ hiện khi đang trong phiên chat) */}
         {activeSessionId !== null && (
           <form className="ai-chat-input-form" onSubmit={handleSendMessage}>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Nhập câu hỏi của bạn tại đây..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={isSending}
               maxLength={1000}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="chat-send-btn"
               disabled={!inputText.trim() || isSending}
             >
@@ -582,15 +661,15 @@ export default function AiChatWidget() {
                 Lịch sử cuộc trò chuyện này sẽ bị xóa vĩnh viễn và không thể khôi phục lại.
               </p>
               <div className="chat-delete-modal-actions">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="chat-delete-modal-btn cancel-btn"
                   onClick={() => { setDeleteModalOpen(false); setTargetSessionId(null); }}
                 >
                   Hủy bỏ
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="chat-delete-modal-btn confirm-btn"
                   onClick={confirmDeleteSession}
                 >

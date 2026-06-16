@@ -3,6 +3,8 @@ package com.product.exe.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "customers")
 @Data
@@ -32,4 +34,8 @@ public class Customer {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    @Column(name = "reminder_time")
+    @Builder.Default
+    private LocalTime reminderTime = LocalTime.of(20, 0);
 }

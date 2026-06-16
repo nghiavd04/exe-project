@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
-import AdminSendNotificationModal from './AdminSendNotificationModal';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import './AdminContactMessagesPage.css';
 
 export default function AdminContactMessagesPage() {
@@ -24,7 +25,6 @@ export default function AdminContactMessagesPage() {
   const [replyText, setReplyText] = useState('');
   const [notesText, setNotesText] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
-  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   // Modal State for Delete Confirmation
   const [deleteModalConfig, setDeleteModalConfig] = useState({
@@ -211,28 +211,6 @@ export default function AdminContactMessagesPage() {
           <h1>Lời nhắn liên hệ</h1>
           <p>Xem, quản lý và gửi phản hồi thông báo trực tiếp cho các tin nhắn hỗ trợ từ khách hàng.</p>
         </div>
-        <button
-          onClick={() => setIsNotificationModalOpen(true)}
-          className="btn-add-admin"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'var(--teal)',
-            color: '#fff',
-            border: 'none',
-            padding: '0.65rem 1.25rem',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--teal-dark)'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--teal)'}
-        >
-          <Bell size={18} /> Gửi thông báo nhắm mục tiêu
-        </button>
       </header>
 
       {/* Tabs UI */}
@@ -433,15 +411,29 @@ export default function AdminContactMessagesPage() {
                   <label htmlFor="replyText">
                     <Send size={16} /> Phản hồi gửi cho khách hàng:
                   </label>
-                  <textarea
-                    id="replyText"
-                    rows="4"
-                    placeholder="Nhập nội dung phản hồi chính thức tại đây..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    disabled={!!selectedMessage.replyMessage}
-                    required
-                  ></textarea>
+                  {!!selectedMessage.replyMessage ? (
+                    <div 
+                      className="quill-read-only-content" 
+                      dangerouslySetInnerHTML={{ __html: replyText }} 
+                      style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '100px' }}
+                    />
+                  ) : (
+                    <ReactQuill
+                      theme="snow"
+                      value={replyText}
+                      onChange={setReplyText}
+                      placeholder="Nhập nội dung phản hồi chính thức tại đây (Hỗ trợ bôi đậm, in nghiêng, chèn đường link)..."
+                      style={{ background: '#fff' }}
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['link'],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                  )}
                 </div>
 
                 <div className="form-group-field">
@@ -501,10 +493,6 @@ export default function AdminContactMessagesPage() {
         cancelText="Hủy bỏ"
         onClose={() => setDeleteModalConfig({ ...deleteModalConfig, isOpen: false })}
         onConfirm={handleConfirmDelete}
-      />
-      <AdminSendNotificationModal
-        isOpen={isNotificationModalOpen}
-        onClose={() => setIsNotificationModalOpen(false)}
       />
     </div>
   );

@@ -13,4 +13,6 @@ public interface NotificationService {
     void markAsRead(Long notificationId, Long userId);
     void markAllAsRead(Long userId);
     long getUnreadCount(Long userId);
+
+    org.springframework.data.domain.Page<com.product.exe.backend.dto.response.AdminNotificationResponse> getSentNotifications(org.springframework.data.domain.Pageable pageable);
 }

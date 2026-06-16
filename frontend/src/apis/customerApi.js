@@ -49,13 +49,13 @@ export const profileApi = {
   updateProfile: (data) => apiClient.put('/profile', data),
   updatePassword: (data) => apiClient.patch('/profile/password', data),
   updateEmail: (data) => apiClient.patch('/profile/email', data),
-  updateAvatar: (avatarUrl, publicId) => 
+  updateAvatar: (avatarUrl, publicId) =>
     apiClient.patch('/profile/avatar', null, { params: { avatarUrl, publicId } }),
 };
 
 export const imageApi = {
   uploadImage: (formData) => axios.post(`${import.meta.env.VITE_API_BASE_URL}/v1/images/upload`, formData, {
-    headers: { 
+    headers: {
       'Content-Type': 'multipart/form-data',
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
@@ -64,7 +64,7 @@ export const imageApi = {
 
 export const screenTimeApi = {
   uploadScreenTime: (formData) => axios.post(`${import.meta.env.VITE_API_BASE_URL}/screen-time/upload`, formData, {
-    headers: { 
+    headers: {
       'Content-Type': 'multipart/form-data',
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
@@ -88,7 +88,7 @@ export const programApi = {
   getProgress: () => apiClient.get('/program/progress'),
   getDayDetail: (dayNumber) => apiClient.get(`/program/day/${dayNumber}`),
   getWeekDetail: (weekNumber) => apiClient.get(`/program/week/${weekNumber}`),
-  toggleTask: (dayNumber, weekNumber, taskIndex, isCompleted) => 
+  toggleTask: (dayNumber, weekNumber, taskIndex, isCompleted) =>
     apiClient.post('/program/toggle-task', null, { params: { dayNumber, weekNumber, taskIndex, isCompleted } }),
   saveDailyLog: (dayNumber, data) => apiClient.post(`/program/day/${dayNumber}/log`, data),
   saveWeeklyLog: (weekNumber, data) => apiClient.post(`/program/week/${weekNumber}/log`, data),
@@ -114,6 +114,8 @@ export const aiChatApi = {
   createSession: (title, type = 'AI') => apiClient.post('/ai-chat/sessions', { title, type }),
   sendMessage: (sessionId, content) => apiClient.post(`/ai-chat/sessions/${sessionId}/message`, { content }),
   deleteSession: (sessionId) => apiClient.delete(`/ai-chat/sessions/${sessionId}`),
+  getUnreadCount: () => apiClient.get('/ai-chat/unread-count'),
+  markAllAsRead: () => apiClient.put('/ai-chat/mark-read'),
 };
 
 export default apiClient;

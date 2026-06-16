@@ -1,6 +1,7 @@
 package com.product.exe.backend.repository;
 
 import com.product.exe.backend.entity.Notification;
+import com.product.exe.backend.enums.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    Page<Notification> findByTypeOrderByCreatedAtDesc(NotificationType type, Pageable pageable);
 
     long countByUserIdAndIsReadFalse(Long userId);
 

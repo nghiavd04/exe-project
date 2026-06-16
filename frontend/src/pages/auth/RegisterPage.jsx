@@ -50,17 +50,17 @@ export default function RegisterPage() {
   }, [step]);
 
   const validateEmail = () => {
-    if (!form.email) return 'Email is required';
+    if (!form.email) return 'Vui lòng nhập email';
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(form.email)) return 'Invalid email format';
+    if (!emailRegex.test(form.email)) return 'Định dạng email không hợp lệ';
     return null;
   };
 
   const validateInfo = () => {
     const errs = {};
-    if (!form.fullName.trim()) errs.fullName = 'Full name is required';
-    if (!form.password) errs.password = 'Password is required';
-    else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters';
+    if (!form.fullName.trim()) errs.fullName = 'Vui lòng nhập họ và tên';
+    if (!form.password) errs.password = 'Vui lòng nhập mật khẩu';
+    else if (form.password.length < 6) errs.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     return errs;
   };
 

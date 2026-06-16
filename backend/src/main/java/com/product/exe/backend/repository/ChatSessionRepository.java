@@ -37,4 +37,6 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> 
         @Param("search") String search,
         Pageable pageable
     );
+
+    long countByCreatedAtAfter(java.time.LocalDateTime date);
 }

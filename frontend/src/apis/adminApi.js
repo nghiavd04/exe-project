@@ -3,6 +3,7 @@ import apiClient from './authApi';
 export const adminApi = {
   getDashboardStats: (period) => apiClient.get(`/v1/admin/dashboard/stats?period=${period || '7d'}`),
   sendNotification: (data) => apiClient.post('/v1/admin/notifications', data),
+  getSentNotifications: (params) => apiClient.get('/v1/admin/notifications', { params }),
   
   // Future methods
   getQuizzes: (params) => apiClient.get('/v1/admin/quizzes', { params }),
@@ -87,5 +88,7 @@ export const adminApi = {
   claimSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/claim`),
   takeoverSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/takeover`),
   sendAdminMessage: (sessionId, content) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/message`, { content }),
+  getAiChatUnreadCount: () => apiClient.get('/v1/admin/ai-chat/unread-count'),
+  markSessionAsRead: (sessionId) => apiClient.put(`/v1/admin/ai-chat/sessions/${sessionId}/mark-read`),
 };
 

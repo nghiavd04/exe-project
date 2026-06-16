@@ -15,4 +15,9 @@ public interface AiChatService {
     List<ChatMessage> getMessages(Long userId, Long sessionId, Integer limit);
     AiChatResponseDto sendMessage(Long userId, Long sessionId, String content);
     void deleteSession(Long userId, Long sessionId);
+
+    long getUnreadCountForUser(Long userId);
+    long getUnreadCountForAdmin();
+    void markAllAsReadForUser(Long userId);
+    void markAllAsReadForSession(Long sessionId, String roleToMarkAsRead);
 }

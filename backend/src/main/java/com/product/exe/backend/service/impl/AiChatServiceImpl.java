@@ -131,6 +131,14 @@ public class AiChatServiceImpl implements AiChatService {
             // Phát tin nhắn qua kênh WebSocket của phòng chat
             messagingTemplate.convertAndSend("/topic/chat/" + sessionId, userMessage);
 
+            // Bắn tín hiệu Notification Global cho màn hình Admin
+            java.util.Map<String, Object> alertPayload = java.util.Map.of(
+                "eventType", "NEW_MESSAGE",
+                "sessionId", sessionId,
+                "message", "Có tin nhắn mới từ khách hàng " + session.getUser().getEmail()
+            );
+            messagingTemplate.convertAndSend("/topic/admin/chat/alerts", (Object) alertPayload);
+
             // SUPPORT chat không gợi ý nội dung AI
             return AiChatResponseDto.builder()
                     .aiText(content)
@@ -191,6 +199,28 @@ public class AiChatServiceImpl implements AiChatService {
             throw new BadRequestException("Bạn không có quyền truy cập cuộc hội thoại này");
         }
         return session;
+    }
+
+    @Override
+    public long getUnreadCountForUser(Long userId) {
+        return chatMessageRepository.countBySessionUserIdAndRoleNotAndIsReadFalse(userId, "user");
+    }
+
+    @Override
+    public long getUnreadCountForAdmin() {
+        return chatMessageRepository.countDistinctSessionByRoleAndIsReadFalse("user");
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsReadForUser(Long userId) {
+        chatMessageRepository.markAllAsReadForUser(userId);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsReadForSession(Long sessionId, String roleToMarkAsRead) {
+        chatMessageRepository.markAllAsReadForSession(sessionId, roleToMarkAsRead);
     }
 
     /**

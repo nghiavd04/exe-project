@@ -2,18 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { adminApi } from '../../../apis/adminApi';
 import { useAuth } from '../../../hooks/AuthContext';
 import { Client } from '@stomp/stompjs';
-import { 
-  Search, Eye, MessageSquare, Calendar, User, 
+import {
+  Search, Eye, MessageSquare, Calendar, User,
   X, ChevronLeft, ChevronRight, Bot, Sparkles, AlertCircle, Send
 } from 'lucide-react';
 import './AdminAiChatLogs.css';
 
 export default function AdminAiChatLogs() {
   const { user: currentAdmin } = useAuth();
-  
+
   // Tab State
   const [activeTab, setActiveTab] = useState('AI'); // 'AI' hoặc 'SUPPORT'
-  
+
   // Tab 1: AI Chat Logs states
   const [sessions, setSessions] = useState([]);
   const [page, setPage] = useState(0);
@@ -41,6 +41,49 @@ export default function AdminAiChatLogs() {
   useEffect(() => {
     fetchSessions();
   }, [page, searchQuery, activeTab]);
+
+  // Global WebSocket for session list updates (real-time badge)
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    let brokerURL = '';
+    if (baseUrl.startsWith('http')) {
+      const wsProto = baseUrl.startsWith('https') ? 'wss' : 'ws';
+      const host = baseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      brokerURL = `${wsProto}://${host}/ws-chat`;
+    } else {
+      const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      brokerURL = `${wsProto}://${window.location.host}${baseUrl}/ws-chat`;
+    }
+
+    const client = new Client({
+      brokerURL,
+      reconnectDelay: 5000,
+    });
+
+    client.onConnect = () => {
+      client.subscribe('/topic/admin/chat/alerts', (message) => {
+        const body = JSON.parse(message.body);
+        if (body.eventType === 'NEW_MESSAGE' && body.sessionId) {
+          setSessions(prev => {
+            // Check if session exists in current list
+            const exists = prev.some(s => s.id === body.sessionId);
+            if (exists) {
+              return prev.map(s => s.id === body.sessionId ? { ...s, unreadCount: (s.unreadCount || 0) + 1 } : s);
+            } else {
+              // If not exists, wait 1s and refetch to get it at top
+              setTimeout(() => {
+                fetchSessions();
+              }, 1000);
+              return prev;
+            }
+          });
+        }
+      });
+    };
+
+    client.activate();
+    return () => client.deactivate();
+  }, []);
 
   // Scroll support chat to bottom on new messages
   useEffect(() => {
@@ -73,7 +116,7 @@ export default function AdminAiChatLogs() {
       client.onConnect = () => {
         client.subscribe(`/topic/chat/${selectedSession.id}`, (message) => {
           const body = JSON.parse(message.body);
-          
+
           if (body.eventType === 'ASSIGNMENT_UPDATE') {
             // Cập nhật session đang chọn
             setSelectedSession(prev => {
@@ -85,7 +128,7 @@ export default function AdminAiChatLogs() {
               }
               return prev;
             });
-            
+
             // Cập nhật session tương ứng trong danh sách sidebar
             setSessions(prevList => prevList.map(s => {
               if (s.id === body.sessionId) {
@@ -207,8 +250,18 @@ export default function AdminAiChatLogs() {
         if (claimRes.data.success) {
           const updatedSession = claimRes.data.data;
           setSelectedSession(updatedSession);
-          setSessions(prev => prev.map(s => s.id === session.id ? updatedSession : s));
+          setSessions(prev => prev.map(s => s.id === session.id ? { ...updatedSession, unreadCount: 0 } : s));
         }
+      } else {
+        // Cập nhật local session unread count = 0
+        setSessions(prev => prev.map(s => s.id === session.id ? { ...s, unreadCount: 0 } : s));
+      }
+
+      // Đánh dấu đã đọc
+      try {
+        await adminApi.markSessionAsRead(session.id);
+      } catch (e) {
+        console.error('Không thể đánh dấu đã đọc:', e);
       }
     } catch (err) {
       console.error('Lỗi khi tiếp nhận phòng hỗ trợ:', err);
@@ -238,7 +291,7 @@ export default function AdminAiChatLogs() {
         const updatedSession = res.data.data;
         setSelectedSession(updatedSession);
         setSessions(prev => prev.map(s => s.id === sessionId ? updatedSession : s));
-        
+
         // Tải lại tin nhắn để hiển thị câu báo của hệ thống
         const msgRes = await adminApi.getAiChatMessages(sessionId);
         if (msgRes.data.success) {
@@ -301,7 +354,7 @@ export default function AdminAiChatLogs() {
         isBullet = true;
         content = line.trim().substring(2);
       }
-      
+
       const parts = content.split(/(\*\*.*?\*\*)/g);
       const formattedContent = parts.map((part, partIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -339,16 +392,16 @@ export default function AdminAiChatLogs() {
 
       {/* Tabs */}
       <div className="admin-chat-tabs">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className={`admin-chat-tab-btn ${activeTab === 'AI' ? 'active' : ''}`}
           onClick={() => handleTabChange('AI')}
         >
           <Bot size={18} />
           <span>Lịch sử Chat AI</span>
         </button>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className={`admin-chat-tab-btn ${activeTab === 'SUPPORT' ? 'active' : ''}`}
           onClick={() => handleTabChange('SUPPORT')}
         >
@@ -371,8 +424,8 @@ export default function AdminAiChatLogs() {
                 const isMe = s.assignedTo?.email === currentAdmin?.email;
                 const isOther = s.assignedTo && !isMe;
                 return (
-                  <div 
-                    key={s.id} 
+                  <div
+                    key={s.id}
                     className={`console-session-item ${selectedSession?.id === s.id ? 'active' : ''}`}
                     onClick={() => handleSelectSupportSession(s)}
                   >
@@ -381,6 +434,9 @@ export default function AdminAiChatLogs() {
                     </span>
                     <span className="console-session-title">
                       {s.title}
+                      {s.unreadCount > 0 && (
+                        <span className="console-unread-badge">{s.unreadCount}</span>
+                      )}
                     </span>
                     <div className="console-session-meta">
                       <span>{formatDateTime(s.updatedAt)}</span>
@@ -420,8 +476,8 @@ export default function AdminAiChatLogs() {
                   </div>
                   <div className="console-pane-status">
                     {!selectedSession.assignedTo ? (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="console-btn-claim"
                         onClick={() => handleClaimSession(selectedSession.id)}
                       >
@@ -436,8 +492,8 @@ export default function AdminAiChatLogs() {
                         <span className="console-status-text" style={{ color: '#d97706' }}>
                           Nhân viên <strong>{selectedSession.assignedTo.email}</strong> đang hỗ trợ
                         </span>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           className="console-btn-takeover"
                           onClick={() => handleTakeoverSession(selectedSession.id)}
                         >
@@ -454,8 +510,8 @@ export default function AdminAiChatLogs() {
                     const isSystem = msg.role === 'support' && msg.content?.startsWith('[HỆ THỐNG]');
                     const isStaff = msg.role === 'support' || msg.role === 'admin';
                     return (
-                      <div 
-                        key={msg.id} 
+                      <div
+                        key={msg.id}
                         className={`console-msg-bubble-wrapper ${isSystem ? 'console-msg-system' : isStaff ? 'console-msg-staff' : 'console-msg-user'}`}
                       >
                         <div className="console-msg-bubble">
@@ -475,15 +531,15 @@ export default function AdminAiChatLogs() {
                 {/* Footer Input */}
                 {selectedSession.assignedTo?.email === currentAdmin?.email ? (
                   <form className="console-chat-input-form" onSubmit={handleSendSupportMessage}>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Nhập tin nhắn gửi tới khách hàng..."
                       value={supportInputText}
                       onChange={(e) => setSupportInputText(e.target.value)}
                       disabled={isSendingSupport}
                     />
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="console-chat-send-btn"
                       disabled={!supportInputText.trim() || isSendingSupport}
                     >
@@ -507,8 +563,8 @@ export default function AdminAiChatLogs() {
             <form onSubmit={handleSearchSubmit} className="logs-search-form">
               <div className="search-input-group">
                 <Search size={18} className="search-icon" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Tìm kiếm theo Email người dùng hoặc tiêu đề cuộc trò chuyện..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
@@ -570,8 +626,8 @@ export default function AdminAiChatLogs() {
                           </div>
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             className="btn-view-transcript"
                             onClick={() => handleViewTranscript(session)}
                             title="Xem nội dung hội thoại"
@@ -653,8 +709,8 @@ export default function AdminAiChatLogs() {
                   ) : (
                     <div className="admin-chat-messages-list">
                       {messages.map((msg) => (
-                        <div 
-                          key={msg.id} 
+                        <div
+                          key={msg.id}
                           className={`admin-msg-bubble-wrapper ${msg.role === 'user' ? 'admin-msg-user' : 'admin-msg-ai'}`}
                         >
                           {msg.role !== 'user' && (

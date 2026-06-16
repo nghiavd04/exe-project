@@ -141,6 +141,26 @@ public class CustomerAiChatController {
         }
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUnreadCount() {
+        Long userId = getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
+        }
+        long count = aiChatService.getUnreadCountForUser(userId);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("unreadCount", count)));
+    }
+
+    @PutMapping("/mark-read")
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead() {
+        Long userId = getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
+        }
+        aiChatService.markAllAsReadForUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("Đã đánh dấu đọc tất cả tin nhắn", null));
+    }
+
     private boolean checkPremiumAccess(Long userId) {
         SubscriptionTier tier = subscriptionService.getUserHighestTier(userId);
         return tier.getWeight() >= SubscriptionTier.PREMIUM.getWeight();

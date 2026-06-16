@@ -14,6 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.product.exe.backend.exception.ResourceNotFoundException;
+import com.product.exe.backend.enums.NotificationType;
+import com.product.exe.backend.dto.response.AdminNotificationResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 import java.time.LocalDateTime;
@@ -49,6 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .title(title)
                 .content(content)
                 .isRead(false)
+                .type(NotificationType.MANUAL_BROADCAST)
                 .build();
         notificationRepository.save(notification);
     }
@@ -68,6 +73,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .title(title)
                 .content(content)
                 .isRead(false)
+                .type(NotificationType.MANUAL_BROADCAST)
                 .build();
         notificationRepository.save(notification);
     }
@@ -179,5 +185,19 @@ public class NotificationServiceImpl implements NotificationService {
         SubscriptionTier userTier = subscriptionService.getUserHighestTier(userId);
 
         return notificationRepository.countUnreadForUser(userId, userTier, user.getCreatedAt());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AdminNotificationResponse> getSentNotifications(Pageable pageable) {
+        Page<Notification> notifications = notificationRepository.findByTypeOrderByCreatedAtDesc(NotificationType.MANUAL_BROADCAST, pageable);
+        return notifications.map(n -> AdminNotificationResponse.builder()
+                .id(n.getId())
+                .title(n.getTitle())
+                .content(n.getContent())
+                .targetEmail(n.getUser() != null ? n.getUser().getEmail() : null)
+                .targetPlanTier(n.getPlanTier())
+                .createdAt(n.getCreatedAt())
+                .build());
     }
 }

@@ -19,6 +19,7 @@ public class AdminChatSessionResponse {
     private UserSummary assignedTo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long unreadCount;
 
     @Data
     @NoArgsConstructor

@@ -253,8 +253,6 @@
     line-height: 1;
 }
 
-/* Custom list styles removed to let quill.snow.css handle them */
-
 /* Inline Code & Pre */
 .article-renderer .article-content pre {
     background: #0f172a;

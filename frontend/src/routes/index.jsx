@@ -35,6 +35,7 @@ import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
 import AdminManagerAccountPage from '../pages/admin/accounts/AdminManagerAccountPage';
 import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptionPage';
 import AdminContactMessagesPage from '../pages/admin/contact/AdminContactMessagesPage';
+import AdminNotificationsPage from '../pages/admin/AdminNotificationsPage';
 import AdminMediaListPage from '../pages/admin/medias/AdminMediaListPage';
 import AdminProgramPage from '../pages/admin/program/AdminProgramPage';
 import AdminAiChatConfig from '../pages/admin/ai-chat/AdminAiChatConfig';
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
           { path: 'users', element: <AdminManagerAccountPage /> },
           { path: 'subscriptions', element: <AdminSubscriptionPage /> },
           { path: 'contact-messages', element: <AdminContactMessagesPage /> },
+          { path: 'notifications', element: <AdminNotificationsPage /> },
           { path: 'medias', element: <AdminMediaListPage /> },
           { path: 'program', element: <AdminProgramPage /> },
           { path: 'ai-chat/prompt', element: <AdminAiChatConfig /> },

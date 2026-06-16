@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.product.exe.backend.service.AiChatService;
+
 @RestController
 @RequestMapping("/api/v1/admin/ai-chat")
 @PreAuthorize("hasRole('ADMIN')")
@@ -37,6 +39,7 @@ public class AdminAiChatController {
     private final SystemConfigService systemConfigService;
     private final ChatSessionRepository chatSessionRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final AiChatService aiChatService;
 
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -222,7 +225,27 @@ public class AdminAiChatController {
         // Broadcast tin nhắn qua WebSocket
         messagingTemplate.convertAndSend("/topic/chat/" + sessionId, message);
         
+        // Broadcast thông báo global cho user
+        Map<String, Object> alertPayload = Map.of(
+            "eventType", "NEW_SUPPORT_MESSAGE",
+            "sessionId", session.getId(),
+            "message", "Bạn có tin nhắn mới từ nhân viên hỗ trợ"
+        );
+        messagingTemplate.convertAndSend("/topic/user/chat/alerts/" + session.getUser().getId(), (Object) alertPayload);
+        
         return ResponseEntity.ok(ApiResponse.success("Gửi tin nhắn thành công!", message));
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> getUnreadCount() {
+        long count = aiChatService.getUnreadCountForAdmin();
+        return ResponseEntity.ok(ApiResponse.success("Lấy số tin nhắn chưa đọc thành công", Map.of("unreadCount", count)));
+    }
+
+    @PutMapping("/sessions/{sessionId}/mark-read")
+    public ResponseEntity<ApiResponse<Void>> markSessionAsRead(@PathVariable(name = "sessionId") Long sessionId) {
+        aiChatService.markAllAsReadForSession(sessionId, "user");
+        return ResponseEntity.ok(ApiResponse.success("Đã đánh dấu đọc tin nhắn của user", null));
     }
 
     private void broadcastSessionUpdate(ChatSession session) {
@@ -235,6 +258,14 @@ public class AdminAiChatController {
             ) : Map.of()
         );
         messagingTemplate.convertAndSend("/topic/chat/" + session.getId(), (Object) event);
+
+        // Broadcast thông báo global cho user
+        Map<String, Object> alert = Map.of(
+            "eventType", "ASSIGNMENT_UPDATE",
+            "sessionId", session.getId(),
+            "message", "Nhân viên hỗ trợ đã tham gia cuộc trò chuyện."
+        );
+        messagingTemplate.convertAndSend("/topic/user/chat/alerts/" + session.getUser().getId(), (Object) alert);
     }
 
     private AdminChatSessionResponse mapToResponse(ChatSession session) {
@@ -254,6 +285,8 @@ public class AdminAiChatController {
                     .build();
         }
         
+        long unreadCount = chatMessageRepository.countBySessionIdAndRoleAndIsReadFalse(session.getId(), "user");
+
         return AdminChatSessionResponse.builder()
                 .id(session.getId())
                 .title(session.getTitle())
@@ -262,6 +295,7 @@ public class AdminAiChatController {
                 .assignedTo(assignedToSummary)
                 .createdAt(session.getCreatedAt())
                 .updatedAt(session.getUpdatedAt())
+                .unreadCount(unreadCount)
                 .build();
     }
 

@@ -77,12 +77,12 @@ export default function LoginPage() {
 
   const validate = () => {
     const errs = {};
-    if (!form.email) errs.email = 'Email is required';
+    if (!form.email) errs.email = 'Vui lòng nhập email';
     else {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(form.email)) errs.email = 'Invalid email format';
+      if (!emailRegex.test(form.email)) errs.email = 'Định dạng email không hợp lệ';
     }
-    if (!form.password) errs.password = 'Password is required';
+    if (!form.password) errs.password = 'Vui lòng nhập mật khẩu';
     return errs;
   };
 

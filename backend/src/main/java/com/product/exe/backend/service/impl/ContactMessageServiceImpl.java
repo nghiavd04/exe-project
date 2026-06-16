@@ -99,7 +99,8 @@ public class ContactMessageServiceImpl implements ContactMessageService {
         // Tạo thông báo cho người dùng gửi tin nhắn
         String adminName = admin.getAdmin() != null ? admin.getAdmin().getFullName() : "Quản trị viên";
         String notifTitle = "Phản hồi liên hệ từ Dopaless";
-        String notifContent = adminName + " đã phản hồi lời nhắn của bạn: \"" + request.getReplyMessage() + "\"";
+        // Thay vì gửi nguyên đoạn text (có thể chứa thẻ HTML) vào thông báo, ta rút gọn lại.
+        String notifContent = adminName + " vừa phản hồi lời nhắn liên hệ của bạn. Hãy nhấn vào đây để xem chi tiết!";
         notificationService.createNotification(message.getUser(), notifTitle, notifContent);
     }
 

@@ -1,6 +1,7 @@
 package com.product.exe.backend.entity;
 
 import com.product.exe.backend.enums.SubscriptionTier;
+import com.product.exe.backend.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,6 +38,11 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     @Builder.Default
     private Boolean isRead = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    @Builder.Default
+    private NotificationType type = NotificationType.SYSTEM;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
