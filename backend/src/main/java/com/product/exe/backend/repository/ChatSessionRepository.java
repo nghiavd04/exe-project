@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.query.Param;
 import com.product.exe.backend.enums.ChatSessionType;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 
 @Repository
@@ -38,5 +39,5 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> 
         Pageable pageable
     );
 
-    long countByCreatedAtAfter(java.time.LocalDateTime date);
+    long countByCreatedAtAfter(LocalDateTime date);
 }

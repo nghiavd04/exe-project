@@ -1,5 +1,6 @@
 package com.product.exe.backend.service.impl;
 
+import com.product.exe.backend.dto.response.DashboardStatsResponse;
 import com.product.exe.backend.enums.SubscriptionStatus;
 import com.product.exe.backend.enums.PaymentStatus;
 import com.product.exe.backend.enums.UserProgramStatus;
@@ -34,10 +35,10 @@ public class DashboardServiceImpl implements DashboardService {
     private final UserProgramProgressRepository userProgramProgressRepository;
 
     @Override
-    public com.product.exe.backend.dto.response.DashboardStatsResponse getStats(String period) {
+    public DashboardStatsResponse getStats(String period) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
 
-        return com.product.exe.backend.dto.response.DashboardStatsResponse.builder()
+        return DashboardStatsResponse.builder()
                 .totalUsers(userRepository.count())
                 .activeSubscriptions(userSubscriptionRepository.countByStatus(SubscriptionStatus.ACTIVE))
                 .totalRevenue(paymentRepository.sumAmountByStatus(PaymentStatus.SUCCESS))
@@ -51,18 +52,18 @@ public class DashboardServiceImpl implements DashboardService {
                 .build();
     }
 
-    private List<com.product.exe.backend.dto.response.DashboardStatsResponse.SubscriptionBreakdownData> getSubscriptionBreakdown() {
+    private List<DashboardStatsResponse.SubscriptionBreakdownData> getSubscriptionBreakdown() {
         List<Object[]> breakdownData = userSubscriptionRepository.countSubscriptionsByPlanName(SubscriptionStatus.ACTIVE);
-        List<com.product.exe.backend.dto.response.DashboardStatsResponse.SubscriptionBreakdownData> breakdown = new ArrayList<>();
+        List<DashboardStatsResponse.SubscriptionBreakdownData> breakdown = new ArrayList<>();
         for (Object[] row : breakdownData) {
             String planName = row[0] != null ? row[0].toString() : "Unknown";
             Long count = row[1] != null ? Long.parseLong(row[1].toString()) : 0L;
-            breakdown.add(new com.product.exe.backend.dto.response.DashboardStatsResponse.SubscriptionBreakdownData(planName, count));
+            breakdown.add(new DashboardStatsResponse.SubscriptionBreakdownData(planName, count));
         }
         return breakdown;
     }
 
-    private List<com.product.exe.backend.dto.response.DashboardStatsResponse.RecentTransactionData> getRecentTransactions() {
+    private List<DashboardStatsResponse.RecentTransactionData> getRecentTransactions() {
         List<Payment> recentPayments = paymentRepository.findTop5ByOrderByCreatedAtDesc();
         return recentPayments.stream().map(p -> com.product.exe.backend.dto.response.DashboardStatsResponse.RecentTransactionData.builder()
                 .customerName(p.getCustomer() != null ? p.getCustomer().getFullName() : "Unknown")
@@ -73,10 +74,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .build()).toList();
     }
 
-    private com.product.exe.backend.dto.response.DashboardStatsResponse.ContentPerformanceData getContentPerformance() {
+    private DashboardStatsResponse.ContentPerformanceData getContentPerformance() {
         // Quizzes
         List<Object[]> topQuizzesRaw = quizAttemptRepository.findTopQuizzes(PageRequest.of(0, 5)).getContent();
-        List<com.product.exe.backend.dto.response.DashboardStatsResponse.TopQuizData> topQuizzes = new ArrayList<>();
+        List<DashboardStatsResponse.TopQuizData> topQuizzes = new ArrayList<>();
         for (Object[] row : topQuizzesRaw) {
             String title = row[0] != null ? row[0].toString() : "Unknown";
             Long attempts = row[1] != null ? Long.parseLong(row[1].toString()) : 0L;
@@ -85,28 +86,28 @@ public class DashboardServiceImpl implements DashboardService {
 
         // Articles
         List<Article> topArticlesRaw = articleRepository.findAllByOrderByViewCountDesc(PageRequest.of(0, 5)).getContent();
-        List<com.product.exe.backend.dto.response.DashboardStatsResponse.TopArticleData> topArticles = topArticlesRaw.stream()
+        List<DashboardStatsResponse.TopArticleData> topArticles = topArticlesRaw.stream()
                 .map(a -> new com.product.exe.backend.dto.response.DashboardStatsResponse.TopArticleData(a.getTitle(), a.getViewCount()))
                 .toList();
 
-        return new com.product.exe.backend.dto.response.DashboardStatsResponse.ContentPerformanceData(topQuizzes, topArticles);
+        return new DashboardStatsResponse.ContentPerformanceData(topQuizzes, topArticles);
     }
 
-    private com.product.exe.backend.dto.response.DashboardStatsResponse.AiChatStatsData getAiChatStats(LocalDateTime startOfDay) {
-        return new com.product.exe.backend.dto.response.DashboardStatsResponse.AiChatStatsData(
+    private DashboardStatsResponse.AiChatStatsData getAiChatStats(LocalDateTime startOfDay) {
+        return new DashboardStatsResponse.AiChatStatsData(
                 chatSessionRepository.countByCreatedAtAfter(startOfDay)
         );
     }
 
-    private com.product.exe.backend.dto.response.DashboardStatsResponse.ProgramProgressData getProgramProgress(LocalDateTime startOfDay) {
-        return new com.product.exe.backend.dto.response.DashboardStatsResponse.ProgramProgressData(
+    private DashboardStatsResponse.ProgramProgressData getProgramProgress(LocalDateTime startOfDay) {
+        return new DashboardStatsResponse.ProgramProgressData(
                 userProgramProgressRepository.countByStatus(UserProgramStatus.ACTIVE),
                 userProgramProgressRepository.countByLastCheckedInAtAfter(startOfDay)
         );
     }
 
-    private List<com.product.exe.backend.dto.response.DashboardStatsResponse.ChartDataPoint> calculateChartData(String period) {
-        List<com.product.exe.backend.dto.response.DashboardStatsResponse.ChartDataPoint> data = new ArrayList<>();
+    private List<DashboardStatsResponse.ChartDataPoint> calculateChartData(String period) {
+        List<DashboardStatsResponse.ChartDataPoint> data = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
         int days = 7;
@@ -137,7 +138,7 @@ public class DashboardServiceImpl implements DashboardService {
             LocalDate date = now.minusDays(i);
             String label = date.format(formatter);
             BigDecimal value = revenueMap.getOrDefault(label, BigDecimal.ZERO);
-            data.add(new com.product.exe.backend.dto.response.DashboardStatsResponse.ChartDataPoint(label, value.longValue()));
+            data.add(new DashboardStatsResponse.ChartDataPoint(label, value.longValue()));
         }
         
         return data;

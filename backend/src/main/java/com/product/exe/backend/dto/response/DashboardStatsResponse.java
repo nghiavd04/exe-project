@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.product.exe.backend.enums.PaymentStatus;
 
 @Data
 @NoArgsConstructor
@@ -42,7 +43,7 @@ public class DashboardStatsResponse {
         private String customerName;
         private String planName;
         private java.math.BigDecimal amount;
-        private com.product.exe.backend.enums.PaymentStatus status;
+        private PaymentStatus status;
         private LocalDateTime createdAt;
     }
 
