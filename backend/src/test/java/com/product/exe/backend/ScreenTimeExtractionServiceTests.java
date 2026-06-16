@@ -21,9 +21,12 @@ class ScreenTimeExtractionServiceTests {
         assertEquals(272, service.parseScreenTime("4h 32m"));
         assertEquals(272, service.parseScreenTime("4h32m"));
         assertEquals(272, service.parseScreenTime("4 hr 32 min"));
+        assertEquals(195, service.parseScreenTime("3 hr, 15 min"));
         assertEquals(272, service.parseScreenTime("4 hrs 32 mins"));
         assertEquals(272, service.parseScreenTime("4 giờ 32 phút"));
         assertEquals(272, service.parseScreenTime("4g 32p"));
+        assertEquals(165, service.parseScreenTime("2h 45m"));
+        assertEquals(165, service.parseScreenTime("2h 45"));
         assertEquals(150, service.parseScreenTime("2h 30m"));
     }
 
