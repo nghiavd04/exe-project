@@ -69,7 +69,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .category(request.getCategory())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .thumbnailPublicId(request.getThumbnailPublicId())
-                .requiredTier(request.getRequiredTier() != null ? request.getRequiredTier() : SubscriptionTier.FREE)
+                .sourceUrl(request.getSourceUrl())
+                .requiredTier(SubscriptionTier.FREE)
                 .slug(SlugUtil.toSlug(request.getTitle()) + "-" + System.currentTimeMillis())
                 .status(ArticleStatus.DRAFT)
                 .admin(admin)
@@ -93,7 +94,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         article.setCategory(request.getCategory());
         article.setThumbnailUrl(request.getThumbnailUrl());
         article.setThumbnailPublicId(request.getThumbnailPublicId());
-        article.setRequiredTier(request.getRequiredTier() != null ? request.getRequiredTier() : SubscriptionTier.FREE);
+        article.setSourceUrl(request.getSourceUrl());
+        article.setRequiredTier(SubscriptionTier.FREE);
         
         // Optionally update slug if title changes significantly
         // article.setSlug(SlugUtil.toSlug(request.getTitle()) + "-" + article.getId());
@@ -166,6 +168,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .slug(article.getSlug())
                 .category(article.getCategory())
                 .categoryDisplayName(article.getCategory() != null ? article.getCategory().getDisplayName() : null)
+                .sourceUrl(article.getSourceUrl())
                 .status(article.getStatus())
                 .statusDisplayName(article.getStatus() != null ? article.getStatus().getDisplayName() : null)
                 .viewCount(article.getViewCount() != null ? article.getViewCount() : 0L)
@@ -190,6 +193,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .content(article.getContent())
                 .category(article.getCategory())
                 .categoryDisplayName(article.getCategory() != null ? article.getCategory().getDisplayName() : null)
+                .sourceUrl(article.getSourceUrl())
                 .status(article.getStatus())
                 .statusDisplayName(article.getStatus() != null ? article.getStatus().getDisplayName() : null)
                 .thumbnailUrl(article.getThumbnailUrl())

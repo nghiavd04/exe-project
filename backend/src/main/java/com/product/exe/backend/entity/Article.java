@@ -44,6 +44,9 @@ public class Article {
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl;
 
+    @Column(name = "source_url", columnDefinition = "TEXT")
+    private String sourceUrl;
+
     @Column(name = "thumbnail_public_id", length = 255)
     private String thumbnailPublicId;
 

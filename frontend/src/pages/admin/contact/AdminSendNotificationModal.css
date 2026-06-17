@@ -275,3 +275,17 @@
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }
+
+/* ReactQuill custom styles */
+.quill-wrapper .ql-container {
+  min-height: 120px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.quill-wrapper .ql-toolbar {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background-color: #f8fafc;
+}

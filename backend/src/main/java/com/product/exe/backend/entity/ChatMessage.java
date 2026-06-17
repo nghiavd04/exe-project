@@ -25,7 +25,7 @@ public class ChatMessage {
     private ChatSession session;
 
 
-    @Column(name = "role", nullable = false, length = 50)
+    @Column(name = "`role`", nullable = false, length = 50)
     private String role; // "user" hoặc "model"
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")

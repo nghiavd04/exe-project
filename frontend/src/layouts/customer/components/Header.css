@@ -453,4 +453,15 @@ nav#navbar.scrolled {
     font-size: 0.75rem;
     color: rgba(0, 0, 0, 0.35);
     display: block;
+}
+
+.notif-item-content a {
+    color: var(--teal);
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.notif-item-content a:hover {
+    color: var(--teal-dark);
 }

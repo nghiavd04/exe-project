@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, Bell } from 'lucide-react';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import './AdminSendNotificationModal.css';
 
 export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess }) {
@@ -69,7 +71,7 @@ export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) {
+    if (!title.trim() || !content.replace(/<[^>]*>?/gm, '').trim()) {
       toast.error('Vui lòng điền đầy đủ tiêu đề và nội dung');
       return;
     }
@@ -83,7 +85,7 @@ export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess 
       setSubmitting(true);
       const payload = {
         title: title.trim(),
-        content: content.trim(),
+        content: content,
         targetEmail: targetType === 'USER' ? targetEmail.trim() : null,
         targetPlanTier: targetType === 'PLAN' ? targetPlanTier : null
       };
@@ -137,15 +139,24 @@ export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess 
             {/* Content */}
             <div className="notification-form-group">
               <label htmlFor="notif-content">Nội dung chi tiết:</label>
-              <textarea
-                id="notif-content"
-                className="notification-textarea"
-                placeholder="Nhập nội dung thông báo gửi tới người dùng..."
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                required
-                disabled={submitting}
-              />
+              <div className="quill-wrapper">
+                <ReactQuill
+                  id="notif-content"
+                  theme="snow"
+                  value={content}
+                  onChange={setContent}
+                  placeholder="Nhập nội dung thông báo gửi tới người dùng..."
+                  readOnly={submitting}
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{'list': 'ordered'}, {'list': 'bullet'}],
+                      ['link', 'color']
+                    ]
+                  }}
+                />
+              </div>
             </div>
 
             {/* Target Type Select */}
@@ -266,7 +277,7 @@ export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess 
             <button
               type="submit"
               className="notification-btn notification-btn-submit"
-              disabled={submitting || !title.trim() || !content.trim() || (targetType === 'USER' && !selectedUser)}
+              disabled={submitting || !title.trim() || !content.replace(/<[^>]*>?/gm, '').trim() || (targetType === 'USER' && !selectedUser)}
             >
               {submitting ? 'Đang gửi...' : 'Gửi thông báo'}
             </button>

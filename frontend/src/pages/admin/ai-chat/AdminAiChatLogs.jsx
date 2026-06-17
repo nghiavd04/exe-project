@@ -12,7 +12,8 @@ export default function AdminAiChatLogs() {
   const { user: currentAdmin } = useAuth();
 
   // Tab State
-  const [activeTab, setActiveTab] = useState('AI'); // 'AI' hoặc 'SUPPORT'
+  const [activeTab, setActiveTab] = useState('SUPPORT'); // 'AI' hoặc 'SUPPORT'
+  const [globalUnreadCount, setGlobalUnreadCount] = useState(0);
 
   // Tab 1: AI Chat Logs states
   const [sessions, setSessions] = useState([]);
@@ -37,9 +38,21 @@ export default function AdminAiChatLogs() {
   const stompClientRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await adminApi.getAiChatUnreadCount();
+      if (res.data.success) {
+        setGlobalUnreadCount(res.data.data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải số tin nhắn chưa đọc:', err);
+    }
+  };
+
   // Fetch sessions on dependencies change
   useEffect(() => {
     fetchSessions();
+    fetchUnreadCount();
   }, [page, searchQuery, activeTab]);
 
   // Global WebSocket for session list updates (real-time badge)
@@ -73,10 +86,12 @@ export default function AdminAiChatLogs() {
               // If not exists, wait 1s and refetch to get it at top
               setTimeout(() => {
                 fetchSessions();
+                fetchUnreadCount();
               }, 1000);
               return prev;
             }
           });
+          fetchUnreadCount();
         }
       });
     };
@@ -383,7 +398,22 @@ export default function AdminAiChatLogs() {
       {/* Header */}
       <div className="admin-page-header">
         <div>
-          <h1 className="admin-page-title">Quản lý Chat & Hỗ trợ</h1>
+          <h1 className="admin-page-title">
+            Quản lý Chat & Hỗ trợ 
+            {globalUnreadCount > 0 && (
+              <span className="admin-header-unread-badge" style={{ 
+                backgroundColor: '#ef4444', 
+                color: 'white', 
+                fontSize: '14px', 
+                padding: '2px 8px', 
+                borderRadius: '12px', 
+                marginLeft: '10px',
+                verticalAlign: 'middle'
+              }}>
+                {globalUnreadCount} chưa đọc
+              </span>
+            )}
+          </h1>
           <p className="admin-page-subtitle">
             Cấu hình prompt, xem lịch sử trao đổi của AI hoặc tham gia chat trực tiếp để hỗ trợ người dùng trực tuyến.
           </p>
@@ -394,19 +424,19 @@ export default function AdminAiChatLogs() {
       <div className="admin-chat-tabs">
         <button
           type="button"
-          className={`admin-chat-tab-btn ${activeTab === 'AI' ? 'active' : ''}`}
-          onClick={() => handleTabChange('AI')}
-        >
-          <Bot size={18} />
-          <span>Lịch sử Chat AI</span>
-        </button>
-        <button
-          type="button"
           className={`admin-chat-tab-btn ${activeTab === 'SUPPORT' ? 'active' : ''}`}
           onClick={() => handleTabChange('SUPPORT')}
         >
           <User size={18} />
           <span>Hỗ trợ Trực tuyến (Real-time)</span>
+        </button>
+        <button
+          type="button"
+          className={`admin-chat-tab-btn ${activeTab === 'AI' ? 'active' : ''}`}
+          onClick={() => handleTabChange('AI')}
+        >
+          <Bot size={18} />
+          <span>Lịch sử Chat AI</span>
         </button>
       </div>
 

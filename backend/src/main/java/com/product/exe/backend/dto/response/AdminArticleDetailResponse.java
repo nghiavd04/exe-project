@@ -21,6 +21,7 @@ public class AdminArticleDetailResponse {
     private String content;
     private ArticleCategory category;
     private String categoryDisplayName;
+    private String sourceUrl;
     private ArticleStatus status;
     private String statusDisplayName;
     private String thumbnailUrl;

@@ -139,9 +139,10 @@ export default function AdminNotificationsPage() {
                   </div>
                 </td>
                 <td>
-                  <div style={{ color: 'var(--text-light)', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
-                    {notif.content}
-                  </div>
+                  <div 
+                    style={{ color: 'var(--text-light)', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}
+                    dangerouslySetInnerHTML={{ __html: notif.content }}
+                  />
                 </td>
                 <td>
                   {getTargetBadge(notif)}

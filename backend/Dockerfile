@@ -23,11 +23,7 @@ RUN apt-get update && \
         libleptonica-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Tesseract OCR and Vietnamese language pack
-RUN apt-get update && apt-get install -y tesseract-ocr tesseract-ocr-vie && rm -rf /var/lib/apt/lists/*
-
 # Copy the built artifact from the build stage
-#(add screen time upload functionality with OCR support; implement related services, models, and UI components)
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080

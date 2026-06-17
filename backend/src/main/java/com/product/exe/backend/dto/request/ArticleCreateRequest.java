@@ -17,5 +17,5 @@ public class ArticleCreateRequest {
     private ArticleCategory category;
     private String thumbnailUrl;
     private String thumbnailPublicId;
-    private SubscriptionTier requiredTier;
+    private String sourceUrl;
 }

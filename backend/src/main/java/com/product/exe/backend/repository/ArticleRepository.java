@@ -43,9 +43,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT SUM(a.viewCount) FROM Article a")
     Long sumViewCount();
 
-    /**
-     * Tìm tối đa N bài viết đã xuất bản có tiêu đề chứa từ khóa (dùng cho AI suggestion).
-     */
     @Query("SELECT a FROM Article a " +
            "WHERE a.status = :status AND a.isActive = true " +
            "AND LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

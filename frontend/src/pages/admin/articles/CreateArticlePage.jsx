@@ -93,6 +93,12 @@ export default function CreateArticlePage() {
     },
   }), [imageHandler]);
 
+  const sourceModules = useMemo(() => ({
+    toolbar: [
+      ['bold', 'italic', 'underline', 'link', 'clean']
+    ],
+  }), []);
+
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
@@ -188,7 +194,7 @@ export default function CreateArticlePage() {
     category: 'EDUCATION',
     thumbnailUrl: '',
     thumbnailPublicId: '',
-    requiredTier: 'FREE',
+    sourceUrl: '',
     status: 'DRAFT'
   });
 
@@ -198,17 +204,10 @@ export default function CreateArticlePage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesRes, tiersRes] = await Promise.all([
-          adminApi.getArticleCategories(),
-          adminApi.getArticleTiers()
-        ]);
+        const categoriesRes = await adminApi.getArticleCategories();
 
         if (categoriesRes.data.success) {
           setCategories(categoriesRes.data.data);
-        }
-
-        if (tiersRes.data.success) {
-          setTiers(tiersRes.data.data);
         }
       } catch (error) {
         console.error('Error fetching meta data:', error);
@@ -288,7 +287,7 @@ export default function CreateArticlePage() {
           category: article.category,
           thumbnailUrl: article.thumbnailUrl,
           thumbnailPublicId: article.thumbnailPublicId,
-          requiredTier: article.requiredTier || 'FREE',
+          sourceUrl: article.sourceUrl || '',
           status: article.status
         });
         setTimeout(() => setInitialLoaded(true), 500); // Allow Quill to initialize
@@ -374,7 +373,7 @@ export default function CreateArticlePage() {
         category: articleData.category,
         thumbnailUrl: articleData.thumbnailUrl,
         thumbnailPublicId: articleData.thumbnailPublicId,
-        requiredTier: articleData.requiredTier
+        sourceUrl: articleData.sourceUrl
       };
 
       if (isEdit) {
@@ -498,6 +497,17 @@ export default function CreateArticlePage() {
           />
           <div className="title-underline-decoration"></div>
 
+          {/* Source URLs */}
+          <div className="article-source-quill" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+            <ReactQuill 
+              theme="snow"
+              value={articleData.sourceUrl}
+              onChange={(content) => handleFieldChange('sourceUrl', content)}
+              modules={sourceModules}
+              placeholder="Nguồn bài viết"
+            />
+          </div>
+
           {/* Content Area - React Quill */}
           <div className="article-quill-editor" style={{ marginTop: '1rem', position: 'relative' }}>
             <ReactQuill 
@@ -555,31 +565,7 @@ export default function CreateArticlePage() {
                 </div>
               </div>
 
-              {/* Subscription Tier Selection */}
-              <div>
-                <label className="field-label">Gói truy cập</label>
-                <div className="select-wrapper">
-                  <select 
-                    value={articleData.requiredTier}
-                    onChange={(e) => handleFieldChange('requiredTier', e.target.value)}
-                    className="admin-select"
-                    style={{ 
-                      background: articleData.requiredTier === 'FREE' ? '#f8fafc' : (articleData.requiredTier === 'BASIC' ? '#f0f9ff' : '#fff9db'),
-                      borderLeft: articleData.requiredTier === 'FREE' ? '1px solid #edf2f7' : (articleData.requiredTier === 'BASIC' ? '4px solid #0ea5e9' : '4px solid #fcc419')
-                    }}
-                  >
-                    {tiers.map(tier => (
-                      <option key={tier.value} value={tier.value}>{tier.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={18} className="select-icon-absolute" />
-                </div>
-                <p className="field-hint">
-                  {articleData.requiredTier === 'FREE' && "Mọi người đều có thể xem bài viết này."}
-                  {articleData.requiredTier === 'BASIC' && "Chỉ thành viên gói Basic trở lên mới có thể xem."}
-                  {articleData.requiredTier === 'PREMIUM' && "Chỉ thành viên gói Premium hoặc Elite mới có thể xem."}
-                </p>
-              </div>
+              {/* End of Settings Group */}
             </div>
           </div>
 

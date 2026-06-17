@@ -16,6 +16,7 @@ public class AdminArticleResponse {
     private String slug;
     private ArticleCategory category;
     private String categoryDisplayName;
+    private String sourceUrl;
     private ArticleStatus status;
     private String statusDisplayName;
     private Long viewCount;

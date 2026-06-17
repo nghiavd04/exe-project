@@ -22,7 +22,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     long countByRoleAndIsReadFalse(String role);
     long countBySessionIdAndRoleAndIsReadFalse(Long sessionId, String role);
 
-    @Query("SELECT COUNT(DISTINCT m.session.id) FROM ChatMessage m WHERE m.role = :role AND m.isRead = false")
+    @Query("SELECT COUNT(DISTINCT m.session) FROM ChatMessage m WHERE m.role = :role AND m.isRead = false AND m.session.sessionType = com.product.exe.backend.enums.ChatSessionType.SUPPORT")
     long countDistinctSessionByRoleAndIsReadFalse(@Param("role") String role);
 
     @Modifying

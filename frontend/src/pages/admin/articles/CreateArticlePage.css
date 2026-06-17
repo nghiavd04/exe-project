@@ -199,25 +199,74 @@
 
 .article-title-textarea {
   width: 100%;
-  border: none;
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
   outline: none;
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #1a1a4b;
-  margin-bottom: 1rem;
   resize: none;
-  font-family: "Outfit", sans-serif;
-  line-height: 1.2;
-  white-space: pre-wrap;
-  background: transparent;
+  line-height: 1.3;
+  padding: 1.5rem;
+  margin: 2rem 0 0.5rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.article-title-textarea:focus {
+  background: #ffffff;
+  border-style: solid;
+  border-color: #0d7a6e;
+  box-shadow: 0 0 0 3px rgba(13, 122, 110, 0.1);
+}
+
+.article-title-textarea::placeholder {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.article-source-quill .ql-container {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  background: #f8fafc;
+  border-color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+
+.article-source-quill .ql-toolbar {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #f1f5f9;
+  border-color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+
+.article-source-quill .ql-editor {
+  min-height: 150px;
+  font-size: 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.article-source-quill:focus-within .ql-container {
+  background: #ffffff;
+  border-color: #0d7a6e !important;
+}
+
+.article-source-quill:focus-within .ql-toolbar {
+  border-color: #0d7a6e !important;
+}
+
+.article-source-quill:focus-within {
+  box-shadow: 0 0 0 3px rgba(13, 122, 110, 0.1);
+  border-radius: 12px;
 }
 
 .title-underline-decoration {
-  width: 80px;
-  height: 6px;
-  background: #4361ee;
-  margin-bottom: 2.5rem;
-  border-radius: 3px;
+  display: none;
 }
 
 .editor-sidebar {
@@ -360,10 +409,17 @@
   line-height: 1.8;
   color: #2d3748;
 }
-.article-quill-editor .ql-editor.ql-blank::before {
+.article-quill-editor .ql-editor.ql-blank::before,
+.article-source-quill .ql-editor.ql-blank::before {
   color: #a0aec0;
   font-style: normal;
 }
+
+/* Hide placeholder immediately when editor is focused to prevent visual overlap */
+.ql-editor:focus.ql-blank::before {
+  display: none !important;
+}
+
 .article-quill-editor .ql-editor img {
   display: block;
   max-width: 100%;

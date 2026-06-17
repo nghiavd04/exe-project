@@ -8,6 +8,7 @@ const ArticleDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
+  const [relatedArticles, setRelatedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -37,6 +38,24 @@ const ArticleDetailPage = () => {
       const response = await articleApi.getArticleDetail(slug);
       if (response.data.success) {
         setArticle(response.data.data);
+        
+        // Fetch related articles from same category, fallback to any category if none
+        try {
+          let relatedRes = await articleApi.getArticles({ category: response.data.data.category, page: 0, size: 4 });
+          if (relatedRes.data.success) {
+            let related = relatedRes.data.data.content.filter(a => a.slug !== slug);
+            
+            if (related.length === 0) {
+              relatedRes = await articleApi.getArticles({ page: 0, size: 4 });
+              if (relatedRes.data.success) {
+                related = relatedRes.data.data.content.filter(a => a.slug !== slug);
+              }
+            }
+            setRelatedArticles(related.slice(0, 3));
+          }
+        } catch (err) {
+          console.error('Error fetching related articles:', err);
+        }
       }
     } catch (err) {
       console.error('Error fetching article:', err);
@@ -60,27 +79,33 @@ const ArticleDetailPage = () => {
 
   if (loading) return <div className="article-detail-loading">Đang tải nội dung...</div>;
 
-  if (error === 'SUBSCRIPTION_REQUIRED') {
-    return (
-      <div className="premium-blocker-page">
-        <div className="blocker-container">
-          <div className="blocker-icon">👑</div>
-          <h1>Nội dung dành cho Hội viên</h1>
-          <p>Bài viết này yêu cầu gói đăng ký thành viên để truy cập. Hãy nâng cấp tài khoản của bạn để xem nội dung này.</p>
-          <div className="blocker-actions">
-            <Link to="/subscription" className="btn-upgrade">Xem các gói đăng ký</Link>
-            <Link to="/bai-viet" className="btn-back">Quay lại danh sách</Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   if (error === 'NOT_FOUND' || !article) {
     return <div className="article-not-found">Không tìm thấy bài viết yêu cầu. <Link to="/bai-viet">Quay lại</Link></div>;
   }
 
-  return <ArticleRenderer article={article} />;
+  return (
+    <div className="article-detail-page-wrapper">
+      <ArticleRenderer article={article} />
+      
+      {relatedArticles.length > 0 && (
+        <div className="related-articles-section">
+          <div className="related-articles-container">
+            <h3>Bài viết liên quan</h3>
+            <div className="related-grid">
+              {relatedArticles.map(item => (
+                <Link to={`/bai-viet/${item.slug}`} className="related-card" key={item.id}>
+                  <img src={item.thumbnailUrl || 'https://via.placeholder.com/300x200'} alt={item.title} />
+                  <h4>{item.title}</h4>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ArticleDetailPage;

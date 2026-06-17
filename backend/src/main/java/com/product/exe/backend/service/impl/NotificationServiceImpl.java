@@ -190,7 +190,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public Page<AdminNotificationResponse> getSentNotifications(Pageable pageable) {
-        Page<Notification> notifications = notificationRepository.findByTypeOrderByCreatedAtDesc(NotificationType.MANUAL_BROADCAST, pageable);
+        Page<Notification> notifications = notificationRepository.findByType(NotificationType.MANUAL_BROADCAST, pageable);
         return notifications.map(n -> AdminNotificationResponse.builder()
                 .id(n.getId())
                 .title(n.getTitle())

@@ -21,8 +21,10 @@ public class ArticleDetailResponse {
     private String thumbnailUrl;
     private ArticleCategory category;
     private String categoryDisplayName;
+    private String sourceUrl;
     private SubscriptionTier requiredTier;
     private String requiredTierDisplayName;
     private LocalDateTime publishedAt;
     private String authorName;
+    private Long viewCount;
 }

@@ -166,7 +166,10 @@ export default function Header() {
                                                     <span className="notif-item-title">{notif.title}</span>
                                                     {!notif.isRead && <span className="notif-dot" />}
                                                 </div>
-                                                <p className="notif-item-content">{notif.content}</p>
+                                                <div 
+                                                    className="notif-item-content" 
+                                                    dangerouslySetInnerHTML={{ __html: notif.content }} 
+                                                />
                                                 <span className="notif-item-time">
                                                     {new Date(notif.createdAt).toLocaleDateString('vi-VN')} {new Date(notif.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                                 </span>

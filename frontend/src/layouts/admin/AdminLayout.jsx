@@ -113,8 +113,7 @@ export default function AdminLayout() {
     { name: 'Quản lý Phác đồ', path: '/admin/program', icon: <Milestone size={20} /> },
     { name: 'Lời nhắn liên hệ', path: '/admin/contact-messages', icon: <MessageSquare size={20} /> },
     { name: 'Lịch sử thông báo', path: '/admin/notifications', icon: <Bell size={20} /> },
-    { name: 'Cấu hình AI Chat', path: '/admin/ai-chat/prompt', icon: <Bot size={20} /> },
-    { name: 'Lịch sử AI Chat', path: '/admin/ai-chat/logs', icon: <MessageSquare size={20} /> },
+    { name: 'Chat & Hỗ trợ', path: '/admin/ai-chat/logs', icon: <MessageSquare size={20} /> },
     { name: 'Cài đặt', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
@@ -145,7 +144,7 @@ export default function AdminLayout() {
                 {item.name === 'Lời nhắn liên hệ' && unreadCount > 0 && (
                   <span className="admin-sidebar-badge">{unreadCount}</span>
                 )}
-                {item.name === 'Lịch sử AI Chat' && aiChatUnreadCount > 0 && (
+                {item.name === 'Chat & Hỗ trợ' && aiChatUnreadCount > 0 && (
                   <span className="admin-sidebar-badge" style={{ backgroundColor: '#ef4444' }}>{aiChatUnreadCount}</span>
                 )}
                 {isActive && <ChevronRight size={14} />}

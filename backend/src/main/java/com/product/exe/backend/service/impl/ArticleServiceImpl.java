@@ -86,8 +86,10 @@ public class ArticleServiceImpl implements ArticleService {
                 .categoryDisplayName(article.getCategory() != null ? article.getCategory().getDisplayName() : null)
                 .requiredTier(article.getRequiredTier())
                 .requiredTierDisplayName(article.getRequiredTier() != null ? article.getRequiredTier().getDisplayName() : null)
+                .sourceUrl(article.getSourceUrl())
                 .publishedAt(article.getPublishedAt())
                 .authorName(article.getAdmin() != null ? article.getAdmin().getFullName() : "Admin")
+                .viewCount(article.getViewCount() != null ? article.getViewCount() : 0L)
                 .build();
     }
 }
