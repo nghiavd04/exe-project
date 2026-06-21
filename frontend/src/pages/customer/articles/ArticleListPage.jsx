@@ -79,6 +79,14 @@ const ArticleListPage = () => {
     navigate(`/bai-viet/${article.slug}`);
   };
 
+  // Cắt title theo ranh giới từ, không cắt giữa chữ
+  const truncateTitle = (text, maxChars = 45) => {
+    if (!text || text.length <= maxChars) return text;
+    const trimmed = text.slice(0, maxChars);
+    const lastSpace = trimmed.lastIndexOf(' ');
+    return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed) + '...';
+  };
+
   return (
     <div className="article-list-page">
       <header className="article-hero">
@@ -135,7 +143,7 @@ const ArticleListPage = () => {
                     <div className="article-meta">
                       <span>{new Date(article.publishedAt).toLocaleDateString('vi-VN')}</span>
                     </div>
-                    <h2>{article.title}</h2>
+                    <h2 title={article.title}>{truncateTitle(article.title)}</h2>
                     <div className="read-more-link">
                       Đọc chi tiết
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

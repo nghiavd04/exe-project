@@ -5,6 +5,25 @@ import toast from 'react-hot-toast';
 import 'react-quill-new/dist/quill.snow.css';
 import './ArticleRenderer.css';
 
+// Giải mã tất cả HTML Entities bằng cơ chế native của trình duyệt (DOMParser)
+// Hỗ trợ fallback cho các môi trường chạy thử nghiệm (tests) không có DOM
+const decodeHtml = (html) => {
+  if (!html) return '';
+  if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
+    return html
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ');
+  }
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  return doc.documentElement.textContent || '';
+};
+
 const ArticleRenderer = ({ article, isPreview = false }) => {
   if (!article) return null;
 
@@ -18,14 +37,10 @@ const ArticleRenderer = ({ article, isPreview = false }) => {
   let htmlContent = article.content || '<p>Chưa có nội dung...</p>';
   const toc = [];
   let headingIndex = 0;
+
   htmlContent = htmlContent.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, text) => {
     const id = `heading-${headingIndex++}`;
-    let cleanText = text.replace(/<[^>]+>/g, '')
-                        .replace(/&nbsp;/g, ' ')
-                        .replace(/&amp;/g, '&')
-                        .replace(/&lt;/g, '<')
-                        .replace(/&gt;/g, '>')
-                        .replace(/\u00A0/g, ' ');
+    const cleanText = decodeHtml(text.replace(/<[^>]+>/g, ''));
     toc.push({ id, text: cleanText, level: tag.toLowerCase() === 'h2' ? 2 : 3 });
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
   });

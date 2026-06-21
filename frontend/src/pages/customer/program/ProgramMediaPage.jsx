@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, Lock, ShieldAlert, Sparkles, 
-  ChevronLeft, Music, Film, PlayCircle, ExternalLink, HelpCircle
+  ChevronLeft, ChevronRight, Music, Film, PlayCircle, ExternalLink, HelpCircle
 } from 'lucide-react';
 import { useProgram } from './ProgramLayout';
 import { programApi } from '../../../apis/customerApi';
@@ -242,18 +242,30 @@ export default function ProgramMediaPage() {
   const [activeTab, setActiveTab] = useState('ALL');
   const [activeVideo, setActiveVideo] = useState(null);
   const [activeAudio, setActiveAudio] = useState(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     document.title = 'Thư viện Thiền & Podcast – Dopaless';
-    fetchMedias();
   }, []);
+
+  useEffect(() => {
+    fetchMedias();
+  }, [page, activeTab]);
 
   const fetchMedias = async () => {
     try {
       setLoading(true);
-      const response = await programApi.getProgramMedias();
+      const params = {
+        page,
+        type: activeTab !== 'ALL' ? activeTab : undefined
+      };
+      const response = await programApi.getProgramMedias(params);
       if (response.data.success) {
-        setMedias(response.data.data || []);
+        setMedias(response.data.data.content || []);
+        setTotalPages(response.data.data.totalPages || 0);
+        setPageSize(response.data.data.size || 10);
       }
     } catch (err) {
       toast.error('Không thể tải tài nguyên đa phương tiện');
@@ -274,10 +286,7 @@ export default function ProgramMediaPage() {
     { key: 'VIDEO', label: '🎥 Video động lực' }
   ];
 
-  const filtered = medias.filter(item => {
-    if (activeTab === 'ALL') return true;
-    return item.mediaType === activeTab;
-  });
+  // Removed client side filter
 
   const progressPct = Math.round(((userProgress?.currentDay || 0) / 120) * 100);
 
@@ -316,7 +325,7 @@ export default function ProgramMediaPage() {
             {tabs.map(tab => (
               <button 
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => { setActiveTab(tab.key); setPage(0); }}
                 className={`media-tab-btn ${activeTab === tab.key ? 'active' : ''}`}
               >
                 {tab.label}
@@ -330,14 +339,14 @@ export default function ProgramMediaPage() {
               <div className="plans-loader"></div>
               <p>Đang tải tài nguyên âm thanh & video...</p>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : medias.length === 0 ? (
             <div className="media-empty-box">
               <Music size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
               <p>Chưa có tài nguyên nào trong mục này.</p>
             </div>
           ) : (
             <div className="media-cards-layout-grid">
-              {filtered.map(item => {
+              {medias.map(item => {
                 if (item.locked) {
                   return (
                     <LockedMediaCard 
@@ -376,6 +385,68 @@ export default function ProgramMediaPage() {
                   />
                 );
               })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && !loading && (
+            <div className="pagination-container" style={{ marginTop: '2rem', justifyContent: 'center' }}>
+              <button 
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+                className="pagination-arrow"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {(() => {
+                const pages = [];
+                const maxVisible = 5;
+                let start = Math.max(0, page - 2);
+                let end = Math.min(totalPages - 1, start + maxVisible - 1);
+                
+                if (end - start < maxVisible - 1) {
+                  start = Math.max(0, end - maxVisible + 1);
+                }
+
+                if (start > 0) {
+                  pages.push(
+                    <button key={0} onClick={() => setPage(0)} className="pagination-btn">1</button>
+                  );
+                  if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
+                }
+
+                for (let i = start; i <= end; i++) {
+                  pages.push(
+                    <button 
+                      key={i} 
+                      onClick={() => setPage(i)}
+                      className={`pagination-btn ${page === i ? 'active' : ''}`}
+                    >
+                      {i + 1}
+                    </button>
+                  );
+                }
+
+                if (end < totalPages - 1) {
+                  if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
+                  pages.push(
+                    <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className="pagination-btn">
+                      {totalPages}
+                    </button>
+                  );
+                }
+
+                return pages;
+              })()}
+
+              <button 
+                disabled={page === totalPages - 1}
+                onClick={() => setPage(page + 1)}
+                className="pagination-arrow"
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
           )}
         </div>

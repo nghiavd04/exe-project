@@ -64,7 +64,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userOptional.get();
             if (!provider.equals(user.getProvider())) {
                 throw new InternalAuthenticationServiceException(
-                        "Email đã được đăng ký bằng nhà cung cấp " + user.getProvider());
+                        "Email already registered with " + user.getProvider() + " provider");
             }
             user.setProviderId(sub);
             user = userRepository.save(user);

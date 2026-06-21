@@ -417,7 +417,7 @@
 
 /* Hide placeholder immediately when editor is focused to prevent visual overlap */
 .ql-editor:focus.ql-blank::before {
-  display: none !important;
+  display: none;
 }
 
 .article-quill-editor .ql-editor img {

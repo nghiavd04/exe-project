@@ -95,7 +95,7 @@ export const programApi = {
   getAnalytics: () => apiClient.get('/program/analytics'),
   getMetadata: () => apiClient.get('/program/metadata'),
   advanceDay: () => apiClient.post('/program/advance-day'),
-  getProgramMedias: () => apiClient.get('/program/medias'),
+  getProgramMedias: (params) => apiClient.get('/program/medias', { params }),
   resume: () => apiClient.post('/program/resume'),
   restart: () => apiClient.post('/program/restart'),
 };

@@ -70,8 +70,8 @@ public class AiChatServiceImpl implements AiChatService {
 
         if (sessionType == ChatSessionType.SUPPORT) {
             SubscriptionTier tier = subscriptionService.getUserHighestTier(userId);
-            if (tier != SubscriptionTier.ELITE) {
-                throw new BadRequestException("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên gói ELITE.");
+            if (tier.getWeight() < SubscriptionTier.BASIC.getWeight()) {
+                throw new BadRequestException("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên.");
             }
             Optional<ChatSession> existingSession = chatSessionRepository.findFirstByUserIdAndSessionType(userId, ChatSessionType.SUPPORT);
             if (existingSession.isPresent()) {

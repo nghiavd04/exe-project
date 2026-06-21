@@ -19,6 +19,12 @@ export default function AiChatWidget() {
   const [isSending, setIsSending] = useState(false);
 
   const [chatType, setChatType] = useState('AI'); // 'AI' hoặc 'SUPPORT'
+
+  useEffect(() => {
+    if (userWeight === 1 && chatType !== 'SUPPORT') {
+      setChatType('SUPPORT');
+    }
+  }, [userWeight]);
   const stompClientRef = useRef(null);
   const globalStompClientRef = useRef(null);
 
@@ -47,7 +53,7 @@ export default function AiChatWidget() {
   };
 
   useEffect(() => {
-    if (user && userWeight >= 2) {
+    if (user && userWeight >= 1) {
       fetchUnreadCount();
       
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -97,7 +103,7 @@ export default function AiChatWidget() {
   }, [unreadCount]);
 
   useEffect(() => {
-    if (isOpen && user && userWeight >= 2) {
+    if (isOpen && user && userWeight >= 1) {
       setChatError(null);
       // Đánh dấu đã đọc khi mở chat
       if (unreadCount > 0) {
@@ -408,8 +414,8 @@ export default function AiChatWidget() {
     });
   };
 
-  // Chỉ hiển thị đối với người dùng đã đăng nhập và thuộc gói Premium (weight >= 2)
-  if (!user || userWeight < 2) {
+  // Chỉ hiển thị đối với người dùng đã đăng nhập và thuộc gói Basic (weight >= 1)
+  if (!user || userWeight < 1) {
     return null;
   }
 
@@ -470,7 +476,7 @@ export default function AiChatWidget() {
                   </button>
                 </div>
               )}
-              {userWeight >= 3 && (
+              {userWeight >= 2 && (
                 <div className="chat-type-toggle-container">
                   <button
                     type="button"

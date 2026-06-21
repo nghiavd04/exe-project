@@ -36,7 +36,9 @@ export default function LoginPage() {
     if (errorParam) {
       let friendlyError = errorParam;
       if (errorParam.includes('Email already registered with LOCAL provider')) {
-        friendlyError = 'Email này đã được đăng ký bằng mật khẩu thông thường. Vui lòng sử dụng đăng nhập bằng mật khẩu.';
+        friendlyError = 'Email này đã được đăng ký bằng mật khẩu thông thường. Vui lòng đăng nhập bằng mật khẩu của bạn.';
+      } else if (errorParam.includes('Email already registered with GOOGLE provider')) {
+        friendlyError = 'Email này đã được đăng ký bằng tài khoản Google. Vui lòng nhấn vào "Tiếp tục với Google" bên dưới.';
       } else if (errorParam === 'oauth2_failed') {
         friendlyError = 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.';
       }

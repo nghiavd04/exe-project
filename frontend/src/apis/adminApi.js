@@ -54,7 +54,7 @@ export const adminApi = {
   deleteContactMessage: (id) => apiClient.delete(`/v1/admin/contact-messages/${id}`),
 
   // Program Medias
-  getMedias: () => apiClient.get('/v1/admin/medias'),
+  getMedias: (params) => apiClient.get('/v1/admin/medias', { params }),
   getMediaDetail: (id) => apiClient.get(`/v1/admin/medias/${id}`),
   createMedia: (data) => apiClient.post('/v1/admin/medias', data),
   updateMedia: (id, data) => apiClient.put(`/v1/admin/medias/${id}`, data),

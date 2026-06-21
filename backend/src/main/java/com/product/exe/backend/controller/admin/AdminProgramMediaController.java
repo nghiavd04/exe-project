@@ -11,8 +11,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.product.exe.backend.enums.MediaType;
+import com.product.exe.backend.enums.SubscriptionTier;
+
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,8 +29,14 @@ public class AdminProgramMediaController {
     private final CloudinaryService cloudinaryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProgramMedia>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(programMediaService.getAllForAdmin()));
+    public ResponseEntity<ApiResponse<Page<ProgramMedia>>> getAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) MediaType type,
+            @RequestParam(required = false) SubscriptionTier tier,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(ApiResponse.success(programMediaService.getAllForAdmin(search, type, tier, pageable)));
     }
 
     @GetMapping("/{id}")

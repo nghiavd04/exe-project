@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -28,7 +29,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                         AuthenticationException exception) throws IOException, ServletException {
         String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/dang-nhap")
                 .queryParam("error", exception.getLocalizedMessage())
-                .build().toUriString();
+                .build()
+                .encode(StandardCharsets.UTF_8)
+                .toUriString();
         cookieAuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, MoreVertical, 
-  ChevronRight, PlayCircle, Music, Film, CheckCircle2, 
+  ChevronLeft, ChevronRight, PlayCircle, Music, Film, CheckCircle2, 
   XCircle, CloudUpload, Trash
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,6 +19,9 @@ export default function AdminMediaListPage() {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterTier, setFilterTier] = useState('');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
 
   // Form States
   const [formTitle, setFormTitle] = useState('');
@@ -43,6 +46,9 @@ export default function AdminMediaListPage() {
 
   useEffect(() => {
     fetchMedias();
+  }, [page, filterType, filterTier]);
+
+  useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null);
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
@@ -51,14 +57,29 @@ export default function AdminMediaListPage() {
   const fetchMedias = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.getMedias();
+      const params = {
+        page,
+        search: search || undefined,
+        type: filterType || undefined,
+        tier: filterTier || undefined
+      };
+      const response = await adminApi.getMedias(params);
       if (response.data.success) {
-        setMedias(response.data.data || []);
+        setMedias(response.data.data.content || []);
+        setTotalPages(response.data.data.totalPages || 0);
+        setPageSize(response.data.data.size || 10);
       }
     } catch (err) {
       toast.error('Không thể tải danh sách tài nguyên đa phương tiện');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearchKey = (e) => {
+    if (e.key === 'Enter') {
+      setPage(0);
+      fetchMedias();
     }
   };
 
@@ -204,13 +225,7 @@ export default function AdminMediaListPage() {
     }
   };
 
-  const filteredMedias = medias.filter(item => {
-    const matchesSearch = item.title?.toLowerCase().includes(search.toLowerCase()) || 
-                          item.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType ? item.mediaType === filterType : true;
-    const matchesTier = filterTier ? item.targetTier === filterTier : true;
-    return matchesSearch && matchesType && matchesTier;
-  });
+  // Remove client side filtering since it's done on server
 
   return (
     <div className="admin-page">
@@ -242,19 +257,20 @@ export default function AdminMediaListPage() {
             placeholder="Tìm kiếm tiêu đề, mô tả..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleSearchKey}
             className="search-media-input"
           />
         </div>
 
         <div className="filter-select-wrapper">
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="filter-select">
+          <select value={filterType} onChange={(e) => { setFilterType(e.target.value); setPage(0); }} className="filter-select">
             <option value="">Tất cả loại file</option>
             <option value="AUDIO">AUDIO (Thiền/Nhạc)</option>
             <option value="VIDEO">VIDEO (Phim ngắn/Hướng dẫn)</option>
             <option value="PODCAST">PODCAST (Audio chia sẻ)</option>
           </select>
 
-          <select value={filterTier} onChange={(e) => setFilterTier(e.target.value)} className="filter-select">
+          <select value={filterTier} onChange={(e) => { setFilterTier(e.target.value); setPage(0); }} className="filter-select">
             <option value="">Tất cả các gói</option>
             <option value="BASIC">BASIC (Cơ bản - Youtube)</option>
             <option value="PREMIUM">PREMIUM (Cao cấp - Cloudinary)</option>
@@ -286,16 +302,16 @@ export default function AdminMediaListPage() {
                   </td>
                 </tr>
               ))
-            ) : filteredMedias.length === 0 ? (
+            ) : medias.length === 0 ? (
               <tr>
                 <td colSpan="7" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
                   <Music size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
                   <p>Không tìm thấy tài nguyên đa phương tiện nào.</p>
                 </td>
               </tr>
-            ) : filteredMedias.map((item, index) => (
+            ) : medias.map((item, index) => (
               <tr key={item.id}>
-                <td style={{ color: 'var(--muted)' }}>{index + 1}</td>
+                <td style={{ color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
                 <td>
                   <div className="media-title-cell">
                     <span className="media-icon-wrapper">
@@ -334,7 +350,7 @@ export default function AdminMediaListPage() {
 
                     {activeMenuId === item.id && (
                       <div className="actions-dropdown-menu" style={{
-                        [filteredMedias.length - index <= 2 && filteredMedias.length > 2 ? 'bottom' : 'top']: '100%'
+                        [medias.length - index <= 2 && medias.length > 2 ? 'bottom' : 'top']: '100%'
                       }}>
                         <button onClick={() => handleOpenEditModal(item)} className="action-menu-item">
                           <Edit2 size={16} /> Sửa thông tin
@@ -351,6 +367,68 @@ export default function AdminMediaListPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="pagination-container" style={{ padding: '1.5rem', background: 'white', borderRadius: '0 0 16px 16px', borderTop: '1px solid #f1f5f9' }}>
+          <button 
+            disabled={page === 0}
+            onClick={() => setPage(page - 1)}
+            className="pagination-arrow"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          {(() => {
+            const pages = [];
+            const maxVisible = 5;
+            let start = Math.max(0, page - 2);
+            let end = Math.min(totalPages - 1, start + maxVisible - 1);
+            
+            if (end - start < maxVisible - 1) {
+              start = Math.max(0, end - maxVisible + 1);
+            }
+
+            if (start > 0) {
+              pages.push(
+                <button key={0} onClick={() => setPage(0)} className="pagination-btn">1</button>
+              );
+              if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
+            }
+
+            for (let i = start; i <= end; i++) {
+              pages.push(
+                <button 
+                  key={i} 
+                  onClick={() => setPage(i)}
+                  className={`pagination-btn ${page === i ? 'active' : ''}`}
+                >
+                  {i + 1}
+                </button>
+              );
+            }
+
+            if (end < totalPages - 1) {
+              if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
+              pages.push(
+                <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className="pagination-btn">
+                  {totalPages}
+                </button>
+              );
+            }
+
+            return pages;
+          })()}
+
+          <button 
+            disabled={page === totalPages - 1}
+            onClick={() => setPage(page + 1)}
+            className="pagination-arrow"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Form Dialog Modal */}
       {isModalOpen && (

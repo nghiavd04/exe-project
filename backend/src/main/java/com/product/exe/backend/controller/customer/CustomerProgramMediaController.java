@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.product.exe.backend.enums.MediaType;
 
 @RestController
 @RequestMapping("/api/v1/customer/program/medias")
@@ -22,9 +25,14 @@ public class CustomerProgramMediaController {
     private final ProgramMediaService programMediaService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CustomerProgramMediaResponse>>> getAllForCustomer(Authentication authentication) {
+    public ResponseEntity<ApiResponse<Page<CustomerProgramMediaResponse>>> getAllForCustomer(
+            Authentication authentication,
+            @RequestParam(required = false) MediaType type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
         String email = authentication.getName();
-        List<CustomerProgramMediaResponse> response = programMediaService.getAllForCustomer(email);
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<CustomerProgramMediaResponse> response = programMediaService.getAllForCustomer(email, type, pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

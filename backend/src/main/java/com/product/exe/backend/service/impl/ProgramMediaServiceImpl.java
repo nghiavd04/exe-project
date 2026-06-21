@@ -17,8 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.product.exe.backend.enums.MediaType;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,8 +36,8 @@ public class ProgramMediaServiceImpl implements ProgramMediaService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public List<ProgramMedia> getAllForAdmin() {
-        return programMediaRepository.findAllByOrderByDayNumberAsc();
+    public Page<ProgramMedia> getAllForAdmin(String search, MediaType type, SubscriptionTier tier, Pageable pageable) {
+        return programMediaRepository.findMediasWithFilters(type, tier, search, pageable);
     }
 
     @Override
@@ -100,21 +103,19 @@ public class ProgramMediaServiceImpl implements ProgramMediaService {
     }
 
     @Override
-    public List<CustomerProgramMediaResponse> getAllForCustomer(String email) {
+    public Page<CustomerProgramMediaResponse> getAllForCustomer(String email, MediaType type, Pageable pageable) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
         SubscriptionTier userTier = subscriptionService.getUserHighestTier(user.getId());
         int userWeight = userTier.getWeight();
 
-        List<ProgramMedia> allMedia = programMediaRepository.findAllByOrderByDayNumberAsc();
-        List<CustomerProgramMediaResponse> responseList = new ArrayList<>();
+        Page<ProgramMedia> mediaPage = programMediaRepository.findMediasWithFilters(type, null, null, pageable);
 
-        for (ProgramMedia media : allMedia) {
-            // Kiểm tra phân quyền theo tier weight
+        return mediaPage.map(media -> {
             boolean isLocked = userWeight < media.getTargetTier().getWeight();
             
-            CustomerProgramMediaResponse response = CustomerProgramMediaResponse.builder()
+            return CustomerProgramMediaResponse.builder()
                     .id(media.getId())
                     .title(media.getTitle())
                     .description(media.getDescription())
@@ -125,10 +126,6 @@ public class ProgramMediaServiceImpl implements ProgramMediaService {
                     .mediaUrl(isLocked ? null : media.getMediaUrl()) // Ẩn link file nếu bị khóa
                     .createdAt(media.getCreatedAt())
                     .build();
-            
-            responseList.add(response);
-        }
-
-        return responseList;
+        });
     }
 }
