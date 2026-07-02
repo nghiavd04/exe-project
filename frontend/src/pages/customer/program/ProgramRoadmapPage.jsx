@@ -125,9 +125,9 @@ export default function ProgramRoadmapPage() {
                                     toggleWeek(weekKey);
                                   }}
                                 >
-                                  <span className="pd-roadmap-week-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <span className="pd-roadmap-week-title pd-flex-align-center">
                                     Tuần {week.num}: {week.label} <span className="pd-roadmap-week-range">({week.range})</span>
-                                    {isWeekLocked && <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'inline-flex', alignItems: 'center' }}>🔒</span>}
+                                    {isWeekLocked && <span className="pd-lock-inline">🔒</span>}
                                   </span>
                                   <div className="pd-roadmap-week-toggle">
                                     {isWeekLocked ? null : (isWeekExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />)}
@@ -154,12 +154,12 @@ export default function ProgramRoadmapPage() {
                                                   window.scrollTo({ top: 0, behavior: 'smooth' });
                                                 }}
                                               >
-                                                <span className="pd-roadmap-day-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <span className="pd-roadmap-day-title pd-flex-align-center">
                                                   Ngày {day.num} — {day.label}
-                                                  {isDayLocked && <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'inline-flex', alignItems: 'center' }}>🔒</span>}
+                                                  {isDayLocked && <span className="pd-lock-inline">🔒</span>}
                                                 </span>
                                                 <div className="pd-roadmap-day-toggle">
-                                                  {isDayLocked ? null : <ArrowRight size={16} style={{ color: 'var(--teal)' }} />}
+                                                  {isDayLocked ? null : <ArrowRight size={16} className="pd-text-teal" />}
                                                 </div>
                                               </div>
                                             </div>
@@ -222,43 +222,28 @@ export default function ProgramRoadmapPage() {
               </div>
               <div className="pd-roadmap-progress-footer">
                 <span>Tiến trình hoàn thành</span>
-                <span style={{ color: 'var(--teal)' }}>{progressPct}%</span>
+                <span className="pd-text-teal">{progressPct}%</span>
               </div>
             </div>
           </div>
 
           <div 
-            className="pd-roadmap-progress-card media-library-card"
-            style={{ 
-              marginTop: '1.5rem', 
-              cursor: 'pointer', 
-              background: 'linear-gradient(135deg, var(--teal-pale), #e0f2fe)',
-              borderColor: 'rgba(13, 122, 110, 0.15)',
-              transition: 'all 0.3s ease'
-            }}
+            className="pd-media-library-card"
             onClick={() => {
               navigate('/phac-do/tai-nguyen');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
           >
             <div className="pd-roadmap-progress-header">
-              <span className="pd-roadmap-progress-icon" style={{ background: 'var(--teal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🎧</span>
+              <span className="pd-roadmap-progress-icon pd-media-library-icon">🎧</span>
               <div>
-                <span className="pd-roadmap-progress-title" style={{ color: 'var(--teal-dark)' }}>Thư viện Thiền & Podcast</span>
+                <span className="pd-roadmap-progress-title pd-media-library-title">Thư viện Thiền & Podcast</span>
                 <span className="pd-roadmap-progress-sub">Kho âm thanh chánh niệm & dopamine</span>
               </div>
             </div>
-            <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 650 }}>
+            <div className="pd-media-library-footer">
               <span>Khám phá ngay</span>
-              <span style={{ fontSize: '1rem' }}>→</span>
+              <span className="pd-media-library-arrow">→</span>
             </div>
           </div>
         </div>

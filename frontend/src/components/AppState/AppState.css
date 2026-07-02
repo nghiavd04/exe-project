@@ -1,0 +1,92 @@
+.app-state {
+  width: 100%;
+  padding: 2rem;
+}
+
+.app-state__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: calc(var(--radius-lg) + 2px);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, var(--surface-raised), var(--surface-muted));
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.app-state--compact .app-state__inner {
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+.app-state__icon-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-overlay);
+  color: var(--teal-dark);
+}
+
+.app-state--error .app-state__icon-wrap {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+}
+
+.app-state--paywall .app-state__icon-wrap {
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--accent);
+}
+
+.app-state__content h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.app-state__content p {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.app-state__actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.app-state__icon.is-spinning {
+  animation: app-state-spin 1s linear infinite;
+}
+
+@keyframes app-state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .app-state {
+    padding: 1rem;
+  }
+
+  .app-state__inner {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .app-state__actions {
+    flex-direction: column;
+  }
+
+  .app-state__actions > * {
+    width: 100%;
+  }
+}

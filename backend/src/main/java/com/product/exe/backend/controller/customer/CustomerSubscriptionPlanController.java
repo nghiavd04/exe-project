@@ -50,72 +50,8 @@ public class CustomerSubscriptionPlanController {
         return ResponseEntity.ok(ApiResponse.success(subscriptionPlanService.getActivePlans()));
     }
 
-    @PostMapping("/{id}/subscribe")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<ApiResponse<String>> subscribe(
-            @PathVariable Long id,
-            @RequestBody SubscribeRequest request,
-            Authentication authentication) {
-        
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
-        
-        Customer customer = customerRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
 
-        SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
 
-        if (Boolean.FALSE.equals(plan.getIsActive())) {
-            throw new BadRequestException("Gói dịch vụ này hiện đã bị ngừng hoạt động");
-        }
-
-        // Create new active user subscription
-        UserSubscription subscription = UserSubscription.builder()
-                .customer(customer)
-                .plan(plan)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(plan.getDurationDays()))
-                .status(SubscriptionStatus.ACTIVE)
-                .tier(plan.getTier())
-                .build();
-        UserSubscription savedSubscription = userSubscriptionRepository.save(subscription);
-
-        // Cancel previous active subscriptions for upgrade logic
-        List<UserSubscription> activeSubs = userSubscriptionRepository.findAllByCustomerIdAndStatus(customer.getId(), SubscriptionStatus.ACTIVE);
-        for (UserSubscription oldSub : activeSubs) {
-            if (!oldSub.getId().equals(savedSubscription.getId())) {
-                oldSub.setStatus(SubscriptionStatus.CANCELLED);
-                userSubscriptionRepository.save(oldSub);
-            }
-        }
-
-        // Parse payment method from request
-        PaymentMethod method;
-        try {
-            method = PaymentMethod.valueOf(request.getPaymentMethod());
-        } catch (Exception e) {
-            method = PaymentMethod.PAYOS; // Default fallback
-        }
-
-        // Create associated successful payment record
-        Payment payment = Payment.builder()
-                .customer(customer)
-                .subscription(savedSubscription)
-                .plan(plan)
-                .amount(plan.getPrice())
-                .currency("VND")
-                .paymentMethod(method)
-                .status(PaymentStatus.SUCCESS)
-                .transactionId("MOCK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
-                .paidAt(LocalDateTime.now())
-                .isActive(true)
-                .build();
-        paymentRepository.save(payment);
-
-        return ResponseEntity.ok(ApiResponse.success("Đăng ký gói dịch vụ thành công! Cấp độ tài khoản đã được nâng cấp."));
-    }
 
     @GetMapping("/upgrade-preview")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -192,10 +128,6 @@ public class CustomerSubscriptionPlanController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Data
-    public static class SubscribeRequest {
-        private String paymentMethod;
-    }
 
     @Data
     public static class UpgradePreviewResponse {

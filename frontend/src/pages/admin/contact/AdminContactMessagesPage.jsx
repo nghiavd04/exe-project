@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
+import Modal from '../../../components/Modal';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import './AdminContactMessagesPage.css';
@@ -330,159 +332,133 @@ export default function AdminContactMessagesPage() {
         </table>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="pagination-controls">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="pagination-btn"
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i)}
-                className={`pagination-btn ${page === i ? 'active' : ''}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-
-            <button
-              disabled={page === totalPages - 1}
-              onClick={() => setPage(page + 1)}
-              className="pagination-btn"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </div>
 
       {/* DETAIL & REPLY MODAL */}
-      {selectedMessage && (
-        <div className="detail-modal-overlay" onClick={handleCloseDetailModal}>
-          <div className="detail-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header-section">
-              <h2>Chi tiết Lời nhắn liên hệ</h2>
-              <button className="btn-close-modal" onClick={handleCloseDetailModal}>&times;</button>
-            </div>
-
-            <div className="modal-body-section">
-              {/* Sender info */}
-              <div className="sender-meta-box">
+      <Modal
+        isOpen={!!selectedMessage}
+        onClose={handleCloseDetailModal}
+        title="Chi tiết Lời nhắn liên hệ"
+        size="md"
+      >
+        {selectedMessage && (
+          <div className="modal-body-section">
+            {/* Sender info */}
+            <div className="sender-meta-box">
+              <div className="meta-row">
+                <span className="meta-label">Người gửi:</span>
+                <span className="meta-val">{selectedMessage.name}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Email:</span>
+                <span className="meta-val">{selectedMessage.email}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Thời gian gửi:</span>
+                <span className="meta-val">
+                  {new Date(selectedMessage.createdAt).toLocaleString('vi-VN')}
+                </span>
+              </div>
+              {selectedMessage.replyMessage && (
                 <div className="meta-row">
-                  <span className="meta-label">Người gửi:</span>
-                  <span className="meta-val">{selectedMessage.name}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-label">Email:</span>
-                  <span className="meta-val">{selectedMessage.email}</span>
-                </div>
-                <div className="meta-row">
-                  <span className="meta-label">Thời gian gửi:</span>
-                  <span className="meta-val">
-                    {new Date(selectedMessage.createdAt).toLocaleString('vi-VN')}
+                  <span className="meta-label">Người phản hồi:</span>
+                  <span className="meta-val" style={{ color: 'var(--teal-dark)', fontWeight: '600' }}>
+                    {selectedMessage.repliedByName || 'Quản trị viên'}
                   </span>
                 </div>
-                {selectedMessage.replyMessage && (
-                  <div className="meta-row">
-                    <span className="meta-label">Người phản hồi:</span>
-                    <span className="meta-val" style={{ color: 'var(--teal-dark)', fontWeight: '600' }}>
-                      {selectedMessage.repliedByName || 'Quản trị viên'}
-                    </span>
-                  </div>
+              )}
+            </div>
+
+            {/* Original message content */}
+            <div className="message-content-box">
+              <h4>Nội dung tin nhắn khách hàng gửi:</h4>
+              <div className="content-text-p">
+                {selectedMessage.message}
+              </div>
+            </div>
+
+            {/* Reply Form */}
+            <form onSubmit={handleSubmitReply} className="reply-form-section">
+              <div className="form-group-field">
+                <label htmlFor="replyText">
+                  <Send size={16} /> Phản hồi gửi cho khách hàng:
+                </label>
+                {!!selectedMessage.replyMessage ? (
+                  <div 
+                    className="quill-read-only-content" 
+                    dangerouslySetInnerHTML={{ __html: replyText }} 
+                    style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '100px' }}
+                  />
+                ) : (
+                  <ReactQuill
+                    theme="snow"
+                    value={replyText}
+                    onChange={setReplyText}
+                    placeholder="Nhập nội dung phản hồi chính thức tại đây (Hỗ trợ bôi đậm, in nghiêng, chèn đường link)..."
+                    style={{ background: '#fff' }}
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                      ]
+                    }}
+                  />
                 )}
               </div>
 
-              {/* Original message content */}
-              <div className="message-content-box">
-                <h4>Nội dung tin nhắn khách hàng gửi:</h4>
-                <div className="content-text-p">
-                  {selectedMessage.message}
-                </div>
+              <div className="form-group-field">
+                <label htmlFor="notesText">
+                  <FileText size={16} /> Ghi chú nội bộ (Chỉ lưu nội bộ Admin xem):
+                </label>
+                <textarea
+                  id="notesText"
+                  rows="2"
+                  placeholder="Ghi chú thêm về lời nhắn này nếu có (ví dụ: đã giải quyết qua điện thoại)..."
+                  value={notesText}
+                  onChange={(e) => setNotesText(e.target.value)}
+                  disabled={!!selectedMessage.replyMessage}
+                ></textarea>
               </div>
 
-              {/* Reply Form */}
-              <form onSubmit={handleSubmitReply} className="reply-form-section">
-                <div className="form-group-field">
-                  <label htmlFor="replyText">
-                    <Send size={16} /> Phản hồi gửi cho khách hàng:
-                  </label>
-                  {!!selectedMessage.replyMessage ? (
-                    <div 
-                      className="quill-read-only-content" 
-                      dangerouslySetInnerHTML={{ __html: replyText }} 
-                      style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '100px' }}
-                    />
-                  ) : (
-                    <ReactQuill
-                      theme="snow"
-                      value={replyText}
-                      onChange={setReplyText}
-                      placeholder="Nhập nội dung phản hồi chính thức tại đây (Hỗ trợ bôi đậm, in nghiêng, chèn đường link)..."
-                      style={{ background: '#fff' }}
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline', 'strike'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['link'],
-                          ['clean']
-                        ]
-                      }}
-                    />
-                  )}
-                </div>
-
-                <div className="form-group-field">
-                  <label htmlFor="notesText">
-                    <FileText size={16} /> Ghi chú nội bộ (Chỉ lưu nội bộ Admin xem):
-                  </label>
-                  <textarea
-                    id="notesText"
-                    rows="2"
-                    placeholder="Ghi chú thêm về lời nhắn này nếu có (ví dụ: đã giải quyết qua điện thoại)..."
-                    value={notesText}
-                    onChange={(e) => setNotesText(e.target.value)}
-                    disabled={!!selectedMessage.replyMessage}
-                  ></textarea>
-                </div>
-
-                <div className="modal-footer-actions">
-                  {selectedMessage.replyMessage ? (
+              <div className="modal-footer-actions">
+                {selectedMessage.replyMessage ? (
+                  <button 
+                    type="button" 
+                    onClick={handleCloseDetailModal}
+                    className="btn-modal-primary"
+                  >
+                    Đóng
+                  </button>
+                ) : (
+                  <>
                     <button 
                       type="button" 
                       onClick={handleCloseDetailModal}
-                      className="btn-modal-primary"
+                      className="btn-modal-secondary"
                     >
-                      Đóng
+                      Hủy bỏ
                     </button>
-                  ) : (
-                    <>
-                      <button 
-                        type="button" 
-                        onClick={handleCloseDetailModal}
-                        className="btn-modal-secondary"
-                      >
-                        Hủy bỏ
-                      </button>
-                      <button 
-                        type="submit" 
-                        className="btn-modal-primary"
-                        disabled={isSubmittingReply || !replyText.trim()}
-                      >
-                        {isSubmittingReply ? 'Đang gửi phản hồi...' : 'Gửi phản hồi & Lưu'}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </form>
-            </div>
+                    <button 
+                      type="submit" 
+                      className="btn-modal-primary"
+                      disabled={isSubmittingReply || !replyText.trim()}
+                    >
+                      {isSubmittingReply ? 'Đang gửi phản hồi...' : 'Gửi phản hồi & Lưu'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* CONFIRM DELETE MODAL */}
       <ConfirmModal

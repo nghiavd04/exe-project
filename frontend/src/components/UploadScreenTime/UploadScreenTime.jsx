@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { screenTimeApi } from '../apis/customerApi';
+import { screenTimeApi } from '../../apis/customerApi';
 import toast from 'react-hot-toast';
 import './UploadScreenTime.css';
 

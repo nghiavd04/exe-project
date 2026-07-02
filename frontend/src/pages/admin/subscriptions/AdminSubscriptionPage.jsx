@@ -9,6 +9,7 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import SubscriptionPlanModal from './SubscriptionPlanModal';
+import Pagination from '../../../components/Pagination';
 import './AdminSubscriptionPage.css';
 
 export default function AdminSubscriptionPage() {
@@ -76,7 +77,7 @@ export default function AdminSubscriptionPage() {
         setPlansTotalPages(response.data.data.totalPages || 0);
       }
     } catch (err) {
-      toast.error('Không thể tải danh sách gói dịch vụ');
+      toast.error('Không thể tải danh sách gói dịch vụ', { id: 'fetch-plans-error' });
     } finally {
       setPlansLoading(false);
     }
@@ -97,7 +98,7 @@ export default function AdminSubscriptionPage() {
         setPaymentsTotalPages(response.data.data.totalPages || 0);
       }
     } catch (err) {
-      toast.error('Không thể tải lịch sử mua gói');
+      toast.error('Không thể tải lịch sử mua gói', { id: 'fetch-payments-error' });
     } finally {
       setPaymentsLoading(false);
     }
@@ -451,61 +452,17 @@ export default function AdminSubscriptionPage() {
 
       {/* Pagination */}
       {activeTab === 'payments' ? (
-        paymentsTotalPages > 1 && (
-          <div className="pagination-subscription-container">
-            <button 
-              disabled={paymentsPage === 0 || paymentsLoading}
-              onClick={() => setPaymentsPage(p => p - 1)}
-              className="pagination-btn-sub"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            {Array.from({ length: paymentsTotalPages }).map((_, i) => (
-              <button 
-                key={i} 
-                onClick={() => setPaymentsPage(i)}
-                className={`pagination-btn-sub ${paymentsPage === i ? 'active' : ''}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button 
-              disabled={paymentsPage >= paymentsTotalPages - 1 || paymentsLoading}
-              onClick={() => setPaymentsPage(p => p + 1)}
-              className="pagination-btn-sub"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )
+        <Pagination
+          page={paymentsPage}
+          totalPages={paymentsTotalPages}
+          onPageChange={setPaymentsPage}
+        />
       ) : (
-        plansTotalPages > 1 && (
-          <div className="pagination-subscription-container">
-            <button 
-              disabled={plansPage === 0 || plansLoading}
-              onClick={() => setPlansPage(p => p - 1)}
-              className="pagination-btn-sub"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            {Array.from({ length: plansTotalPages }).map((_, i) => (
-              <button 
-                key={i} 
-                onClick={() => setPlansPage(i)}
-                className={`pagination-btn-sub ${plansPage === i ? 'active' : ''}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button 
-              disabled={plansPage >= plansTotalPages - 1 || plansLoading}
-              onClick={() => setPlansPage(p => p + 1)}
-              className="pagination-btn-sub"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )
+        <Pagination
+          page={plansPage}
+          totalPages={plansTotalPages}
+          onPageChange={setPlansPage}
+        />
       )}
     </div>
   );

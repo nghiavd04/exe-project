@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/AuthContext';
-import { 
-  Users, 
-  DollarSign, 
+import {
+  Users,
+  DollarSign,
   Crown,
   MessageCircle,
-  TrendingUp,
   Activity,
   PieChart,
-  List,
   BookOpen,
-  MessageSquare,
-  ArrowUpRight, 
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { adminApi } from '../../../apis/adminApi';
+import AppState from '../../../components/AppState';
+import { PageHeader } from '../../../components/PageSection';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
@@ -57,24 +55,38 @@ export default function DashboardPage() {
 
   if (loading && !dashboardData) {
     return (
-      <div className="dashboard-loading">
-        <Loader2 className="animate-spin" size={48} />
-        <p>Đang tải dữ liệu dashboard...</p>
-      </div>
+      <AppState
+        variant="loading"
+        title="Đang tải dữ liệu dashboard"
+        description="Chúng tôi đang tổng hợp doanh thu, người dùng và hiệu suất nội dung mới nhất."
+      />
+    );
+  }
+
+  if (error && !dashboardData) {
+    return (
+      <AppState
+        variant="error"
+        title="Không thể tải dashboard"
+        description={error}
+        actionLabel="Thử lại"
+        onAction={fetchDashboardStats}
+      />
     );
   }
 
   return (
     <div className="dashboard-page">
-      <header className="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Chào mừng trở lại, <span>{user?.fullName || 'Administrator'}</span>! Đây là những gì đang diễn ra hôm nay.</p>
-      </header>
+      <PageHeader
+        className="dashboard-header"
+        title="Dashboard"
+        description={`Chào mừng trở lại, ${user?.fullName || 'Administrator'}! Đây là những gì đang diễn ra hôm nay.`}
+      />
 
       {/* Stats Grid */}
       <div className="stats-grid">
         {stats.map((stat, i) => (
-          <div key={i} className="stat-card">
+          <div key={i} className="ui-card stat-card">
             <div className="stat-card-header">
               <div className="stat-icon-wrapper" style={{ background: `${stat.color}15`, color: stat.color }}>
                 {stat.icon}
@@ -88,7 +100,7 @@ export default function DashboardPage() {
 
       <div className="dashboard-row-2">
         {/* Doanh thu */}
-        <div className="chart-card">
+        <div className="ui-card chart-card">
           <div className="chart-header">
             <h3>Biểu đồ Doanh thu</h3>
             <select 
@@ -135,7 +147,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Giao dịch gần đây */}
-        <div className="dashboard-card">
+        <div className="ui-card dashboard-card">
           <h3 className="card-title">Giao dịch gần đây</h3>
           <div className="recent-transactions">
             {dashboardData?.recentTransactions?.map((tx, idx) => (
@@ -158,7 +170,7 @@ export default function DashboardPage() {
 
       <div className="dashboard-row-3">
         {/* Tỷ lệ Gói dịch vụ */}
-        <div className="dashboard-card">
+        <div className="ui-card dashboard-card">
           <h3 className="card-title"><PieChart size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Tỷ lệ Gói dịch vụ</h3>
           <div className="breakdown-list" style={{ marginTop: '1rem' }}>
             {dashboardData?.subscriptionBreakdown?.map((plan, idx) => {
@@ -183,7 +195,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tương tác AI & Phác đồ */}
-        <div className="dashboard-card">
+        <div className="ui-card dashboard-card">
           <h3 className="card-title"><Activity size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Tương tác AI & Phác đồ</h3>
           <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="stat-highlight">
@@ -206,7 +218,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Nội dung nổi bật */}
-        <div className="dashboard-card">
+        <div className="ui-card dashboard-card">
           <h3 className="card-title"><BookOpen size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Nội dung nổi bật</h3>
           
           <div style={{ marginBottom: '1rem' }}>

@@ -10,6 +10,31 @@
   padding-bottom: 6rem;
 }
 
+.pd-state-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 1.5rem 4rem;
+}
+
+.pd-state-feature-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.pd-state-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+}
+
 /* ── Hero Banner ── */
 .pd-hero {
   background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, #12b8a8 100%);
@@ -2206,4 +2231,260 @@
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
+}
+
+/* ── Custom UI Consistency Classes (Refactored from inline styles) ── */
+.pd-hero-center {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.pd-hero-center-content {
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+.pd-phase-badge-center {
+  margin: 0 auto 1rem !important;
+}
+
+.pd-hero-cta-large {
+  margin-top: 2rem !important;
+  padding: 1rem 2.5rem !important;
+  font-size: 1.1rem !important;
+}
+
+.pd-day-nav-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pd-day-nav-btn-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pd-btn-nav-day {
+  background: rgba(13, 122, 110, 0.08);
+  color: var(--teal);
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pd-btn-nav-day:hover:not(:disabled) {
+  background: var(--teal);
+  color: #fff;
+}
+
+.pd-btn-nav-day:disabled {
+  background: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+.pd-day-nav-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 80px;
+  text-align: center;
+}
+
+.pd-science-em {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.pd-metric-card-full {
+  grid-column: 1 / -1 !important;
+}
+
+.pd-journal-prompts-header {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.pd-journal-prompts-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.pd-journal-prompt-chip {
+  transition: opacity 0.2s;
+}
+
+.pd-journal-prompt-chip.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pd-journal-prompt-chip:not(.disabled) {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.pd-journal-footer-right {
+  justify-content: flex-end !important;
+}
+
+.pd-save-row-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pd-save-row-status {
+  font-size: 0.9rem;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.pd-save-row-btns {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pd-btn-secondary-edit {
+  background: rgba(13, 122, 110, 0.08);
+  color: var(--teal);
+  border: 1px solid rgba(13, 122, 110, 0.2);
+  padding: 0.65rem 1.5rem;
+  border-radius: 999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pd-btn-secondary-edit:hover {
+  background: var(--teal);
+  color: #fff;
+}
+
+.pd-milestone-card {
+  background: linear-gradient(135deg, #fff9ec, #fff3e8);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pd-milestone-title {
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+}
+
+.pd-milestone-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+.pd-milestone-desc strong {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.pd-milestone-progress {
+  background: rgba(249,115,22,0.1);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.pd-milestone-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #fb923c);
+  border-radius: 999px;
+}
+
+.pd-milestone-footer {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+  text-align: right;
+}
+
+.pd-media-library-card {
+  margin-top: 1.5rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--teal-pale), #e0f2fe);
+  border: 1px solid rgba(13, 122, 110, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.pd-media-library-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.pd-media-library-icon {
+  background: var(--teal) !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pd-media-library-title {
+  color: var(--teal-dark) !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+}
+
+.pd-media-library-footer {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 650;
+}
+
+.pd-media-library-arrow {
+  font-size: 1rem;
+}
+
+.pd-flex-align-center {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+
+.pd-lock-inline {
+  font-size: 0.75rem !important;
+  color: var(--muted) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.pd-text-teal {
+  color: var(--teal) !important;
 }

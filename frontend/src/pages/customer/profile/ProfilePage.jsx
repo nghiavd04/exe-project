@@ -260,7 +260,7 @@ export default function ProfilePage() {
             <div className="profile-header-bg"></div>
             <div className="profile-content">
                 <div className="profile-sidebar">
-                    <div className="profile-card user-info-card">
+                    <div className="ui-card profile-card user-info-card">
                         <div className="avatar-section">
                             <div className="avatar-wrapper">
                                 {avatarPreview ? (
@@ -285,7 +285,7 @@ export default function ProfilePage() {
                                 />
                             </div>
                             {avatarFile && (
-                                <button className="btn-upload-avatar" onClick={handleUploadAvatar} disabled={saving}>
+                                <button className="ui-btn ui-btn--secondary btn-upload-avatar" onClick={handleUploadAvatar} disabled={saving}>
                                     {saving ? 'Đang lưu...' : 'Lưu ảnh mới'}
                                 </button>
                             )}
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                         <p className="user-email" title={user?.email}>{user?.email}</p>
                     </div>
 
-                    <div className="profile-nav-card">
+                    <div className="ui-card profile-nav-card">
                         <button
                             className={`nav-item ${activeTab === 'info' ? 'active' : ''}`}
                             onClick={() => setActiveTab('info')}
@@ -327,7 +327,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="profile-main">
-                    <div className="profile-card form-card">
+                    <div className="ui-card profile-card form-card">
                         {activeTab === 'info' && (
                             <div className="tab-content">
                                 <h3>Thông tin cá nhân</h3>
@@ -342,7 +342,7 @@ export default function ProfilePage() {
                                                         type="text"
                                                         value={tempFullName}
                                                         onChange={(e) => setTempFullName(e.target.value)}
-                                                        className="inline-input"
+                                                        className="ui-input inline-input"
                                                         autoFocus
                                                     />
                                                     <div className="inline-actions">
@@ -407,6 +407,7 @@ export default function ProfilePage() {
                                                     value={oldPassword}
                                                     onChange={(e) => setOldPassword(e.target.value)}
                                                     placeholder="••••••••"
+                                                    className="ui-input"
                                                     required
                                                 />
                                                 <button
@@ -427,6 +428,7 @@ export default function ProfilePage() {
                                                     value={newPassword}
                                                     onChange={(e) => setNewPassword(e.target.value)}
                                                     placeholder="Tối thiểu 6 ký tự"
+                                                    className="ui-input"
                                                     required
                                                 />
                                                 <button
@@ -447,6 +449,7 @@ export default function ProfilePage() {
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     placeholder="••••••••"
+                                                    className="ui-input"
                                                     required
                                                 />
                                                 <button
@@ -459,7 +462,7 @@ export default function ProfilePage() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <button type="submit" className="btn-save" disabled={saving}>
+                                        <button type="submit" className="ui-btn ui-btn--primary btn-save" disabled={saving}>
                                             {saving ? 'Đang lưu...' : 'Cập nhật mật khẩu'}
                                         </button>
                                     </form>
@@ -473,7 +476,7 @@ export default function ProfilePage() {
             {/* Email Change Modal */}
             {showEmailModal && (
                 <div className="modal-overlay">
-                    <div className="modal-content animate-slide-up">
+                    <div className="ui-card modal-content animate-slide-up">
                         <button className="modal-close" onClick={() => setShowEmailModal(false)}>
                             <X size={24} />
                         </button>
@@ -496,11 +499,11 @@ export default function ProfilePage() {
                                             value={newEmailForm}
                                             onChange={(e) => setNewEmailForm(e.target.value)}
                                             placeholder="Nhập email mới của bạn"
-                                            className="modal-input"
+                                            className="ui-input modal-input"
                                         />
                                     </div>
                                     <button 
-                                        className="btn-modal-primary" 
+                                        className="ui-btn ui-btn--primary btn-modal-primary" 
                                         onClick={handleSendEmailCode}
                                         disabled={saving}
                                     >
@@ -519,7 +522,7 @@ export default function ProfilePage() {
                                                 ref={(el) => (emailOtpInputs.current[index] = el)}
                                                 type="text"
                                                 maxLength="1"
-                                                className={`otp-modal-field otp-field-${index}`}
+                                                className={`ui-input otp-modal-field otp-field-${index}`}
                                                 value={digit}
                                                 onChange={(e) => handleOtpChange(index, e.target.value)}
                                                 onKeyDown={(e) => handleEmailOtpKeyDown(index, e)}
@@ -540,10 +543,10 @@ export default function ProfilePage() {
                                     </div>
 
                                     <div className="modal-actions-row">
-                                        <button className="btn-modal-secondary" onClick={() => setEmailStep(1)}>
+                                        <button className="ui-btn ui-btn--ghost btn-modal-secondary" onClick={() => setEmailStep(1)}>
                                             Quay lại
                                         </button>
-                                        <button className="btn-modal-primary" onClick={handleVerifyEmailChange} disabled={saving}>
+                                        <button className="ui-btn ui-btn--primary btn-modal-primary" onClick={handleVerifyEmailChange} disabled={saving}>
                                             {saving ? 'Đang xác thực...' : 'Xác nhận thay đổi'}
                                         </button>
                                     </div>

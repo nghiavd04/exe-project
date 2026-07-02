@@ -7,7 +7,7 @@ export default function CustomerLayout() {
   return (
     <>
       <Header />
-      <main>
+      <main className="customer-shell">
         <Outlet />
       </main>
       <Footer />

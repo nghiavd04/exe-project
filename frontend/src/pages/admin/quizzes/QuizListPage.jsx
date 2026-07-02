@@ -10,6 +10,8 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import QuizRenderer from '../../../components/QuizRenderer/QuizRenderer';
+import Pagination from '../../../components/Pagination';
+import Modal from '../../../components/Modal';
 import './QuizListPage.css';
 
 export default function QuizListPage() {
@@ -434,66 +436,11 @@ export default function QuizListPage() {
         </table>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="pagination-quiz-controls">
-            <button 
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="pagination-btn-quiz"
-            >
-              <ChevronLeft size={20} />
-            </button>
-
-            {(() => {
-              const pages = [];
-              const maxVisible = 5;
-              let start = Math.max(0, page - 2);
-              let end = Math.min(totalPages - 1, start + maxVisible - 1);
-              
-              if (end - start < maxVisible - 1) {
-                start = Math.max(0, end - maxVisible + 1);
-              }
-
-              if (start > 0) {
-                pages.push(
-                  <button key={0} onClick={() => setPage(0)} className={`pagination-btn-quiz ${page === 0 ? 'active' : ''}`}>1</button>
-                );
-                if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
-              }
-
-              for (let i = start; i <= end; i++) {
-                pages.push(
-                  <button 
-                    key={i} 
-                    onClick={() => setPage(i)}
-                    className={`pagination-btn-quiz ${page === i ? 'active' : ''}`}
-                  >
-                    {i + 1}
-                  </button>
-                );
-              }
-
-              if (end < totalPages - 1) {
-                if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
-                pages.push(
-                  <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className={`pagination-btn-quiz ${page === totalPages - 1 ? 'active' : ''}`}>
-                    {totalPages}
-                  </button>
-                );
-              }
-
-              return pages;
-            })()}
-
-            <button 
-              disabled={page === totalPages - 1}
-              onClick={() => setPage(page + 1)}
-              className="pagination-btn-quiz"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </div>
 
       <ConfirmModal 
@@ -506,34 +453,26 @@ export default function QuizListPage() {
       />
 
       {/* View Detail Modal */}
-      {showDetailModal && (
-        <div className="detail-modal-overlay" onClick={() => setShowDetailModal(false)}>
-          <div className="detail-modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
-            <div className="detail-modal-header">
-              <div className="detail-modal-header-info">
-                <h2>Chi tiết bài test</h2>
-                <p>Chế độ xem nhanh nội dung câu hỏi và phản hồi</p>
-              </div>
-              <button className="detail-modal-close-btn" onClick={() => setShowDetailModal(false)}>
-                <X size={24} />
-              </button>
+      <Modal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        title="Chi tiết bài test"
+        size="lg"
+      >
+        <p className="auth-subtitle" style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+          Chế độ xem nhanh nội dung câu hỏi và phản hồi
+        </p>
+        <div className="detail-modal-main-card" style={{ minHeight: '300px', display: 'flex', flexDirection: 'column' }}>
+          {detailLoading ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '3rem' }}>
+              <Loader2 className="animate-spin" size={40} color="var(--teal)" />
+              <p style={{ color: 'var(--muted)', fontWeight: '600' }}>Đang tải nội dung...</p>
             </div>
-            
-            <div className="detail-modal-main-card">
-              {detailLoading ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
-                  <Loader2 className="animate-spin" size={40} color="#1a1a4b" />
-                  <p style={{ color: 'var(--muted)', fontWeight: '600' }}>Đang tải nội dung...</p>
-                </div>
-              ) : (
-                <QuizRenderer quiz={selectedQuiz} isPreview={true} />
-              )}
-            </div>
-            
-            
-          </div>
+          ) : (
+            <QuizRenderer quiz={selectedQuiz} isPreview={true} />
+          )}
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

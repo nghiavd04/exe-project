@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { quizApi } from '../../../apis/customerApi';
 import defaultQuizImg from '../../../assets/dopamine-bg.png';
+import AppState from '../../../components/AppState';
+import { PageSection, PageHeader } from '../../../components/PageSection';
+import Pagination from '../../../components/Pagination';
 import './QuizListPage.css';
 
 const QuizListPage = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -17,6 +21,7 @@ const QuizListPage = () => {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
+      setError(false);
       const params = {
         page
       };
@@ -27,6 +32,8 @@ const QuizListPage = () => {
       }
     } catch (error) {
       console.error('Error fetching quizzes:', error);
+      setError(true);
+      setQuizzes([]);
     } finally {
       setLoading(false);
     }
@@ -35,83 +42,75 @@ const QuizListPage = () => {
   return (
     <div className="quiz-list-page">
       <header className="quiz-hero">
-        <div className="quiz-hero-content">
-          <div className="hero-badge">
-            <span className="hero-badge-dot"></span>
-            INSIGHT QUIZ
-          </div>
-          <h1>Thấu hiểu <span>bản thân</span> qua từng câu hỏi</h1>
-          <p>Làm các bài test tâm lý và hành vi để nhận được những nhận xét chuyên sâu giúp bạn cải thiện chất lượng cuộc sống.</p>
-        </div>
+        <PageHeader
+          align="center"
+          className="quiz-hero-content"
+          eyebrow="INSIGHT QUIZ"
+          title={<>Thấu hiểu <span>bản thân</span> qua từng câu hỏi</>}
+          description="Làm các bài test tâm lý và hành vi để nhận được những nhận xét chuyên sâu giúp bạn cải thiện chất lượng cuộc sống."
+        />
       </header>
 
-      <section className="quiz-grid-section">
+      <PageSection className="quiz-grid-section" width="wide">
         {loading ? (
-          <div className="global-loading-container">
-            Đang tải danh sách bài test
-            <span className="loading-dots">
-              <span></span><span></span><span></span>
-            </span>
-          </div>
+          <AppState
+            variant="loading"
+            compact
+            title="Đang tải danh sách bài test"
+            description="Chúng tôi đang chuẩn bị các bài kiểm tra tốt nhất cho bạn."
+          />
+        ) : error ? (
+          <AppState
+            variant="error"
+            title="Không thể tải danh sách bài test"
+            description="Đã xảy ra sự cố khi kết nối dữ liệu từ máy chủ. Vui lòng kiểm tra lại đường truyền."
+            actionLabel="Thử lại"
+            onAction={fetchQuizzes}
+          />
         ) : quizzes.length > 0 ? (
-          <div className="quiz-grid">
-            {quizzes.map((quiz) => (
-              <div key={quiz.id} className="quiz-card">
-                <div className="quiz-card-banner">
-                  <img 
-                    src={quiz.imageUrl || defaultQuizImg} 
-                    alt={quiz.title} 
-                    className="quiz-card-img" 
-                    onError={(e) => { e.target.src = defaultQuizImg; }}
-                  />
-                  <div className="quiz-card-badge">Tâm lý</div>
-                </div>
-                <div className="quiz-card-content">
-                  <div className="quiz-card-body">
-                    <h3>{quiz.title}</h3>
-                    <p>{quiz.description || 'Không có mô tả cho bài test này.'}</p>
+          <>
+            <div className="quiz-grid">
+              {quizzes.map((quiz) => (
+                <div key={quiz.id} className="quiz-card">
+                  <div className="quiz-card-banner">
+                    <img 
+                      src={quiz.imageUrl || defaultQuizImg} 
+                      alt={quiz.title} 
+                      className="quiz-card-img" 
+                      onError={(e) => { e.target.src = defaultQuizImg; }}
+                    />
+                    <div className="quiz-card-badge">Tâm lý</div>
                   </div>
-                  <div className="quiz-card-footer">
-                    <Link to={`/trac-nghiem/${quiz.id}/bat-dau`} className="btn-start">Bắt đầu test</Link>
+                  <div className="quiz-card-content">
+                    <div className="quiz-card-body">
+                      <h3>{quiz.title}</h3>
+                      <p>{quiz.description || 'Không có mô tả cho bài test này.'}</p>
+                    </div>
+                    <div className="quiz-card-footer">
+                      <Link to={`/trac-nghiem/${quiz.id}/bat-dau`} className="btn-start">Bắt đầu test</Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </>
         ) : (
-          <div className="no-quizzes">Hiện chưa có bài test nào được công khai.</div>
+          <AppState
+            variant="empty"
+            title="Chưa có bài test nào được công khai"
+            description="Hiện chưa có bài trắc nghiệm tâm lý nào được đăng tải. Vui lòng quay lại sau ít phút."
+          />
         )}
-
-        {totalPages > 1 && (
-          <div className="pagination">
-            <button 
-              disabled={page === 0} 
-              onClick={() => setPage(page - 1)}
-              className="page-btn"
-            >
-              &larr;
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i)}
-                className={`page-btn ${page === i ? 'active' : ''}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button 
-              disabled={page === totalPages - 1} 
-              onClick={() => setPage(page + 1)}
-              className="page-btn"
-            >
-              &rarr;
-            </button>
-          </div>
-        )}
-      </section>
+      </PageSection>
     </div>
   );
 };
 
 export default QuizListPage;
+

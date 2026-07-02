@@ -67,9 +67,9 @@ export default function ProgramDetailPage() {
     return (
       <div className="pd-page pd-not-enrolled-page">
         <div className="pd-hero">
-          <div className="pd-hero-inner" style={{ justifyContent: 'center', textAlign: 'center' }}>
-            <div className="pd-hero-left" style={{ maxWidth: '600px', margin: '0 auto' }}>
-              <div className="pd-phase-badge" style={{ margin: '0 auto 1rem' }}>
+          <div className="pd-hero-inner pd-hero-center">
+            <div className="pd-hero-left pd-hero-center-content">
+              <div className="pd-phase-badge pd-phase-badge-center">
                 <span className="pd-phase-dot" />
                 Sẵn sàng cho sự thay đổi
               </div>
@@ -80,8 +80,7 @@ export default function ProgramDetailPage() {
                 Bạn đã đăng ký gói dịch vụ thành công! Hãy nhấn nút dưới đây để kích hoạt và bắt đầu hành trình tái cân bằng dopamine cũng như thiết lập thói quen lành mạnh.
               </p>
               <button 
-                className="pd-hero-cta" 
-                style={{ marginTop: '2rem', padding: '1rem 2.5rem', fontSize: '1.1rem' }}
+                className="pd-hero-cta pd-hero-cta-large" 
                 onClick={handleEnroll}
               >
                 🚀 Bắt đầu lộ trình ngay hôm nay
@@ -282,7 +281,7 @@ export default function ProgramDetailPage() {
 
       <div className="pd-content">
         <div className="pd-main">
-          <div className="pd-back-to-roadmap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div className="pd-day-nav-wrapper">
             <button 
               onClick={() => {
                 navigate('/phac-do');
@@ -293,7 +292,7 @@ export default function ProgramDetailPage() {
               ← Quay lại Lộ Trình 120 Ngày
             </button>
 
-            <div className="pd-day-nav" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="pd-day-nav-btn-group">
               <button
                 className="pd-btn-nav-day"
                 disabled={currentDayNum <= 1}
@@ -301,34 +300,10 @@ export default function ProgramDetailPage() {
                   navigate(`/phac-do/chi-tiet?day=${currentDayNum - 1}`);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                style={{
-                  background: currentDayNum <= 1 ? '#e2e8f0' : 'rgba(13, 122, 110, 0.08)',
-                  color: currentDayNum <= 1 ? '#94a3b8' : 'var(--teal)',
-                  border: 'none',
-                  padding: '0.4rem 1rem',
-                  borderRadius: '999px',
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: currentDayNum <= 1 ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  if (currentDayNum > 1) {
-                    e.currentTarget.style.background = 'var(--teal)';
-                    e.currentTarget.style.color = '#fff';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (currentDayNum > 1) {
-                    e.currentTarget.style.background = 'rgba(13, 122, 110, 0.08)';
-                    e.currentTarget.style.color = 'var(--teal)';
-                  }
-                }}
               >
                 ← Ngày trước
               </button>
-              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)', minWidth: '80px', textAlign: 'center' }}>
+              <span className="pd-day-nav-label">
                 Ngày {currentDayNum} / {userProgress?.currentDay || 120}
               </span>
               <button
@@ -337,30 +312,6 @@ export default function ProgramDetailPage() {
                 onClick={() => {
                   navigate(`/phac-do/chi-tiet?day=${currentDayNum + 1}`);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                style={{
-                  background: currentDayNum >= (userProgress?.currentDay || 1) ? '#e2e8f0' : 'rgba(13, 122, 110, 0.08)',
-                  color: currentDayNum >= (userProgress?.currentDay || 1) ? '#94a3b8' : 'var(--teal)',
-                  border: 'none',
-                  padding: '0.4rem 1rem',
-                  borderRadius: '999px',
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: currentDayNum >= (userProgress?.currentDay || 1) ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  if (currentDayNum < (userProgress?.currentDay || 1)) {
-                    e.currentTarget.style.background = 'var(--teal)';
-                    e.currentTarget.style.color = '#fff';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (currentDayNum < (userProgress?.currentDay || 1)) {
-                    e.currentTarget.style.background = 'rgba(13, 122, 110, 0.08)';
-                    e.currentTarget.style.color = 'var(--teal)';
-                  }
                 }}
               >
                 Ngày sau →
@@ -373,7 +324,7 @@ export default function ProgramDetailPage() {
               <span className="pd-science-ico">🧬</span>
               <p className="pd-science-text">
                 <strong>Tháng {dayDetail?.phaseNumber} — {activePhaseData?.label}:</strong> {activePhaseData?.focus}
-                <em style={{ display: 'block', marginTop: '4px', fontSize: '0.78rem' }}>Cơ sở khoa học: {activePhaseData?.science}</em>
+                <em className="pd-science-em">Cơ sở khoa học: {activePhaseData?.science}</em>
               </p>
             </div>
           )}
@@ -513,7 +464,7 @@ export default function ProgramDetailPage() {
                 </div>
               </div>
 
-              <div className="pd-metric-card" style={{ gridColumn: '1/-1' }}>
+              <div className="pd-metric-card pd-metric-card-full">
                 <div className="pd-metric-top">
                   <span className="pd-metric-label">Mức độ tập trung</span>
                   <span className="pd-metric-icon">🎯</span>
@@ -545,25 +496,22 @@ export default function ProgramDetailPage() {
 
             <div className="pd-journal-card">
               <div style={{ marginBottom: '1.2rem' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginBottom: '0.5rem', fontWeight: 600 }}>Gợi ý viết nhật ký (Nhấp chọn để dùng làm biểu mẫu):</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div className="pd-journal-prompts-header">Gợi ý viết nhật ký (Nhấp chọn để dùng làm biểu mẫu):</div>
+                <div className="pd-journal-prompts-chips">
                   <span 
-                    className="pd-journal-prompt-chip" 
-                    style={{ opacity: isEditing ? 1 : 0.5, cursor: isEditing ? 'pointer' : 'default' }}
+                    className={`pd-journal-prompt-chip ${isEditing ? '' : 'disabled'}`}
                     onClick={() => isEditing && handlePromptClick('💬 3 điều bạn để ý hôm nay mà không qua màn hình?')}
                   >
                     💡 3 điều nhận thức tự nhiên
                   </span>
                   <span 
-                    className="pd-journal-prompt-chip" 
-                    style={{ opacity: isEditing ? 1 : 0.5, cursor: isEditing ? 'pointer' : 'default' }}
+                    className={`pd-journal-prompt-chip ${isEditing ? '' : 'disabled'}`}
                     onClick={() => isEditing && handlePromptClick('💬 Cảm xúc nào khó chịu nhất và bạn xử lý ra sao?')}
                   >
                     💡 Đối diện cảm xúc khó chịu
                   </span>
                   <span 
-                    className="pd-journal-prompt-chip" 
-                    style={{ opacity: isEditing ? 1 : 0.5, cursor: isEditing ? 'pointer' : 'default' }}
+                    className={`pd-journal-prompt-chip ${isEditing ? '' : 'disabled'}`}
                     onClick={() => isEditing && handlePromptClick('💬 Khoảnh khắc nào bạn cảm thấy kiểm soát được nhất?')}
                   >
                     💡 Khoảnh khắc làm chủ bản thân
@@ -577,7 +525,7 @@ export default function ProgramDetailPage() {
                 onChange={e => setJournal(e.target.value)}
                 disabled={!isEditing}
               />
-              <div className="pd-journal-footer" style={{ justifyContent: 'flex-end' }}>
+              <div className="pd-journal-footer pd-journal-footer-right">
                 <span className="pd-journal-chars">{journal.length} ký tự</span>
               </div>
             </div>
@@ -585,33 +533,13 @@ export default function ProgramDetailPage() {
 
           <div className="pd-save-row">
             {!isEditing ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <span style={{ fontSize: '0.9rem', color: 'var(--teal)', fontWeight: 700 }}>
+              <div className="pd-save-row-inner">
+                <span className="pd-save-row-status">
                   ✓ Đã ghi nhận chỉ số &amp; nhật ký ngày {currentDayNum}
                 </span>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="pd-save-row-btns">
                   <button 
                     className="pd-btn-secondary-edit"
-                    style={{
-                      background: 'rgba(13, 122, 110, 0.08)',
-                      color: 'var(--teal)',
-                      border: '1px solid rgba(13, 122, 110, 0.2)',
-                      padding: '0.65rem 1.5rem',
-                      borderRadius: '999px',
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: '0.88rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'var(--teal)';
-                      e.currentTarget.style.color = '#fff';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'rgba(13, 122, 110, 0.08)';
-                      e.currentTarget.style.color = 'var(--teal)';
-                    }}
                     onClick={() => setIsEditing(true)}
                   >
                     ✏️ Sửa chỉ số &amp; nhật ký
@@ -716,61 +644,38 @@ export default function ProgramDetailPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              background: 'linear-gradient(135deg, #fff9ec, #fff3e8)',
-              border: '1px solid rgba(249,115,22,0.2)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.4rem',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <div style={{ fontSize: '1rem', fontWeight: 800, fontFamily: 'Outfit', color: 'var(--text)', marginBottom: '0.8rem' }}>
+          <div className="pd-milestone-card">
+            <div className="pd-milestone-title">
               🏆 Milestone tiếp theo
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.75rem', lineHeight: 1.5, fontWeight: 300 }}>
-              Còn <strong style={{ color: 'var(--accent)', fontSize: '1.1rem' }}>{7 - (currentDayNum % 7)} ngày</strong> nữa đến cột mốc tiếp theo!
+            <div className="pd-milestone-desc">
+              Còn <strong>{7 - (currentDayNum % 7)} ngày</strong> nữa đến cột mốc tiếp theo!
             </div>
-            <div style={{ background: 'rgba(249,115,22,0.1)', borderRadius: 999, height: 8, overflow: 'hidden' }}>
-              <div style={{ width: `${Math.round(((currentDayNum % 7) / 7) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent), #fb923c)', borderRadius: 999 }} />
+            <div className="pd-milestone-progress">
+              <div className="pd-milestone-progress-bar" style={{ width: `${Math.round(((currentDayNum % 7) / 7) * 100)}%` }} />
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.4rem', textAlign: 'right' }}>
+            <div className="pd-milestone-footer">
               Ngày {currentDayNum % 7}/7
             </div>
           </div>
 
           <div 
-            className="pd-roadmap-progress-card media-library-card"
-            style={{ 
-              marginTop: '1.5rem', 
-              cursor: 'pointer', 
-              background: 'linear-gradient(135deg, var(--teal-pale), #e0f2fe)',
-              borderColor: 'rgba(13, 122, 110, 0.15)',
-              transition: 'all 0.3s ease'
-            }}
+            className="pd-media-library-card"
             onClick={() => {
               navigate('/phac-do/tai-nguyen');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
           >
             <div className="pd-roadmap-progress-header">
-              <span className="pd-roadmap-progress-icon" style={{ background: 'var(--teal)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🎧</span>
+              <span className="pd-roadmap-progress-icon pd-media-library-icon">🎧</span>
               <div>
-                <span className="pd-roadmap-progress-title" style={{ color: 'var(--teal-dark)', fontSize: '0.92rem', fontWeight: 700 }}>Thư viện Thiền & Podcast</span>
+                <span className="pd-roadmap-progress-title pd-media-library-title">Thư viện Thiền & Podcast</span>
                 <span className="pd-roadmap-progress-sub">Kho âm thanh chánh niệm & dopamine</span>
               </div>
             </div>
-            <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 650 }}>
+            <div className="pd-media-library-footer">
               <span>Khám phá ngay</span>
-              <span style={{ fontSize: '1rem' }}>→</span>
+              <span className="pd-media-library-arrow">→</span>
             </div>
           </div>
         </div>

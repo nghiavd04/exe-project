@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
-  User, Shield, Mail, CreditCard, UserX, UserCheck, MoreVertical, ShieldCheck, TrendingUp
+  Search, ChevronLeft, ChevronRight,
+  User, Mail, CreditCard, UserX, UserCheck, MoreVertical, ShieldCheck, TrendingUp, ChevronRight as CrumbChevron
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
+import AppState from '../../../components/AppState';
 import ConfirmModal from '../../../components/ConfirmModal';
+import { PageHeader } from '../../../components/PageSection';
 import AdminCreateModal from './AdminCreateModal';
 import AdminUserProgressModal from './AdminUserProgressModal';
 import './AdminManagerAccountPage.css';
@@ -30,20 +32,18 @@ export default function AdminManagerAccountPage() {
     { label: 'Quản trị viên (Admin)', value: 'ADMIN' },
   ];
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null);
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Modal State
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     title: '',
     message: '',
     type: 'danger',
-    onConfirm: () => { }
+    onConfirm: () => {},
   });
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function AdminManagerAccountPage() {
         page,
         size: pageSize,
         search: search || undefined,
-        role: role,
-        isActive: isActive !== '' ? isActive : undefined
+        role,
+        isActive: isActive !== '' ? isActive : undefined,
       };
       const response = await adminApi.getUsers(params);
       if (response.data.success) {
@@ -68,6 +68,7 @@ export default function AdminManagerAccountPage() {
     } catch (err) {
       console.error('Error fetching users:', err);
       toast.error('Không thể tải danh sách người dùng', { id: 'fetch-users-error' });
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -96,7 +97,7 @@ export default function AdminManagerAccountPage() {
         } catch (err) {
           toast.error(err.response?.data?.message || 'Lỗi khi thực hiện', { id: loadingToast });
         }
-      }
+      },
     });
   };
 
@@ -104,27 +105,21 @@ export default function AdminManagerAccountPage() {
     <div className="admin-page">
       <div className="account-breadcrumb">
         <Link to="/admin">ADMIN</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
+        <CrumbChevron size={14} style={{ opacity: 0.5 }} />
         <span>QUẢN LÝ TÀI KHOẢN</span>
       </div>
 
-      <header className="account-header">
-        <div>
-          <h1>Quản lý Tài khoản</h1>
-          <p>Quản lý người dùng và phân quyền trong hệ thống.</p>
-        </div>
-
-        {role === 'ADMIN' && (
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="btn-add-admin"
-          >
+      <PageHeader
+        className="account-header"
+        title="Quản lý Tài khoản"
+        description="Quản lý người dùng, phân quyền và theo dõi tiến độ trong hệ thống."
+        actions={role === 'ADMIN' ? (
+          <button onClick={() => setIsCreateModalOpen(true)} className="ui-btn ui-btn--primary btn-add-admin">
             <ShieldCheck size={20} /> Thêm Admin
           </button>
-        )}
-      </header>
+        ) : null}
+      />
 
-      {/* Tabs UI */}
       <div className="tabs-container">
         {tabs.map((tab) => (
           <button
@@ -137,9 +132,7 @@ export default function AdminManagerAccountPage() {
         ))}
       </div>
 
-      {/* Filters Bar */}
-      <div className="account-filters-bar">
-        {/* Search */}
+      <div className="ui-card account-filters-bar">
         <div className="search-wrapper-relative">
           <Search className="search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
           <input
@@ -148,15 +141,14 @@ export default function AdminManagerAccountPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearch}
-            className="search-input-field"
+            className="ui-input search-input-field"
           />
         </div>
 
-        {/* Status Filter */}
         <select
           value={isActive}
           onChange={(e) => { setIsActive(e.target.value); setPage(0); }}
-          className="status-select-filter"
+          className="ui-select status-select-filter"
         >
           <option value="">Tất cả trạng thái</option>
           <option value="true">Đang hoạt động</option>
@@ -164,8 +156,7 @@ export default function AdminManagerAccountPage() {
         </select>
       </div>
 
-      {/* Users Table */}
-      <div className="table-wrapper-card">
+      <div className="ui-card table-wrapper-card">
         <table className="admin-table">
           <thead>
             <tr>
@@ -199,9 +190,13 @@ export default function AdminManagerAccountPage() {
               ))
             ) : (!users || users.length === 0) ? (
               <tr>
-                <td colSpan={role === 'CUSTOMER' ? 6 : 4} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👥</div>
-                  Không tìm thấy {role.toLowerCase()} nào.
+                <td colSpan={role === 'CUSTOMER' ? 6 : 4} style={{ padding: '2rem' }}>
+                  <AppState
+                    variant="empty"
+                    compact
+                    title={`Không tìm thấy ${role.toLowerCase()} nào`}
+                    description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+                  />
                 </td>
               </tr>
             ) : users.map((user, index) => (
@@ -210,23 +205,17 @@ export default function AdminManagerAccountPage() {
                 <td>
                   <div className="user-cell-flex">
                     <div className="avatar-container">
-                      {user.avatarUrl ? (
-                        <img src={user.avatarUrl} alt="" />
-                      ) : (
-                        <User size={20} color="var(--teal-dark)" />
-                      )}
+                      {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : <User size={20} color="var(--teal-dark)" />}
                     </div>
                     <div className="user-info-text">
                       <div className="user-name">{user.fullName}</div>
-                      <div className="user-email">
-                        <Mail size={12} /> {user.email}
-                      </div>
+                      <div className="user-email"><Mail size={12} /> {user.email}</div>
                     </div>
                   </div>
                 </td>
                 {role === 'CUSTOMER' && (
                   <td>
-                    <div className={`plan-badge ${user.subscriptionPlan === 'FREE' ? 'free' : 'paid' || user.subscriptionPlan === 'Miễn phí'}`}>
+                    <div className={`plan-badge ${user.subscriptionPlan === 'FREE' ? 'free' : 'paid'}`}>
                       <CreditCard size={14} />
                       {user.subscriptionPlan}
                     </div>
@@ -236,14 +225,8 @@ export default function AdminManagerAccountPage() {
                   <td>
                     {user.currentDay ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--teal)' }}>
-                          Ngày {user.currentDay}/120
-                        </span>
-                        {user.streakCount > 0 && (
-                          <span style={{ fontSize: '0.72rem', color: '#f97316', fontWeight: 600 }}>
-                            🔥 {user.streakCount} ngày liên tục
-                          </span>
-                        )}
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--teal)' }}>Ngày {user.currentDay}/120</span>
+                        {user.streakCount > 0 && <span style={{ fontSize: '0.72rem', color: '#f97316', fontWeight: 600 }}>🔥 {user.streakCount} ngày liên tục</span>}
                       </div>
                     ) : (
                       <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>Chưa bắt đầu</span>
@@ -266,10 +249,10 @@ export default function AdminManagerAccountPage() {
                     </button>
 
                     {activeMenuId === user.id && (
-                      <div className="action-dropdown-menu" style={{
+                      <div className="ui-card action-dropdown-menu" style={{
                         [users && users.length - index <= 2 && users.length > 3 ? 'bottom' : 'top']: '100%',
                         marginTop: users.length - index <= 2 && users.length > 3 ? '0' : '0.5rem',
-                        marginBottom: users.length - index <= 2 && users.length > 3 ? '0.5rem' : '0'
+                        marginBottom: users.length - index <= 2 && users.length > 3 ? '0.5rem' : '0',
                       }}>
                         {role === 'CUSTOMER' && (
                           <button
@@ -278,15 +261,14 @@ export default function AdminManagerAccountPage() {
                               setIsProgressModalOpen(true);
                               setActiveMenuId(null);
                             }}
-                            className="action-dropdown-btn"
-                            style={{ color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '8px' }}
+                            className="action-dropdown-btn dropdown-item-teal"
                           >
                             <TrendingUp size={16} /> Xem tiến trình chỉ số
                           </button>
                         )}
                         <button
                           onClick={() => handleToggleStatus(user)}
-                          className={`action-dropdown-btn ${user.isActive ? 'danger' : 'success'}`}
+                          className={`action-dropdown-btn ${user.isActive ? 'dropdown-item-danger' : 'dropdown-item-success'}`}
                         >
                           {user.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
                           {user.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
@@ -300,34 +282,17 @@ export default function AdminManagerAccountPage() {
           </tbody>
         </table>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination-controls">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="pagination-btn"
-              style={page === 0 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}
-            >
+            <button disabled={page === 0} onClick={() => setPage(page - 1)} className="pagination-btn" style={page === 0 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}>
               <ChevronLeft size={20} />
             </button>
-
             {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i)}
-                className={`pagination-btn ${page === i ? 'active' : ''}`}
-              >
+              <button key={i} onClick={() => setPage(i)} className={`pagination-btn ${page === i ? 'active' : ''}`}>
                 {i + 1}
               </button>
             ))}
-
-            <button
-              disabled={page === totalPages - 1}
-              onClick={() => setPage(page + 1)}
-              className="pagination-btn"
-              style={page === totalPages - 1 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}
-            >
+            <button disabled={page === totalPages - 1} onClick={() => setPage(page + 1)} className="pagination-btn" style={page === totalPages - 1 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}>
               <ChevronRight size={20} />
             </button>
           </div>
@@ -342,16 +307,8 @@ export default function AdminManagerAccountPage() {
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
         onConfirm={modalConfig.onConfirm}
       />
-      <AdminCreateModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={fetchUsers}
-      />
-      <AdminUserProgressModal
-        isOpen={isProgressModalOpen}
-        onClose={() => { setIsProgressModalOpen(false); setSelectedProgressUser(null); }}
-        user={selectedProgressUser}
-      />
+      <AdminCreateModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSuccess={fetchUsers} />
+      <AdminUserProgressModal isOpen={isProgressModalOpen} onClose={() => { setIsProgressModalOpen(false); setSelectedProgressUser(null); }} user={selectedProgressUser} />
     </div>
   );
 }

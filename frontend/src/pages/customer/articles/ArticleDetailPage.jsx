@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { articleApi } from '../../../apis/customerApi';
+import AppState from '../../../components/AppState';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
+import { PageSection } from '../../../components/PageSection';
 import './ArticleDetailPage.css';
 
 const ArticleDetailPage = () => {
@@ -77,18 +79,52 @@ const ArticleDetailPage = () => {
     }
   };
 
-  if (loading) return <div className="article-detail-loading">Đang tải nội dung...</div>;
+  if (loading) {
+    return (
+      <PageSection className="article-detail-state" width="narrow">
+        <AppState
+          variant="loading"
+          title="Đang tải nội dung bài viết"
+          description="Chúng tôi đang chuẩn bị nội dung để bạn có trải nghiệm đọc tốt nhất."
+        />
+      </PageSection>
+    );
+  }
 
-
+  if (error === 'SUBSCRIPTION_REQUIRED') {
+    return (
+      <PageSection className="article-detail-state" width="narrow">
+        <AppState
+          variant="paywall"
+          title="Bài viết này dành cho thành viên"
+          description="Nâng cấp gói dịch vụ để đọc trọn vẹn nội dung chuyên sâu và những bài viết độc quyền khác."
+          actionLabel="Xem các gói dịch vụ"
+          actionTo="/goi-dich-vu"
+          secondaryLabel="Quay lại danh sách bài viết"
+          secondaryTo="/bai-viet"
+        />
+      </PageSection>
+    );
+  }
 
   if (error === 'NOT_FOUND' || !article) {
-    return <div className="article-not-found">Không tìm thấy bài viết yêu cầu. <Link to="/bai-viet">Quay lại</Link></div>;
+    return (
+      <PageSection className="article-detail-state" width="narrow">
+        <AppState
+          variant="error"
+          title="Không tìm thấy bài viết"
+          description="Bài viết bạn đang tìm kiếm có thể đã bị gỡ bỏ, đổi liên kết hoặc chưa sẵn sàng hiển thị."
+          actionLabel="Quay lại bài viết"
+          actionTo="/bai-viet"
+        />
+      </PageSection>
+    );
   }
 
   return (
     <div className="article-detail-page-wrapper">
       <ArticleRenderer article={article} />
-      
+
       {relatedArticles.length > 0 && (
         <div className="related-articles-section">
           <div className="related-articles-container">

@@ -211,30 +211,28 @@
    PLAYING VIEW – HEADER
 ────────────────────────────────────────── */
 .qr-playing {
+    --qr-top-offset: 75px;
+    --qr-header-height: 62px;
     background: #f8fafc;
-    padding-top: 75px;
+    padding-top: var(--qr-top-offset);
+    min-height: 100dvh;
 }
 
 @media (max-width: 768px) {
     .qr-playing {
-        padding-top: 65px;
+        --qr-top-offset: 65px;
+        --qr-header-height: 58px;
     }
 }
 
 .qr-header {
     width: 100%;
     position: sticky;
-    top: 75px;
+    top: var(--qr-top-offset);
     z-index: 50;
     background: white;
     box-shadow: 0 1px 0 #edf2f7, 0 4px 16px rgba(0,0,0,0.04);
     transition: top 0.3s ease;
-}
-
-@media (max-width: 768px) {
-    .qr-header {
-        top: 65px;
-    }
 }
 
 .qr-progress-track {
@@ -298,18 +296,24 @@
 .qr-main {
     max-width: 760px;
     width: 100%;
-    padding: 2.5rem 1.5rem 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    min-height: calc(100dvh - var(--qr-top-offset) - var(--qr-header-height));
+    padding: 1rem 1.5rem 1.25rem;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0.875rem;
+    box-sizing: border-box;
 }
 
 .qr-question-card {
     background: white;
     border-radius: 24px;
-    padding: 2.5rem;
+    padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03);
     animation: slideInCard 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .qr-question-card.forward  { animation-name: slideInForward; }
@@ -329,7 +333,8 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.875rem;
+    flex-shrink: 0;
 }
 
 .qr-question-badge {
@@ -355,27 +360,35 @@
 
 .qr-question-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.45rem;
+    font-size: clamp(1.05rem, 2.4vh, 1.45rem);
     font-weight: 700;
     color: #1a1a4b;
-    line-height: 1.45;
-    margin: 0 0 2rem;
+    line-height: 1.35;
+    margin: 0 0 1rem;
     white-space: pre-wrap;
+    flex-shrink: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* ── Answers ── */
 .qr-answers {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    gap: 0.625rem;
+    margin-bottom: 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.25rem;
 }
 
 .qr-option {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.1rem 1.25rem;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 0.9rem 1rem;
     border: 2px solid #edf2f7;
     border-radius: 16px;
     cursor: pointer;
@@ -384,6 +397,7 @@
     animation: fadeIn 0.3s ease both;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 @keyframes fadeIn {
@@ -448,10 +462,10 @@
 }
 
 .qr-option-text {
-    font-size: 1rem;
+    font-size: clamp(0.94rem, 1.9vh, 1rem);
     font-weight: 600;
     color: #2d3748;
-    line-height: 1.5;
+    line-height: 1.45;
     white-space: pre-wrap;
 }
 
@@ -473,6 +487,10 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+    position: sticky;
+    bottom: 0;
+    background: #f8fafc;
+    padding-top: 0.25rem;
 }
 
 .qr-btn-prev {
@@ -727,11 +745,14 @@
     .qr-intro-card   { border-radius: 20px; }
     .qr-intro-body   { padding: 1.75rem 1.25rem; }
     .qr-intro-title  { font-size: 1.5rem; }
-    .qr-question-card { padding: 1.75rem 1.25rem; }
-    .qr-question-text { font-size: 1.2rem; }
-    .qr-main  { padding: 1.5rem 1rem 3rem; }
+    .qr-question-card { padding: 1.125rem 1rem; border-radius: 20px; }
+    .qr-question-text { -webkit-line-clamp: 4; }
+    .qr-main  { padding: 0.75rem 1rem 1rem; gap: 0.75rem; }
     .qr-dots  { gap: 5px; }
     .qr-dot   { width: 8px; height: 8px; }
+    .qr-nav { gap: 0.75rem; }
+    .qr-btn-prev,
+    .qr-btn-next { padding: 0.85rem 1rem; font-size: 0.9rem; }
     .result-content-card { margin: 2rem auto; padding: 2rem 1.25rem; }
     .result-title { font-size: 1.5rem; }
 }

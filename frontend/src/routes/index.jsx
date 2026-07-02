@@ -1,111 +1,126 @@
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
-import OAuth2RedirectPage from '../pages/auth/OAuth2RedirectPage';
+import AppState from '../components/AppState';
+
 import ProtectedRoute from '../components/ProtectedRoute';
 import TierRoute from '../components/TierRoute';
 
-import AdminRoute from './AdminRoute';
-import AdminLayout from '../layouts/admin/AdminLayout';
-import DashboardPage from '../pages/admin/dashboard/DashboardPage';
+// A simple wrapper to enable Suspense during lazy loading
+const Suspended = ({ element }) => (
+  <Suspense fallback={<AppState variant="loading" compact title="Đang tải trang..." />}>
+    {element}
+  </Suspense>
+);
 
-import CustomerLayout from '../layouts/customer/CustomerLayout';
-import HomePage from '../pages/customer/home/HomePage';
-import AboutPage from '../pages/customer/about/AboutPage';
-import ContactPage from '../pages/customer/contact/ContactPage';
-import PlaceholderPage from '../pages/customer/PlaceholderPage';
-import ArticleListPage from '../pages/customer/articles/ArticleListPage';
-import ArticleDetailPage from '../pages/customer/articles/ArticleDetailPage';
-import QuizListPage from '../pages/customer/quizzes/QuizListPage';
-import QuizRunnerPage from '../pages/customer/quizzes/QuizRunnerPage';
-import ProfilePage from '../pages/customer/profile/ProfilePage';
-import TermsAndPrivacyPage from '../pages/customer/legal/TermsAndPrivacyPage';
-import SubscriptionPlansPage from '../pages/customer/plans/SubscriptionPlansPage';
-import PaymentSuccessPage from '../pages/customer/plans/PaymentSuccessPage';
-import PaymentCancelPage from '../pages/customer/plans/PaymentCancelPage';
-import ProgramLayout from '../pages/customer/program/ProgramLayout';
-import ProgramRoadmapPage from '../pages/customer/program/ProgramRoadmapPage';
-import ProgramDetailPage from '../pages/customer/program/ProgramDetailPage';
-import ProgramMediaPage from '../pages/customer/program/ProgramMediaPage';
+// Admin / Layout Shells (Lazy Loaded)
+const AdminRoute = lazy(() => import('./AdminRoute'));
+const AdminLayout = lazy(() => import('../layouts/admin/AdminLayout'));
+const CustomerLayout = lazy(() => import('../layouts/customer/CustomerLayout'));
 
-import AdminQuizListPage from '../pages/admin/quizzes/QuizListPage';
-import AdminArticleListPage from '../pages/admin/articles/ArticleListPage';
-import CreateArticlePage from '../pages/admin/articles/CreateArticlePage';
-import CreateQuizPage from '../pages/admin/quizzes/CreateQuizPage';
-import AdminManagerAccountPage from '../pages/admin/accounts/AdminManagerAccountPage';
-import AdminSubscriptionPage from '../pages/admin/subscriptions/AdminSubscriptionPage';
-import AdminContactMessagesPage from '../pages/admin/contact/AdminContactMessagesPage';
-import AdminNotificationsPage from '../pages/admin/AdminNotificationsPage';
-import AdminMediaListPage from '../pages/admin/medias/AdminMediaListPage';
-import AdminProgramPage from '../pages/admin/program/AdminProgramPage';
-import AdminAiChatLogs from '../pages/admin/ai-chat/AdminAiChatLogs';
+// Auth Pages
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
+const OAuth2RedirectPage = lazy(() => import('../pages/auth/OAuth2RedirectPage'));
+
+// Admin Pages
+const DashboardPage = lazy(() => import('../pages/admin/dashboard/DashboardPage'));
+const AdminQuizListPage = lazy(() => import('../pages/admin/quizzes/QuizListPage'));
+const CreateQuizPage = lazy(() => import('../pages/admin/quizzes/CreateQuizPage'));
+const AdminArticleListPage = lazy(() => import('../pages/admin/articles/ArticleListPage'));
+const CreateArticlePage = lazy(() => import('../pages/admin/articles/CreateArticlePage'));
+const AdminManagerAccountPage = lazy(() => import('../pages/admin/accounts/AdminManagerAccountPage'));
+const AdminSubscriptionPage = lazy(() => import('../pages/admin/subscriptions/AdminSubscriptionPage'));
+const AdminContactMessagesPage = lazy(() => import('../pages/admin/contact/AdminContactMessagesPage'));
+const AdminNotificationsPage = lazy(() => import('../pages/admin/AdminNotificationsPage'));
+const AdminMediaListPage = lazy(() => import('../pages/admin/medias/AdminMediaListPage'));
+const AdminProgramPage = lazy(() => import('../pages/admin/program/AdminProgramPage'));
+const AdminAiChatLogs = lazy(() => import('../pages/admin/ai-chat/AdminAiChatLogs'));
+
+// Customer Pages
+const HomePage = lazy(() => import('../pages/customer/home/HomePage'));
+const AboutPage = lazy(() => import('../pages/customer/about/AboutPage'));
+const ContactPage = lazy(() => import('../pages/customer/contact/ContactPage'));
+const PlaceholderPage = lazy(() => import('../pages/customer/PlaceholderPage'));
+const ArticleListPage = lazy(() => import('../pages/customer/articles/ArticleListPage'));
+const ArticleDetailPage = lazy(() => import('../pages/customer/articles/ArticleDetailPage'));
+const QuizListPage = lazy(() => import('../pages/customer/quizzes/QuizListPage'));
+const QuizRunnerPage = lazy(() => import('../pages/customer/quizzes/QuizRunnerPage'));
+const ProfilePage = lazy(() => import('../pages/customer/profile/ProfilePage'));
+const TermsAndPrivacyPage = lazy(() => import('../pages/customer/legal/TermsAndPrivacyPage'));
+const SubscriptionPlansPage = lazy(() => import('../pages/customer/plans/SubscriptionPlansPage'));
+const PaymentSuccessPage = lazy(() => import('../pages/customer/plans/PaymentSuccessPage'));
+const PaymentCancelPage = lazy(() => import('../pages/customer/plans/PaymentCancelPage'));
+const ProgramLayout = lazy(() => import('../pages/customer/program/ProgramLayout'));
+const ProgramRoadmapPage = lazy(() => import('../pages/customer/program/ProgramRoadmapPage'));
+const ProgramDetailPage = lazy(() => import('../pages/customer/program/ProgramDetailPage'));
+const ProgramMediaPage = lazy(() => import('../pages/customer/program/ProgramMediaPage'));
 
 export const router = createBrowserRouter([
   {
     path: '/dang-nhap',
-    element: <LoginPage />,
+    element: <Suspended element={<LoginPage />} />,
   },
   {
     path: '/dang-ky',
-    element: <RegisterPage />,
+    element: <Suspended element={<RegisterPage />} />,
   },
   {
     path: '/oauth2/redirect',
-    element: <OAuth2RedirectPage />,
+    element: <Suspended element={<OAuth2RedirectPage />} />,
   },
   {
     path: '/admin',
-    element: <AdminRoute />,
+    element: <Suspended element={<AdminRoute />} />,
     children: [
       {
         path: '',
-        element: <AdminLayout />,
+        element: <Suspended element={<AdminLayout />} />,
         children: [
-          { path: '', element: <DashboardPage /> },
-          { path: 'quizzes', element: <AdminQuizListPage /> },
-          { path: 'quizzes/create', element: <CreateQuizPage /> },
-          { path: 'quizzes/edit/:id', element: <CreateQuizPage /> },
-          { path: 'articles', element: <AdminArticleListPage /> },
-          { path: 'articles/create', element: <CreateArticlePage /> },
-          { path: 'articles/edit/:id', element: <CreateArticlePage /> },
-          { path: 'users', element: <AdminManagerAccountPage /> },
-          { path: 'subscriptions', element: <AdminSubscriptionPage /> },
-          { path: 'contact-messages', element: <AdminContactMessagesPage /> },
-          { path: 'notifications', element: <AdminNotificationsPage /> },
-          { path: 'medias', element: <AdminMediaListPage /> },
-          { path: 'program', element: <AdminProgramPage /> },
-          { path: 'ai-chat/logs', element: <AdminAiChatLogs /> },
-          { path: 'settings', element: <PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" /> },
+          { path: '', element: <Suspended element={<DashboardPage />} /> },
+          { path: 'quizzes', element: <Suspended element={<AdminQuizListPage />} /> },
+          { path: 'quizzes/create', element: <Suspended element={<CreateQuizPage />} /> },
+          { path: 'quizzes/edit/:id', element: <Suspended element={<CreateQuizPage />} /> },
+          { path: 'articles', element: <Suspended element={<AdminArticleListPage />} /> },
+          { path: 'articles/create', element: <Suspended element={<CreateArticlePage />} /> },
+          { path: 'articles/edit/:id', element: <Suspended element={<CreateArticlePage />} /> },
+          { path: 'users', element: <Suspended element={<AdminManagerAccountPage />} /> },
+          { path: 'subscriptions', element: <Suspended element={<AdminSubscriptionPage />} /> },
+          { path: 'contact-messages', element: <Suspended element={<AdminContactMessagesPage />} /> },
+          { path: 'notifications', element: <Suspended element={<AdminNotificationsPage />} /> },
+          { path: 'medias', element: <Suspended element={<AdminMediaListPage />} /> },
+          { path: 'program', element: <Suspended element={<AdminProgramPage />} /> },
+          { path: 'ai-chat/logs', element: <Suspended element={<AdminAiChatLogs />} /> },
+          { path: 'settings', element: <Suspended element={<PlaceholderPage title="Cài đặt hệ thống" emoji="⚙️" description="Tính năng đang được phát triển." backLink="/admin" />} /> },
         ]
       }
     ]
   },
   {
     path: '/',
-    element: <CustomerLayout />,
+    element: <Suspended element={<CustomerLayout />} />,
     children: [
-      { path: '', element: <HomePage /> },
-      { path: 'gioi-thieu', element: <AboutPage /> },
-      { path: 'bai-viet', element: <ArticleListPage /> },
-      { path: 'goi-dich-vu', element: <SubscriptionPlansPage /> },
-      { path: 'payment-success', element: <PaymentSuccessPage /> },
-      { path: 'payment-cancel', element: <PaymentCancelPage /> },
-      { path: 'bai-viet/:slug', element: <ArticleDetailPage /> },
-      { path: 'trac-nghiem', element: <QuizListPage /> },
+      { path: '', element: <Suspended element={<HomePage />} /> },
+      { path: 'gioi-thieu', element: <Suspended element={<AboutPage />} /> },
+      { path: 'bai-viet', element: <Suspended element={<ArticleListPage />} /> },
+      { path: 'goi-dich-vu', element: <Suspended element={<SubscriptionPlansPage />} /> },
+      { path: 'payment-success', element: <Suspended element={<PaymentSuccessPage />} /> },
+      { path: 'payment-cancel', element: <Suspended element={<PaymentCancelPage />} /> },
+      { path: 'bai-viet/:slug', element: <Suspended element={<ArticleDetailPage />} /> },
+      { path: 'trac-nghiem', element: <Suspended element={<QuizListPage />} /> },
       { 
         path: 'trac-nghiem/:id/bat-dau', 
         element: (
           <ProtectedRoute>
-            <QuizRunnerPage />
+            <Suspended element={<QuizRunnerPage />} />
           </ProtectedRoute>
         ) 
       },
-      { path: 'lien-he', element: <ContactPage /> },
+      { path: 'lien-he', element: <Suspended element={<ContactPage />} /> },
       { 
         path: 'ho-so', 
         element: (
           <ProtectedRoute>
-            <ProfilePage />
+            <Suspended element={<ProfilePage />} />
           </ProtectedRoute>
         ) 
       },
@@ -113,23 +128,23 @@ export const router = createBrowserRouter([
         path: 'phac-do',
         element: (
           <ProtectedRoute>
-            <ProgramLayout />
+            <Suspended element={<ProgramLayout />} />
           </ProtectedRoute>
         ),
         children: [
-          { path: '', element: <ProgramRoadmapPage /> },
-          { path: 'chi-tiet', element: <ProgramDetailPage /> },
-          { path: 'tai-nguyen', element: <ProgramMediaPage /> }
+          { path: '', element: <Suspended element={<ProgramRoadmapPage />} /> },
+          { path: 'chi-tiet', element: <Suspended element={<ProgramDetailPage />} /> },
+          { path: 'tai-nguyen', element: <Suspended element={<ProgramMediaPage />} /> }
         ]
       },
-      { path: 'dieu-khoan-dich-vu', element: <TermsAndPrivacyPage /> },
+      { path: 'dieu-khoan-dich-vu', element: <Suspended element={<TermsAndPrivacyPage />} /> },
       { 
         path: '*', 
-        element: <PlaceholderPage 
+        element: <Suspended element={<PlaceholderPage 
           title="404 – Không tìm thấy trang" 
           emoji="🔍" 
           description="Trang bạn đang tìm kiếm không tồn tại." 
-        /> 
+        />} /> 
       }
     ]
   }

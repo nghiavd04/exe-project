@@ -20,3 +20,7 @@ backend/target/
 .idea/
 .vscode/
 
+# Agent/AI skill folders
+.agent/
+.claude/
+.opencode/

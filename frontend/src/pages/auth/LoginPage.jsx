@@ -4,14 +4,15 @@ import { authApi } from '../../apis/authApi';
 import toast from 'react-hot-toast';
 import './auth.css';
 import { useAuth } from '../../hooks/AuthContext';
-import { Eye, EyeOff, X, Mail, Lock, ShieldCheck, KeyRound } from 'lucide-react';
+import { Mail, Lock, ShieldCheck } from 'lucide-react';
+import FormField from '../../components/FormField';
+import Modal from '../../components/Modal';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
   const { login } = useAuth();
 
@@ -23,10 +24,8 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [forgotTimer, setForgotTimer] = useState(0);
-  const [showNewPassword, setShowNewPassword] = useState(false);
   
   const otpInputs = useRef([]);
-
   const hasShownToast = useRef(false);
 
   useEffect(() => {
@@ -43,7 +42,6 @@ export default function LoginPage() {
         friendlyError = 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.';
       }
       setServerError(friendlyError);
-      // Clear search query parameters immediately from the address bar
       window.history.replaceState(null, '', window.location.pathname);
     }
 
@@ -76,7 +74,6 @@ export default function LoginPage() {
     }
   }, [serverError, errors]);
 
-
   const validate = () => {
     const errs = {};
     if (!form.email) errs.email = 'Vui lòng nhập email';
@@ -104,7 +101,6 @@ export default function LoginPage() {
       const res = await authApi.login(form.email, form.password);
       const data = res.data.data;
       
-      // Use the login function from AuthContext to set state globally
       login(data, data.token);
       if (data.role === 'ADMIN') {
         navigate('/admin');
@@ -209,22 +205,21 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     <div className="auth-page">
       <div className="auth-bg"></div>
 
-      <div className="auth-card">
+      <div className="ui-card auth-card">
         {/* Back Button inside card */}
-        <Link to="/" className="auth-back-btn" title="Về trang chủ">
+        <Link to="/" className="ui-btn ui-btn--ghost auth-back-btn" title="Về trang chủ">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </Link>
 
         {/* Logo / Brand */}
-        <Link to="/" className="auth-brand" style={{textDecoration: 'none'}}>
-          <span className="auth-brand-name" style={{ fontSize: '2.5rem' }}>EXE<span style={{ color: 'var(--accent)' }}>Project.</span></span>
+        <Link to="/" className="auth-brand">
+          <span className="auth-brand-name auth-brand-name--large">EXE<span>Project.</span></span>
         </Link>
 
         <h1 className="auth-title">Chào mừng trở lại</h1>
@@ -240,67 +235,50 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className={`form-input ${errors.email ? 'input-error' : ''}`}
-              value={form.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
-            {errors.email && <span className="field-error">{errors.email}</span>}
-          </div>
+          <FormField
+            id="email"
+            label="Email"
+            error={errors.email}
+            icon={Mail}
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Mật khẩu
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                className={`form-input ${errors.password ? 'input-error' : ''}`}
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex="-1"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-            {errors.password && <span className="field-error">{errors.password}</span>}
-            <div style={{ textAlign: 'right', marginTop: '8px' }}>
-              <button 
-                type="button" 
-                className="auth-link" 
-                style={{ fontSize: '0.85rem', background: 'none', border: 'none', cursor: 'pointer' }}
-                onClick={() => {
-                  setShowForgotModal(true);
-                  setForgotStep(1);
-                  setForgotOtp(['','','','','','']);
-                }}
-              >
-                Quên mật khẩu?
-              </button>
-            </div>
-          </div>
+          <FormField
+            id="password"
+            label="Mật khẩu"
+            error={errors.password}
+            icon={Lock}
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
 
+          <div className="auth-forgot-link-wrapper">
+            <button 
+              type="button" 
+              className="auth-link auth-link-forgot" 
+              onClick={() => {
+                setShowForgotModal(true);
+                setForgotStep(1);
+                setForgotOtp(['','','','','','']);
+              }}
+            >
+              Quên mật khẩu?
+            </button>
+          </div>
 
           <button
             id="login-submit-btn"
             type="submit"
-            className="auth-btn"
+            className="ui-btn ui-btn--primary auth-btn"
             disabled={loading}
           >
             {loading ? (
@@ -313,14 +291,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="auth-divider" style={{ marginTop: '24px' }}>
+        <div className="auth-divider">
           <span>hoặc đăng nhập bằng</span>
         </div>
 
         {/* Google Login */}
         <button
           id="google-login-btn"
-          className="google-btn"
+          className="ui-btn ui-btn--ghost google-btn"
           onClick={handleGoogleLogin}
           type="button"
         >
@@ -333,8 +311,8 @@ export default function LoginPage() {
           Tiếp tục với Google
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--muted)', marginTop: '20px', lineHeight: '1.4' }}>
-          Bằng việc đăng nhập, bạn đồng ý với <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '600', textDecoration: 'underline' }}>Điều khoản dịch vụ</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '600', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của Dopaless.
+        <p className="auth-disclaimer-text">
+          Bằng việc đăng nhập, bạn đồng ý với <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" className="auth-link">Điều khoản dịch vụ</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" className="auth-link">Chính sách bảo mật</Link> của Dopaless.
         </p>
 
         <p className="auth-footer">
@@ -344,136 +322,111 @@ export default function LoginPage() {
       </div>
 
       {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className="modal-overlay">
-          <div className="modal-content animate-slide-up" style={{ maxWidth: '420px' }}>
-            <button className="modal-close" onClick={() => setShowForgotModal(false)}>
-              <X size={24} />
-            </button>
-            
-            <div className="modal-header">
-              <div className="modal-icon-circle">
-                <KeyRound size={24} />
+      <Modal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        title="Quên mật khẩu?"
+        size="sm"
+      >
+        <p className="auth-subtitle" style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+          {forgotStep === 1 && 'Nhập email của bạn để nhận mã xác thực'}
+          {forgotStep === 2 && 'Nhập mã xác thực đã gửi đến email của bạn'}
+          {forgotStep === 3 && 'Tạo mật khẩu mới cho tài khoản của bạn'}
+        </p>
+
+        <div className="modal-body-content">
+          {forgotStep === 1 && (
+            <div className="forgot-step-1">
+              <FormField
+                id="forgotEmail"
+                label="Địa chỉ Email"
+                icon={Mail}
+                type="email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+              <button 
+                className="ui-btn ui-btn--primary auth-btn" 
+                onClick={handleSendForgotCode}
+                disabled={loading}
+                style={{ marginTop: '10px' }}
+              >
+                {loading ? 'Đang gửi...' : 'Tiếp tục'}
+              </button>
+            </div>
+          )}
+
+          {forgotStep === 2 && (
+            <div className="forgot-step-2">
+              <div className="otp-container">
+                {forgotOtp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (otpInputs.current[index] = el)}
+                    type="text"
+                    maxLength="1"
+                    className="ui-input otp-modal-field"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={handleOtpPaste}
+                    onFocus={(e) => e.target.select()}
+                  />
+                ))}
               </div>
-              <h2>Quên mật khẩu?</h2>
-              <p>
-                {forgotStep === 1 && 'Nhập email của bạn để nhận mã xác thực'}
-                {forgotStep === 2 && 'Nhập mã xác thực đã gửi đến email của bạn'}
-                {forgotStep === 3 && 'Tạo mật khẩu mới cho tài khoản của bạn'}
-              </p>
-            </div>
-
-            <div className="modal-body">
-              {forgotStep === 1 && (
-                <div className="forgot-step-1">
-                  <div className="form-group">
-                    <label>Địa chỉ Email</label>
-                    <div style={{ position: 'relative' }}>
-                      <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="email"
-                        value={forgotEmail}
-                        onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        className="form-input"
-                        style={{ paddingLeft: '40px' }}
-                      />
-                    </div>
-                  </div>
-                  <button 
-                    className="auth-btn" 
-                    onClick={handleSendForgotCode}
-                    disabled={loading}
-                    style={{ marginTop: '10px' }}
-                  >
-                    {loading ? 'Đang gửi...' : 'Tiếp tục'}
+              
+              <div className="resend-section">
+                {forgotTimer > 0 ? (
+                  <span className="auth-timer-text">Gửi lại mã sau <b>{forgotTimer}s</b></span>
+                ) : (
+                  <button type="button" className="resend-link" onClick={handleSendForgotCode}>
+                    Gửi lại mã xác nhận
                   </button>
-                </div>
-              )}
+                )}
+              </div>
 
-              {forgotStep === 2 && (
-                <div className="forgot-step-2">
-                  <div className="otp-container" style={{ justifyContent: 'center', gap: '10px' }}>
-                    {forgotOtp.map((digit, index) => (
-                      <input
-                        key={index}
-                        ref={(el) => (otpInputs.current[index] = el)}
-                        type="text"
-                        maxLength="1"
-                        className="otp-modal-field"
-                        value={digit}
-                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        onPaste={handleOtpPaste}
-                        onFocus={(e) => e.target.select()}
-                        style={{ width: '45px', height: '55px', fontSize: '1.2rem', textAlign: 'center' }}
-                      />
-                    ))}
-                  </div>
-                  
-                  <div className="resend-section" style={{ textAlign: 'center', marginTop: '15px' }}>
-                    {forgotTimer > 0 ? (
-                      <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Gửi lại mã sau <b>{forgotTimer}s</b></span>
-                    ) : (
-                      <button className="auth-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={handleSendForgotCode}>
-                        Gửi lại mã xác nhận
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="modal-actions-row" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <button className="btn-modal-secondary" style={{ flex: 1 }} onClick={() => setForgotStep(1)}>Quay lại</button>
-                    <button className="auth-btn" style={{ flex: 2 }} onClick={handleVerifyForgotOtp}>Tiếp tục</button>
-                  </div>
-                </div>
-              )}
-
-              {forgotStep === 3 && (
-                <div className="forgot-step-3">
-                  <div className="form-group">
-                    <label>Mật khẩu mới</label>
-                    <div className="password-input-wrapper">
-                      <input
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="form-input"
-                      />
-                      <button
-                        type="button"
-                        className="password-toggle-btn"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        tabIndex="-1"
-                      >
-                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Xác nhận mật khẩu mới</label>
-                    <input
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="form-input"
-                    />
-                  </div>
-                  <button 
-                    className="auth-btn" 
-                    onClick={handleResetPassword}
-                    disabled={loading}
-                  >
-                    {loading ? 'Đang lưu...' : 'Đặt lại mật khẩu'}
-                  </button>
-                </div>
-              )}
+              <div className="auth-modal-actions-row">
+                <button type="button" className="ui-btn ui-btn--ghost" style={{ flex: 1 }} onClick={() => setForgotStep(1)}>Quay lại</button>
+                <button type="button" className="ui-btn ui-btn--primary auth-btn" style={{ flex: 2, marginTop: 0 }} onClick={handleVerifyForgotOtp}>Tiếp tục</button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {forgotStep === 3 && (
+            <div className="forgot-step-3">
+              <FormField
+                id="newPassword"
+                label="Mật khẩu mới"
+                icon={Lock}
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <FormField
+                id="confirmNewPassword"
+                label="Xác nhận mật khẩu mới"
+                icon={ShieldCheck}
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <button 
+                className="ui-btn ui-btn--primary auth-btn" 
+                onClick={handleResetPassword}
+                disabled={loading}
+                style={{ marginTop: '10px' }}
+              >
+                {loading ? 'Đang lưu...' : 'Đặt lại mật khẩu'}
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
     </div>
   );
 }
+
 

@@ -234,14 +234,14 @@ export default function ArticleListPage() {
           <h1>Quản lý Bài viết</h1>
           <p>Xem và quản lý tất cả nội dung bài viết trong hệ thống.</p>
         </div>
-        <Link to="/admin/articles/create" className="btn-create-new">
+        <Link to="/admin/articles/create" className="ui-btn ui-btn--primary btn-create-new">
           <Plus size={20} /> Viết Bài Mới
         </Link>
       </header>
 
       {/* Stats Widgets */}
       <div className="article-stats-grid">
-        <div className="stat-widget-card">
+        <div className="ui-card stat-widget-card">
           <div className="stat-icon-box teal"><FileText size={24} /></div>
           <div>
             <p className="stat-info-p">Tổng số bài viết</p>
@@ -252,7 +252,7 @@ export default function ArticleListPage() {
             )}
           </div>
         </div>
-        <div className="stat-widget-card">
+        <div className="ui-card stat-widget-card">
           <div className="stat-icon-box blue"><Eye size={24} /></div>
           <div>
             <p className="stat-info-p">Tổng lượt xem</p>
@@ -266,7 +266,7 @@ export default function ArticleListPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="filters-bar">
+      <div className="ui-card filters-bar">
         <div className="status-tabs">
           {statusTabs.map((tab) => (
             <button
@@ -286,13 +286,13 @@ export default function ArticleListPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearch}
-            className="search-input"
+            className="ui-input search-input"
           />
         </div>
       </div>
 
       {/* Article Table */}
-      <div className="article-table-container">
+      <div className="ui-card article-table-container">
         <table className="admin-table">
           <thead>
             <tr>
@@ -349,7 +349,7 @@ export default function ArticleListPage() {
                       <Crown size={12} /> CAO CẤP
                     </span>
                   ) : article.requiredTier === 'BASIC' ? (
-                    <span className="tier-badge basic" style={{ background: '#f0f9ff', color: '#0ea5e9', border: '1px solid #bae6fd' }}>
+                    <span className="tier-badge basic">
                       <Star size={12} fill="#0ea5e9" /> CƠ BẢN
                     </span>
                   ) : (
@@ -410,29 +410,29 @@ export default function ArticleListPage() {
                       </button>
 
                       {activeMenuId === article.id && (
-                        <div className="dropdown-menu-container" style={{
+                        <div className="ui-card dropdown-menu-container" style={{
                           ...(index >= articles.length - 3 && articles.length > 3 
                             ? { bottom: '100%', marginBottom: '0.5rem' } 
                             : { top: '100%', marginTop: '0.5rem' }
                           )
                         }}>
                           {article.status === 'DRAFT' && (
-                            <button onClick={() => handlePublish(article.id)} className="dropdown-menu-item" style={{ color: 'var(--teal-dark)' }}>
+                            <button onClick={() => handlePublish(article.id)} className="dropdown-menu-item dropdown-item-teal">
                               <Plus size={16} /> Xuất bản bài viết
                             </button>
                           )}
                           {article.status === 'PUBLISHED' && (
-                            <button onClick={() => handleArchive(article.id)} className="dropdown-menu-item" style={{ color: '#d69e2e' }}>
+                            <button onClick={() => handleArchive(article.id)} className="dropdown-menu-item dropdown-item-orange">
                               <Archive size={16} /> Lưu trữ bài viết
                             </button>
                           )}
                           {article.status === 'ARCHIVED' && (
-                            <button onClick={() => handleUnarchive(article.id)} className="dropdown-menu-item" style={{ color: '#3182ce' }}>
+                            <button onClick={() => handleUnarchive(article.id)} className="dropdown-menu-item dropdown-item-blue">
                               <RotateCcw size={16} /> Khôi phục bài viết
                             </button>
                           )}
                           <div className="dropdown-divider"></div>
-                          <button onClick={() => handleViewDetail(article)} className="dropdown-menu-item" style={{ color: 'var(--muted)' }}>
+                          <button onClick={() => handleViewDetail(article)} className="dropdown-menu-item dropdown-item-muted">
                             <Search size={16} /> Xem chi tiết
                           </button>
                         </div>

@@ -27,11 +27,7 @@
 }
 
 .stat-card {
-  background: #fff;
   padding: 1.75rem;
-  border-radius: 24px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.02);
-  border: 1px solid #f0f4f8;
 }
 
 .stat-card-header {
@@ -99,11 +95,7 @@
 }
 
 .dashboard-card, .chart-card {
-  background: #fff;
   padding: 1.5rem 2rem;
-  border-radius: 24px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.02);
-  border: 1px solid #f0f4f8;
   display: flex;
   flex-direction: column;
 }
@@ -120,7 +112,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-subtle);
 }
 .list-item:last-child {
   border-bottom: none;
@@ -156,7 +148,7 @@
 }
 .progress-bar {
   height: 8px;
-  background: #e2e8f0;
+  background: var(--border-subtle);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -182,9 +174,9 @@
 .chart-select {
   padding: 0.5rem 1rem;
   border-radius: 12px;
-  border: 1px solid #edf2f7;
+  border: 1px solid var(--border-subtle);
   outline: none;
-  background: #f8fafc;
+  background: var(--surface-muted);
   font-weight: 600;
   color: var(--teal-dark);
   cursor: pointer;
@@ -193,7 +185,7 @@
 .chart-body {
   height: 300px;
   width: 100%;
-  background: #f8fafc;
+  background: var(--surface-muted);
   border-radius: 20px;
   display: flex;
   align-items: flex-end;

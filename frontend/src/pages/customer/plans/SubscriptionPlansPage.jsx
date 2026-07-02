@@ -38,7 +38,7 @@ export default function SubscriptionPlansPage() {
       }
     } catch (error) {
       console.error('Error fetching plans:', error);
-      toast.error('Không thể tải danh sách gói dịch vụ');
+      toast.error('Không thể tải danh sách gói dịch vụ', { id: 'fetch-plans-error' });
     } finally {
       setLoading(false);
     }
@@ -84,35 +84,20 @@ export default function SubscriptionPlansPage() {
     }
   };
 
-  const handleConfirmMockPayment = async () => {
+  const handleConfirmPayment = async () => {
     if (!selectedPlan) return;
     setSubmitting(true);
     try {
-      if (paymentMethod === 'PAYOS') {
-        const res = await subscriptionApi.createPayOSPayment(selectedPlan.id);
-        if (res.data.success && res.data.data.checkoutUrl) {
-          toast.success('Đang chuyển hướng đến cổng thanh toán PayOS...');
-          window.location.href = res.data.data.checkoutUrl;
-        } else {
-          throw new Error('Không nhận được liên kết thanh toán');
-        }
+      const res = await subscriptionApi.createPayOSPayment(selectedPlan.id);
+      if (res.data.success && res.data.data.checkoutUrl) {
+        toast.success('Đang chuyển hướng đến cổng thanh toán PayOS...');
+        window.location.href = res.data.data.checkoutUrl;
       } else {
-        const res = await subscriptionApi.subscribeToPlan(selectedPlan.id, paymentMethod);
-        if (res.data.success) {
-          toast.success(res.data.data || 'Đăng ký thành viên thành công!');
-          
-          // Update user state in frontend
-          const updatedUser = { ...user, subscriptionTier: selectedPlan.tier };
-          updateUser(updatedUser);
-          
-          setSelectedPlan(null);
-          setUpgradePreview(null);
-          navigate('/ho-so');
-        }
+        throw new Error('Không nhận được liên kết thanh toán từ PayOS');
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      toast.error(error.response?.data?.message || error.message || 'Gặp lỗi trong quá trình xử lý đăng ký');
+      toast.error(error.response?.data?.message || error.message || 'Gặp lỗi trong quá trình xử lý thanh toán');
     } finally {
       setSubmitting(false);
     }
@@ -334,7 +319,7 @@ export default function SubscriptionPlansPage() {
               </button>
               <button 
                 className="btn-checkout-submit" 
-                onClick={handleConfirmMockPayment}
+                onClick={handleConfirmPayment}
                 disabled={submitting || loadingUpgrade}
               >
                 {submitting ? 'Đang xử lý...' : 'Xác nhận & kích hoạt'}

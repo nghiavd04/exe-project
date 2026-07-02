@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../../apis/authApi';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
 import './auth.css';
+import FormField from '../../components/FormField';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -13,7 +14,6 @@ export default function RegisterPage() {
   const otpInputs = useRef([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
@@ -102,7 +102,6 @@ export default function RegisterPage() {
     
     setOtp(newOtp);
 
-    // Focus vào ô cuối cùng hoặc ô tiếp theo sau dữ liệu dán
     const nextIndex = Math.min(pasteData.length, 5);
     otpInputs.current[nextIndex].focus();
   };
@@ -173,13 +172,13 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-bg auth-bg-register"></div>
 
-      <div className="auth-card">
-        <Link to="/" className="auth-back-btn" title="Về trang chủ">
+      <div className="ui-card auth-card">
+        <Link to="/" className="ui-btn ui-btn--ghost auth-back-btn" title="Về trang chủ">
           <ArrowLeft size={22} />
         </Link>
         
-        <Link to="/" className="auth-brand" style={{textDecoration: 'none'}}>
-          <span className="auth-brand-name" style={{ fontSize: '2.5rem' }}>EXE<span style={{ color: 'var(--accent)' }}>Project.</span></span>
+        <Link to="/" className="auth-brand">
+          <span className="auth-brand-name auth-brand-name--large">EXE<span>Project.</span></span>
         </Link>
 
         <h1 className="auth-title">
@@ -206,26 +205,20 @@ export default function RegisterPage() {
 
         {step === 1 && (
           <form onSubmit={handleSendCode} noValidate>
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Địa chỉ Email</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  className={`form-input ${errors.email ? 'input-error' : ''}`}
-                  style={{ paddingLeft: '40px' }}
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="name@example.com"
-                  autoComplete="email"
-                />
-              </div>
-              {errors.email && <span className="field-error">{errors.email}</span>}
-            </div>
+            <FormField
+              id="email"
+              label="Địa chỉ Email"
+              error={errors.email}
+              icon={Mail}
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="name@example.com"
+              autoComplete="email"
+            />
 
-            <div className="form-group checkbox-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px', marginBottom: '20px' }}>
+            <div className="auth-agree-terms-wrapper">
               <input
                 id="agreeTerms"
                 name="agreeTerms"
@@ -235,15 +228,15 @@ export default function RegisterPage() {
                   setAgreeTerms(e.target.checked);
                   setErrors({ ...errors, agreeTerms: '' });
                 }}
-                style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer', accentColor: 'var(--teal)' }}
+                className="auth-agree-checkbox"
               />
-              <label htmlFor="agreeTerms" style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: '1.4', cursor: 'pointer', userSelect: 'none' }}>
-                Tôi đồng ý với các <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '700', textDecoration: 'underline' }}>Điều khoản sử dụng</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal-dark)', fontWeight: '700', textDecoration: 'underline' }}>Chính sách bảo mật</Link> của Dopaless.
+              <label htmlFor="agreeTerms" className="auth-agree-label">
+                Tôi đồng ý với các <Link to="/dieu-khoan-dich-vu?tab=terms" target="_blank" rel="noopener noreferrer" className="auth-link">Điều khoản sử dụng</Link> và <Link to="/dieu-khoan-dich-vu?tab=privacy" target="_blank" rel="noopener noreferrer" className="auth-link">Chính sách bảo mật</Link> của Dopaless.
               </label>
             </div>
-            {errors.agreeTerms && <span className="field-error" style={{ display: 'block', marginTop: '-12px', marginBottom: '16px' }}>{errors.agreeTerms}</span>}
+            {errors.agreeTerms && <span className="field-error auth-agree-error">{errors.agreeTerms}</span>}
 
-            <button type="submit" className="auth-btn" disabled={loading}>
+            <button type="submit" className="ui-btn ui-btn--primary auth-btn" disabled={loading}>
               {loading ? (
                 <span className="loading-dots">
                   <span></span><span></span><span></span>
@@ -264,7 +257,7 @@ export default function RegisterPage() {
                   ref={(el) => (otpInputs.current[index] = el)}
                   type="text"
                   maxLength="1"
-                  className={`otp-input ${digit ? 'has-value' : ''}`}
+                  className={`ui-input otp-input ${digit ? 'has-value' : ''}`}
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
@@ -292,14 +285,14 @@ export default function RegisterPage() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
                 type="button" 
-                className="auth-btn" 
-                style={{ background: '#f1f5f9', color: '#64748b', flex: 1 }} 
+                className="ui-btn ui-btn--ghost auth-btn" 
+                style={{ flex: 1 }} 
                 onClick={() => setStep(1)}
                 disabled={loading}
               >
                 Quay lại
               </button>
-              <button type="submit" className="auth-btn" style={{ flex: 2 }} disabled={loading}>
+              <button type="submit" className="ui-btn ui-btn--primary auth-btn" style={{ flex: 2 }} disabled={loading}>
                 {loading ? (
                   <span className="loading-dots">
                     <span></span><span></span><span></span>
@@ -314,46 +307,31 @@ export default function RegisterPage() {
 
         {step === 3 && (
           <form onSubmit={handleSubmit} noValidate>
-            <div className="form-group">
-              <label htmlFor="fullName" className="form-label">Họ và tên</label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                className={`form-input ${errors.fullName ? 'input-error' : ''}`}
-                value={form.fullName}
-                onChange={handleChange}
-                placeholder="Nguyễn Văn A"
-              />
-              {errors.fullName && <span className="field-error">{errors.fullName}</span>}
-            </div>
+            <FormField
+              id="fullName"
+              label="Họ và tên"
+              error={errors.fullName}
+              type="text"
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              placeholder="Nguyễn Văn A"
+            />
 
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">Mật khẩu</label>
-              <div className="password-input-wrapper">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  className={`form-input ${errors.password ? 'input-error' : ''}`}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Tối thiểu 6 ký tự"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex="-1"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {errors.password && <span className="field-error">{errors.password}</span>}
-            </div>
+            <FormField
+              id="password"
+              label="Mật khẩu"
+              error={errors.password}
+              icon={Lock}
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Tối thiểu 6 ký tự"
+              autoComplete="new-password"
+            />
 
-            <button type="submit" className="auth-btn" disabled={loading}>
+            <button type="submit" className="ui-btn ui-btn--primary auth-btn" disabled={loading}>
               {loading ? (
                 <span className="loading-dots">
                   <span></span><span></span><span></span>
@@ -373,3 +351,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

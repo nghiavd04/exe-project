@@ -5,8 +5,7 @@ import toast from 'react-hot-toast';
 import 'react-quill-new/dist/quill.snow.css';
 import './ArticleRenderer.css';
 
-// Giải mã tất cả HTML Entities bằng cơ chế native của trình duyệt (DOMParser)
-// Hỗ trợ fallback cho các môi trường chạy thử nghiệm (tests) không có DOM
+
 const decodeHtml = (html) => {
   if (!html) return '';
   if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {

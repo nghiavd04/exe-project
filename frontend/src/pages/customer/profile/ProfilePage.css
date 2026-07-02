@@ -27,11 +27,6 @@
 }
 
 .profile-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 30px;
     transition: all 0.3s ease;
 }
@@ -209,22 +204,7 @@
     margin-bottom: 8px;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 14px 18px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    font-size: 1rem;
-    transition: all 0.2s;
-    outline: none;
-}
-
-.form-group input:focus {
-    border-color: var(--teal-main);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.1);
-}
+/* Form input styles handled by .ui-input */
 
 /* ── Password Toggle ── */
 .password-input-wrapper {
@@ -266,27 +246,6 @@
 .btn-save {
     margin-top: 10px;
     width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--teal-dark);
-    color: white;
-    border: none;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
-}
-
-.btn-save:hover:not(:disabled) {
-    background: #134e4a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3);
-}
-
-.btn-save:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
 }
 
 .profile-loading {
@@ -480,13 +439,10 @@
 }
 
 .modal-content {
-    background: white;
-    border-radius: 28px;
     width: 100%;
     max-width: 480px;
     position: relative;
     padding: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .modal-close {
@@ -540,40 +496,15 @@
 
 .modal-input {
     width: 100%;
-    padding: 14px 20px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    font-size: 1rem;
     margin-bottom: 20px;
 }
 
 .btn-modal-primary {
     width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--teal-dark);
-    color: white;
-    border: none;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-modal-primary:hover:not(:disabled) {
-    background: #134e4a;
-    transform: translateY(-2px);
 }
 
 .btn-modal-secondary {
-    padding: 14px 24px;
-    border-radius: 12px;
-    background: #f1f5f9;
-    color: #475569;
-    border: none;
     font-weight: 600;
-    cursor: pointer;
 }
 
 .modal-actions-row {
@@ -604,20 +535,10 @@
 .otp-modal-field {
     width: 50px;
     height: 60px;
-    border-radius: 12px;
-    border: 2px solid #e2e8f0;
     text-align: center;
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--teal-dark);
-    background: #f8fafc;
-    transition: all 0.2s;
-}
-
-.otp-modal-field:focus {
-    border-color: var(--teal-main);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.1);
 }
 
 .resend-modal-timer {

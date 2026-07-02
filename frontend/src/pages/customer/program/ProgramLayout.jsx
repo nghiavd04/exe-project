@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/AuthContext';
 import { profileApi, programApi } from '../../../apis/customerApi';
+import AppState from '../../../components/AppState';
 import './ProgramDashboardPage.css';
 
 const ProgramContext = createContext();
@@ -259,41 +260,37 @@ export default function ProgramLayout() {
   // Early return for locked users (Inspect Element / F12 bypass protection)
   if (showLocked) {
     return (
-      <div className="pd-page pd-locked-page">
-        <div className="pd-locked-overlay">
-          <div className="pd-locked-card">
-            <span className="pd-lock-icon">🔐</span>
-            <h2 className="pd-lock-title">Tính năng dành cho thành viên</h2>
-            <p className="pd-lock-desc">
-              Chương trình hỗ trợ 120 ngày có cấu trúc dựa trên bằng chứng khoa học — chỉ dành cho người đã kích hoạt gói dịch vụ.
-            </p>
-            <div className="pd-lock-features">
-              {LOCK_FEATURES.map((f, i) => (
-                <div key={i} className="pd-lock-feat">
-                  <div className="pd-lock-feat-ico">{f.ico}</div>
-                  <span>{f.text}</span>
-                </div>
-              ))}
-            </div>
-            <button className="pd-lock-cta" onClick={() => navigate('/goi-dich-vu')}>
-              Xem các gói dịch vụ →
-            </button>
-            <button className="pd-lock-back-btn" onClick={() => navigate(-1)}>
-              ← Quay lại trang trước
-            </button>
+      <div className="pd-page pd-state-page">
+        <AppState
+          variant="paywall"
+          title="Chương trình 120 ngày dành cho thành viên"
+          description="Mở khóa toàn bộ lộ trình, nhiệm vụ hằng ngày, nhật ký và các chỉ số theo dõi để bắt đầu hành trình tự cân bằng của bạn."
+          actionLabel="Xem các gói dịch vụ"
+          onAction={() => navigate('/goi-dich-vu')}
+          secondaryLabel="Quay lại trang trước"
+          secondaryAction={() => navigate(-1)}
+        >
+          <div className="pd-state-feature-list">
+            {LOCK_FEATURES.map((f, i) => (
+              <div key={i} className="pd-state-feature-item">
+                <span>{f.ico}</span>
+                <span>{f.text}</span>
+              </div>
+            ))}
           </div>
-        </div>
+        </AppState>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="pd-loading-container">
-        <div className="pd-loading-spinner" />
-        <div style={{ color: 'var(--teal-dark)', fontSize: '1.05rem', fontWeight: 600, fontFamily: 'Outfit', letterSpacing: '0.5px' }}>
-          Đang tải thông tin lộ trình
-        </div>
+      <div className="pd-page pd-state-page">
+        <AppState
+          variant="loading"
+          title="Đang tải thông tin lộ trình"
+          description="Chúng tôi đang chuẩn bị dữ liệu tiến trình, nhiệm vụ và các chỉ số theo dõi của bạn."
+        />
       </div>
     );
   }

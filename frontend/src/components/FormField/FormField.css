@@ -1,0 +1,104 @@
+.ui-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.ui-form-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.ui-form-control-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ui-form-icon-leading {
+  position: absolute;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ui-form-control-wrapper .ui-input,
+.ui-form-control-wrapper .ui-select,
+.ui-form-control-wrapper .ui-textarea {
+  padding: 0.75rem 1rem;
+  min-height: 44px;
+}
+
+.ui-form-control-wrapper .ui-input.has-icon-leading {
+  padding-left: 2.75rem;
+}
+
+.ui-form-control-wrapper .ui-input.has-icon-trailing {
+  padding-right: 2.75rem;
+}
+
+.ui-password-toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.ui-password-toggle:hover {
+  color: var(--teal);
+}
+
+.ui-password-toggle:focus-visible {
+  outline: 2px solid var(--teal);
+  border-radius: 4px;
+  outline-offset: 2px;
+}
+
+.ui-field-error {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--danger);
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: field-error-shake 0.3s ease;
+}
+
+.ui-form-control-wrapper .ui-input.input-error,
+.ui-form-control-wrapper .ui-select.input-error,
+.ui-form-control-wrapper .ui-textarea.input-error {
+  border-color: var(--danger);
+  background-color: rgba(220, 38, 38, 0.02);
+}
+
+.ui-form-control-wrapper .ui-input.input-error:focus,
+.ui-form-control-wrapper .ui-select.input-error:focus,
+.ui-form-control-wrapper .ui-textarea.input-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.14);
+}
+
+@keyframes field-error-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}

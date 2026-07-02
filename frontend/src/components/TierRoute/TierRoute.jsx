@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/AuthContext';
+import { useAuth } from '../../hooks/AuthContext';
+import AppState from '../AppState';
 
 /**
  * TierRoute - A protected route that checks for minimum subscription tier weight.
@@ -13,18 +14,19 @@ const TierRoute = ({ requiredWeight, children }) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      </div>
+      <AppState
+        variant="loading"
+        compact
+        title="Đang xác thực quyền truy cập"
+        description="Chúng tôi đang kiểm tra gói dịch vụ và quyền sử dụng của bạn."
+      />
     );
   }
 
-  // If user is not logged in, redirect to login
   if (!user) {
     return <Navigate to="/dang-nhap" state={{ from: location }} replace />;
   }
 
-  // If user does not meet the required weight, redirect to subscription plans
   if (userWeight < requiredWeight) {
     return <Navigate to="/goi-dich-vu" replace />;
   }
