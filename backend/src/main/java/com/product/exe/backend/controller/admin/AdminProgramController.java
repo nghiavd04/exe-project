@@ -21,92 +21,105 @@ public class AdminProgramController {
 
     private final AdminProgramService adminProgramService;
 
-    @GetMapping("/metadata")
-    public ResponseEntity<ApiResponse<AdminProgramMetadataResponse>> getProgramMetadata() {
+    @GetMapping("/{protocolId}/metadata")
+    public ResponseEntity<ApiResponse<AdminProgramMetadataResponse>> getProgramMetadata(@PathVariable Long protocolId) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Lấy thông tin cấu trúc phác đồ thành công",
-                adminProgramService.getProgramMetadata()
+                adminProgramService.getProgramMetadata(protocolId)
         ));
     }
 
-    @PostMapping("/phases")
+    @PostMapping("/{protocolId}/phases")
     public ResponseEntity<ApiResponse<ProgramPhaseMetadata>> createPhase(
+            @PathVariable Long protocolId,
             @Valid @RequestBody AdminPhaseCreateRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Tạo giai đoạn thành công",
-                adminProgramService.createPhase(request)
+                adminProgramService.createPhase(protocolId, request)
         ));
     }
 
-    @DeleteMapping("/phases/{phaseNumber}")
-    public ResponseEntity<ApiResponse<Void>> deletePhase(@PathVariable Integer phaseNumber) {
-        adminProgramService.deletePhase(phaseNumber);
+    @DeleteMapping("/{protocolId}/phases/{phaseNumber}")
+    public ResponseEntity<ApiResponse<Void>> deletePhase(
+            @PathVariable Long protocolId,
+            @PathVariable Integer phaseNumber) {
+        adminProgramService.deletePhase(protocolId, phaseNumber);
         return ResponseEntity.ok(ApiResponse.success("Xóa giai đoạn thành công", null));
     }
 
-    @PutMapping("/phases/{phaseNumber}")
+    @PutMapping("/{protocolId}/phases/{phaseNumber}")
     public ResponseEntity<ApiResponse<Void>> updatePhase(
+            @PathVariable Long protocolId,
             @PathVariable Integer phaseNumber,
             @Valid @RequestBody AdminPhaseUpdateRequest request) {
-        adminProgramService.updatePhase(phaseNumber, request);
+        adminProgramService.updatePhase(protocolId, phaseNumber, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin giai đoạn thành công", null));
     }
 
-    @PutMapping("/weeks/{weekNumber}")
+    @PutMapping("/{protocolId}/weeks/{weekNumber}")
     public ResponseEntity<ApiResponse<Void>> updateWeek(
+            @PathVariable Long protocolId,
             @PathVariable Integer weekNumber,
             @Valid @RequestBody AdminWeekUpdateRequest request) {
-        adminProgramService.updateWeek(weekNumber, request);
+        adminProgramService.updateWeek(protocolId, weekNumber, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật mô tả tuần thành công", null));
     }
 
-    @PostMapping("/tasks")
+    @PostMapping("/{protocolId}/tasks")
     public ResponseEntity<ApiResponse<ProgramTaskMetadata>> createTask(
+            @PathVariable Long protocolId,
             @Valid @RequestBody AdminTaskRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Thêm nhiệm vụ thành công",
-                adminProgramService.createTask(request)
+                adminProgramService.createTask(protocolId, request)
         ));
     }
 
-    @PutMapping("/tasks/{id}")
+    @PutMapping("/{protocolId}/tasks/{id}")
     public ResponseEntity<ApiResponse<ProgramTaskMetadata>> updateTask(
+            @PathVariable Long protocolId,
             @PathVariable Long id,
             @Valid @RequestBody AdminTaskRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Cập nhật nhiệm vụ thành công",
-                adminProgramService.updateTask(id, request)
+                adminProgramService.updateTask(protocolId, id, request)
         ));
     }
 
-    @DeleteMapping("/tasks/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable Long id) {
-        adminProgramService.deleteTask(id);
+    @DeleteMapping("/{protocolId}/tasks/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteTask(
+            @PathVariable Long protocolId,
+            @PathVariable Long id) {
+        adminProgramService.deleteTask(protocolId, id);
         return ResponseEntity.ok(ApiResponse.success("Xóa nhiệm vụ thành công", null));
     }
 
-    @PostMapping("/metrics")
+    @PostMapping("/{protocolId}/metrics")
     public ResponseEntity<ApiResponse<ProgramMetricMetadata>> createMetric(
+            @PathVariable Long protocolId,
             @Valid @RequestBody AdminMetricRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Thêm chỉ số thành công",
-                adminProgramService.createMetric(request)
+                adminProgramService.createMetric(protocolId, request)
         ));
     }
 
-    @PutMapping("/metrics/{id}")
+    @PutMapping("/{protocolId}/metrics/{id}")
     public ResponseEntity<ApiResponse<ProgramMetricMetadata>> updateMetric(
+            @PathVariable Long protocolId,
             @PathVariable Long id,
             @Valid @RequestBody AdminMetricRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Cập nhật chỉ số thành công",
-                adminProgramService.updateMetric(id, request)
+                adminProgramService.updateMetric(protocolId, id, request)
         ));
     }
 
-    @DeleteMapping("/metrics/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteMetric(@PathVariable Long id) {
-        adminProgramService.deleteMetric(id);
+    @DeleteMapping("/{protocolId}/metrics/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteMetric(
+            @PathVariable Long protocolId,
+            @PathVariable Long id) {
+        adminProgramService.deleteMetric(protocolId, id);
         return ResponseEntity.ok(ApiResponse.success("Xóa chỉ số thành công", null));
     }
 }

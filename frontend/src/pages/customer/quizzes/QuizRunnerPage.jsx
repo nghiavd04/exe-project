@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { quizApi } from '../../../apis/customerApi';
+import { quizApi, programApi } from '../../../apis/customerApi';
+import { useAuth } from '../../../hooks/AuthContext';
+import Modal from '../../../components/Modal';
 import toast from 'react-hot-toast';
 import defaultQuizImg from '../../../assets/dopamine-bg.png';
 import './QuizRunnerPage.css';
@@ -9,6 +11,7 @@ const QuizRunnerPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const questionRef = useRef(null);
+  const { userWeight } = useAuth();
 
   const [quiz, setQuiz] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
@@ -17,6 +20,8 @@ const QuizRunnerPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [overallResult, setOverallResult] = useState(null);
+  const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // Local state: track all selections
   const [answers, setAnswers] = useState({});         // { questionId: id | [ids] }
@@ -89,7 +94,17 @@ const QuizRunnerPage = () => {
   const goTo = (index, direction = 'forward') => {
     setAnimDir(direction);
     setCurrentIndex(index);
-    setTimeout(() => questionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+    requestAnimationFrame(() => {
+      const el = questionRef.current;
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+
+      if (rect.top < 0 || rect.top > 80) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   };
 
   const handlePrev = () => {
@@ -130,6 +145,69 @@ const QuizRunnerPage = () => {
       setSubmitting(false);
     }
   };
+
+  const saveProtocolSelection = async (recommendation) => {
+    const res = await programApi.selectProtocol(recommendation.protocolId);
+    if (res.data.success) {
+      toast.success(`Đã lựa chọn ${recommendation.name}!`);
+    }
+    return res;
+  };
+
+  const handleRecommendationClick = async (recommendation) => {
+    if (userWeight < 1) {
+      setSelectedRecommendation(recommendation);
+      setShowSubscriptionModal(true);
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await saveProtocolSelection(recommendation);
+      navigate('/phac-do');
+    } catch (err) {
+      console.error(err);
+      const message = err?.response?.data?.message || 'Có lỗi xảy ra khi lưu lựa chọn phác đồ.';
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpgradeFromModal = async () => {
+    if (!selectedRecommendation) return;
+
+    try {
+      setSubmitting(true);
+      await saveProtocolSelection(selectedRecommendation);
+      setShowSubscriptionModal(false);
+      navigate('/goi-dich-vu');
+    } catch (err) {
+      console.error(err);
+      const message = err?.response?.data?.message || 'Có lỗi xảy ra khi lưu lựa chọn phác đồ.';
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const closeSubscriptionModal = () => {
+    if (submitting) return;
+    setShowSubscriptionModal(false);
+    setSelectedRecommendation(null);
+  };
+
+  const recommendationGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1.25rem',
+    marginTop: '1rem',
+    alignItems: 'stretch'
+  };
+
+  const subscriptionMessage = selectedRecommendation
+    ? `${selectedRecommendation.name} là phác đồ cá nhân hóa yêu cầu gói thành viên từ BASIC trở lên để có thể bắt đầu sử dụng.`
+    : 'Phác đồ cá nhân hóa yêu cầu gói thành viên từ BASIC trở lên để có thể bắt đầu sử dụng.';
 
   // ─────────────────────────────────────────────
   // LOADING
@@ -223,6 +301,124 @@ const QuizRunnerPage = () => {
             </div>
           )}
 
+          {overallResult?.recommendations && overallResult.recommendations.length > 0 && (
+            <div className="result-recommendations-section" style={{ marginTop: '2.5rem', marginBottom: '2rem' }}>
+              <h3 className="result-section-label" style={{ fontSize: '1.25rem', color: '#0d7a6e', marginBottom: '1.2rem', fontWeight: '700', textAlign: 'center' }}>
+                🎯 Phác đồ Đề xuất dành cho bạn
+              </h3>
+              <div style={recommendationGridStyle}>
+                {overallResult.recommendations.map((rec, idx) => {
+                  const isTop = idx === 0;
+                  return (
+                    <div
+                      key={rec.protocolId}
+                      className={`recommendation-card ${isTop ? 'top-recommendation' : ''}`}
+                      style={{
+                        padding: '1.5rem',
+                        borderRadius: '12px',
+                        border: isTop ? '2.5px solid #14b8a6' : '1px solid rgba(0,0,0,0.08)',
+                        background: isTop ? 'linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)' : '#fff',
+                        position: 'relative',
+                        boxShadow: 'var(--shadow-sm)',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        textAlign: 'left'
+                      }}
+                    >
+                      {isTop && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '-12px',
+                          left: '20px',
+                          background: 'linear-gradient(135deg, #0d7a6e 0%, #14b8a6 100%)',
+                          color: '#fff',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          boxShadow: 'var(--shadow-sm)'
+                        }}>
+                          Được đề xuất nhiều nhất
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: '700' }}>
+                            {rec.name}
+                          </h4>
+                          <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
+                            Thời gian: {rec.durationDays} ngày
+                          </span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0d7a6e' }}>
+                            {Math.round(rec.matchScore)}%
+                          </div>
+                          <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
+                            Độ tương thích
+                          </span>
+                        </div>
+                      </div>
+
+                      <p style={{ margin: '0.5rem 0 1rem 0', fontSize: '0.95rem', color: '#334155', lineHeight: '1.5' }}>
+                        {rec.description}
+                      </p>
+
+                      {rec.reasonText && (
+                        <div style={{
+                          background: 'rgba(13, 122, 110, 0.05)',
+                          padding: '0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.85rem',
+                          color: '#0d7a6e',
+                          marginBottom: '1rem',
+                          borderLeft: '3px solid #0d7a6e'
+                        }}>
+                          <strong>Lý do phù hợp:</strong> {rec.reasonText}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => handleRecommendationClick(rec)}
+                        disabled={submitting}
+                        style={{
+                          width: '100%',
+                          background: isTop ? 'linear-gradient(135deg, #0d7a6e 0%, #14b8a6 100%)' : '#fff',
+                          color: isTop ? '#fff' : '#0d7a6e',
+                          border: isTop ? 'none' : '1.5px solid #0d7a6e',
+                          padding: '0.65rem',
+                          borderRadius: '8px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          boxShadow: isTop ? '0 4px 12px rgba(13, 122, 110, 0.2)' : 'none'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          if (!isTop) {
+                            e.currentTarget.style.background = '#0d7a6e';
+                            e.currentTarget.style.color = '#fff';
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = 'none';
+                          if (!isTop) {
+                            e.currentTarget.style.background = '#fff';
+                            e.currentTarget.style.color = '#0d7a6e';
+                          }
+                        }}
+                      >
+                        {userWeight < 1
+                          ? (isTop ? '🚀 Chọn phác đồ & mở khóa BASIC+' : 'Chọn phác đồ này')
+                          : (isTop ? '🚀 Bắt đầu phác đồ' : 'Chọn phác đồ này')}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="result-gentle-note">
             <span>💙</span>
             <p>Đây là bài test tự nhận thức, không phải chẩn đoán y tế. Nếu bạn cảm thấy lo lắng, hãy trao đổi với chuyên gia tâm lý.</p>
@@ -233,6 +429,42 @@ const QuizRunnerPage = () => {
             <Link to="/" className="btn-result-secondary">Về trang chủ</Link>
           </div>
         </div>
+
+        <Modal
+          isOpen={showSubscriptionModal}
+          onClose={closeSubscriptionModal}
+          title="Cần gói BASIC trở lên"
+          size="sm"
+        >
+          <div className="quiz-protocol-upgrade-modal">
+            <div className="quiz-protocol-upgrade-badge">Mở khóa phác đồ cá nhân hóa</div>
+            <p className="quiz-protocol-upgrade-text">{subscriptionMessage}</p>
+            {selectedRecommendation && (
+              <div className="quiz-protocol-upgrade-summary">
+                <strong>{selectedRecommendation.name}</strong>
+                <span>Thời lượng: {selectedRecommendation.durationDays} ngày</span>
+              </div>
+            )}
+            <div className="quiz-protocol-upgrade-actions">
+              <button
+                type="button"
+                className="quiz-protocol-upgrade-secondary"
+                onClick={closeSubscriptionModal}
+                disabled={submitting}
+              >
+                Để sau
+              </button>
+              <button
+                type="button"
+                className="quiz-protocol-upgrade-primary"
+                onClick={handleUpgradeFromModal}
+                disabled={submitting}
+              >
+                {submitting ? 'Đang xử lý...' : 'Đăng ký gói BASIC+'}
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     );
   }

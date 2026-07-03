@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "program_weeks")
+@Table(name = "program_weeks", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"protocol_id", "week_number"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,12 +14,19 @@ import lombok.*;
 public class ProgramWeekMetadata {
 
     @Id
-    @Column(name = "week_number")
-    private Integer weekNumber;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phase_number", nullable = false)
+    @JoinColumn(name = "protocol_id", nullable = false)
+    private Protocol protocol;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "phase_id", nullable = false)
     private ProgramPhaseMetadata phase;
+
+    @Column(name = "week_number", nullable = false)
+    private Integer weekNumber;
 
     @Column(name = "label", nullable = false)
     private String label;

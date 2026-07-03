@@ -41,28 +41,85 @@ public class ProgramServiceImpl implements ProgramService {
     private final UserDailyLogRepository userDailyLogRepository;
     private final UserWeeklyLogRepository userWeeklyLogRepository;
     private final SubscriptionService subscriptionService;
+    private final ProtocolRepository protocolRepository;
+    private final ProtocolSelectionRepository protocolSelectionRepository;
+    private final ProgramReviewRepository programReviewRepository;
 
     @Override
     @Transactional
     public ProgramProgressResponse enroll(Long userId) {
+        Protocol defaultProtocol = protocolRepository.findByCode("P_INTENSIVE_120")
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mặc định (P_INTENSIVE_120)"));
+        return enroll(userId, defaultProtocol.getId());
+    }
+
+    @Override
+    @Transactional
+    public ProgramProgressResponse enroll(Long userId, Long protocolId) {
         Customer customer = customerRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
 
+        Protocol protocol = protocolRepository.findById(protocolId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ với ID: " + protocolId));
+
         Optional<UserProgramProgress> existing = progressRepository.findByCustomerId(customer.getId());
         if (existing.isPresent()) {
-            return mapToProgressResponse(existing.get());
+            UserProgramProgress existingProgress = existing.get();
+            // Nếu phác đồ của tiến trình hiện tại khác phác đồ yêu cầu và trạng thái là ACTIVE
+            // (Thường thì chỉ ghi đè nếu trước đó chưa gán phác đồ, hoặc nâng cấp từ hệ thống thanh toán)
+            if (existingProgress.getProtocol() == null) {
+                existingProgress.setProtocol(protocol);
+                existingProgress.setSwitchLockedUntil(LocalDateTime.now().plusDays(Math.min(21, protocol.getDurationDays())));
+                existingProgress.setReviewDueAt(LocalDateTime.now().plusDays(Math.min(30, protocol.getDurationDays())));
+                existingProgress = progressRepository.save(existingProgress);
+            }
+            return mapToProgressResponse(existingProgress);
         }
 
         UserProgramProgress progress = UserProgramProgress.builder()
                 .customer(customer)
+                .protocol(protocol)
                 .currentDay(1)
                 .streakCount(0)
+                .cycleNumber(1)
                 .status(UserProgramStatus.ACTIVE)
+                .switchLockedUntil(LocalDateTime.now().plusDays(Math.min(21, protocol.getDurationDays())))
+                .reviewDueAt(LocalDateTime.now().plusDays(Math.min(30, protocol.getDurationDays())))
                 .build();
 
         progress = progressRepository.save(progress);
-        log.info("Customer ID {} enrolled in Dopamine Detox Program.", customer.getId());
+        log.info("Customer ID {} enrolled in protocol {}.", customer.getId(), protocol.getCode());
         return mapToProgressResponse(progress);
+    }
+
+    @Override
+    @Transactional
+    public void selectProtocol(Long userId, Long protocolId) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        Protocol protocol = protocolRepository.findById(protocolId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ với ID: " + protocolId));
+
+        if (!protocol.getIsActive()) {
+            throw new BadRequestException("Phác đồ này hiện không hoạt động");
+        }
+
+        // Hủy các lựa chọn PENDING_PAYMENT cũ của người dùng này
+        List<ProtocolSelection> oldSelections = protocolSelectionRepository.findByCustomerIdAndStatus(customer.getId(), "PENDING_PAYMENT");
+        for (ProtocolSelection sel : oldSelections) {
+            sel.setStatus("EXPIRED");
+            protocolSelectionRepository.save(sel);
+        }
+
+        ProtocolSelection selection = ProtocolSelection.builder()
+                .customer(customer)
+                .selectedProtocol(protocol)
+                .status("PENDING_PAYMENT")
+                .build();
+
+        protocolSelectionRepository.save(selection);
+        log.info("Customer ID {} selected protocol {} (pending payment).", customer.getId(), protocol.getCode());
     }
 
     @Override
@@ -88,14 +145,20 @@ public class ProgramServiceImpl implements ProgramService {
             throw new BadRequestException("Ngày " + dayNumber + " chưa được mở khóa. Hiện tại bạn đang ở ngày " + progress.getCurrentDay());
         }
 
-        ProgramDayMetadata dayMeta = dayMetadataRepository.findById(dayNumber)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy dữ liệu ngày thứ " + dayNumber));
+        Protocol protocol = progress.getProtocol();
+        if (protocol == null) {
+            protocol = protocolRepository.findByCode("P_INTENSIVE_120")
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mặc định"));
+        }
+
+        ProgramDayMetadata dayMeta = dayMetadataRepository.findByProtocolIdAndDayNumber(protocol.getId(), dayNumber)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy dữ liệu ngày thứ " + dayNumber + " cho phác đồ " + progress.getProtocol().getName()));
 
         ProgramWeekMetadata weekMeta = dayMeta.getWeek();
         ProgramPhaseMetadata phaseMeta = weekMeta.getPhase();
 
         // Tasks
-        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByDayDayNumberOrderByTaskIndexAsc(dayNumber);
+        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocol.getId(), dayNumber);
         List<UserProgramTask> completedTasks = userProgramTaskRepository.findByCustomerIdAndDayNumber(customer.getId(), dayNumber);
 
         List<ProgramDayDetailResponse.TaskDetail> tasks = new ArrayList<>();
@@ -114,7 +177,7 @@ public class ProgramServiceImpl implements ProgramService {
         }
 
         // Metrics Names
-        List<String> metricsList = metricMetadataRepository.findByDayDayNumber(dayNumber).stream()
+        List<String> metricsList = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocol.getId(), dayNumber).stream()
                 .map(ProgramMetricMetadata::getMetricName)
                 .collect(Collectors.toList());
 
@@ -165,13 +228,19 @@ public class ProgramServiceImpl implements ProgramService {
             throw new BadRequestException("Tuần " + weekNumber + " chưa được mở khóa. Hiện tại bạn đang ở ngày " + progress.getCurrentDay());
         }
 
-        ProgramWeekMetadata weekMeta = weekMetadataRepository.findById(weekNumber)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy dữ liệu tuần thứ " + weekNumber));
+        Protocol protocol = progress.getProtocol();
+        if (protocol == null) {
+            protocol = protocolRepository.findByCode("P_INTENSIVE_120")
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mặc định"));
+        }
+
+        ProgramWeekMetadata weekMeta = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocol.getId(), weekNumber)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy dữ liệu tuần thứ " + weekNumber + " cho phác đồ " + progress.getProtocol().getName()));
 
         ProgramPhaseMetadata phaseMeta = weekMeta.getPhase();
 
         // Tasks (weekly tasks where dayNumber is null)
-        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(weekNumber);
+        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocol.getId(), weekNumber);
         List<UserProgramTask> completedTasks = userProgramTaskRepository.findByCustomerIdAndWeekNumberAndDayNumberIsNull(customer.getId(), weekNumber);
 
         List<ProgramWeekDetailResponse.TaskDetail> tasks = new ArrayList<>();
@@ -190,7 +259,7 @@ public class ProgramServiceImpl implements ProgramService {
         }
 
         // Metrics Names
-        List<String> metricsList = metricMetadataRepository.findByWeekWeekNumberAndDayIsNull(weekNumber).stream()
+        List<String> metricsList = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocol.getId(), weekNumber).stream()
                 .map(ProgramMetricMetadata::getMetricName)
                 .collect(Collectors.toList());
 
@@ -400,31 +469,38 @@ public class ProgramServiceImpl implements ProgramService {
                     continue;
                 }
 
+                Protocol protocol = progress.getProtocol();
+                if (protocol == null) {
+                    protocol = protocolRepository.findByCode("P_INTENSIVE_120").orElse(null);
+                }
+                Long protocolId = protocol != null ? protocol.getId() : null;
+
                 Integer currentDay = progress.getCurrentDay();
 
+                boolean hasDailyTasks = false;
+                if (protocolId != null) {
+                    hasDailyTasks = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, currentDay).isPresent();
+                }
+
                 boolean allCompleted = false;
-                if (currentDay <= 30) {
-                    // Check daily tasks count (must be 4 completed)
+                if (hasDailyTasks) {
                     long completedCount = userProgramTaskRepository.countByCustomerIdAndDayNumberAndIsCompletedTrue(customerId, currentDay);
                     allCompleted = (completedCount >= 4);
                 } else {
-                    // Check weekly tasks (Week number = (currentDay - 1) / 7 + 1)
                     int currentWeek = (currentDay - 1) / 7 + 1;
                     long completedCount = userProgramTaskRepository.countByCustomerIdAndWeekNumberAndDayNumberIsNullAndIsCompletedTrue(customerId, currentWeek);
                     allCompleted = (completedCount >= 4);
                 }
 
                 if (allCompleted) {
-                    // Keep or increase streak
                     progress.setStreakCount(progress.getStreakCount() + 1);
                 } else {
-                    // Lost streak
                     progress.setStreakCount(0);
                 }
 
-                // Advance day
                 progress.setCurrentDay(currentDay + 1);
-                if (progress.getCurrentDay() > getMaxProgramDays()) {
+                int maxDays = protocol != null ? protocol.getDurationDays() : 120;
+                if (progress.getCurrentDay() > maxDays) {
                     progress.setStatus(UserProgramStatus.COMPLETED);
                     log.info("Customer ID {} successfully completed the program!", customerId);
                 }
@@ -438,30 +514,115 @@ public class ProgramServiceImpl implements ProgramService {
         }
     }
 
+    @Override
+    @Transactional
+    public ProgramProgressResponse advanceDayForUser(Long userId) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        UserProgramProgress progress = progressRepository.findByCustomerId(customer.getId())
+                .orElseThrow(() -> new BadRequestException("Bạn chưa tham gia lộ trình phác đồ"));
+
+        LocalDate today = LocalDate.now();
+        if (progress.getStartedAt() != null && progress.getStartedAt().toLocalDate().isEqual(today)) {
+            throw new BadRequestException("Bạn chỉ có thể tiến sang ngày tiếp theo vào ngày mai!");
+        }
+        if (progress.getLastCheckedInAt() != null && progress.getLastCheckedInAt().toLocalDate().isEqual(today)) {
+            throw new BadRequestException("Bạn chỉ có thể tiến sang ngày tiếp theo vào ngày mai!");
+        }
+
+        Protocol protocol = progress.getProtocol();
+        if (protocol == null) {
+            protocol = protocolRepository.findByCode("P_INTENSIVE_120")
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mặc định"));
+        }
+        Long protocolId = protocol.getId();
+        Integer currentDay = progress.getCurrentDay();
+
+        boolean hasDailyTasks = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, currentDay).isPresent();
+
+        boolean allCompleted = false;
+        if (hasDailyTasks) {
+            long completedCount = userProgramTaskRepository.countByCustomerIdAndDayNumberAndIsCompletedTrue(customer.getId(), currentDay);
+            allCompleted = (completedCount >= 4);
+        } else {
+            int currentWeek = (currentDay - 1) / 7 + 1;
+            long completedCount = userProgramTaskRepository.countByCustomerIdAndWeekNumberAndDayNumberIsNullAndIsCompletedTrue(customer.getId(), currentWeek);
+            allCompleted = (completedCount >= 4);
+        }
+
+        if (allCompleted) {
+            progress.setStreakCount(progress.getStreakCount() + 1);
+        } else {
+            progress.setStreakCount(0);
+        }
+
+        progress.setCurrentDay(currentDay + 1);
+        int maxDays = protocol.getDurationDays();
+        if (progress.getCurrentDay() > maxDays) {
+            progress.setStatus(UserProgramStatus.COMPLETED);
+        }
+
+        progress.setLastCheckedInAt(LocalDateTime.now());
+        progress = progressRepository.save(progress);
+        return mapToProgressResponse(progress);
+    }
+
     private ProgramProgressResponse mapToProgressResponse(UserProgramProgress progress) {
         boolean isCheckedInToday = false;
         if (progress.getLastCheckedInAt() != null) {
             isCheckedInToday = progress.getLastCheckedInAt().toLocalDate().isEqual(LocalDate.now());
         }
 
-        return ProgramProgressResponse.builder()
+        ProgramProgressResponse.ProgramProgressResponseBuilder builder = ProgramProgressResponse.builder()
                 .id(progress.getId())
                 .currentDay(progress.getCurrentDay())
                 .streakCount(progress.getStreakCount())
                 .startedAt(progress.getStartedAt())
                 .lastCheckedInAt(progress.getLastCheckedInAt())
                 .status(progress.getStatus().name())
-                .isCheckedInToday(isCheckedInToday)
-                .build();
+                .isCheckedInToday(isCheckedInToday);
+
+        if (progress.getProtocol() != null) {
+            builder.protocolId(progress.getProtocol().getId())
+                   .protocolCode(progress.getProtocol().getCode())
+                   .protocolName(progress.getProtocol().getName())
+                   .durationDays(progress.getProtocol().getDurationDays())
+                   .cycleNumber(progress.getCycleNumber())
+                   .reviewDueAt(progress.getReviewDueAt())
+                   .switchLockedUntil(progress.getSwitchLockedUntil());
+        }
+
+        return builder.build();
     }
 
     @Override
     public com.product.exe.backend.dto.response.ProgramMetadataResponse getProgramMetadata() {
-        List<ProgramPhaseMetadata> phases = phaseMetadataRepository.findAll();
+        Protocol defaultProtocol = protocolRepository.findByCode("P_INTENSIVE_120")
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mặc định (P_INTENSIVE_120)"));
+        return getProgramMetadata(defaultProtocol.getId());
+    }
+
+    @Override
+    public com.product.exe.backend.dto.response.ProgramMetadataResponse getProgramMetadataForUser(Long userId) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        Optional<UserProgramProgress> progressOpt = progressRepository.findByCustomerId(customer.getId());
+        if (progressOpt.isPresent() && progressOpt.get().getProtocol() != null) {
+            return getProgramMetadata(progressOpt.get().getProtocol().getId());
+        }
+
+        return getProgramMetadata();
+    }
+
+    @Override
+    public com.product.exe.backend.dto.response.ProgramMetadataResponse getProgramMetadata(Long protocolId) {
+        List<ProgramPhaseMetadata> phases = phaseMetadataRepository.findByProtocolIdOrderByPhaseNumberAsc(protocolId);
         List<com.product.exe.backend.dto.response.ProgramMetadataResponse.PhaseDto> phaseDtos = new ArrayList<>();
 
         for (ProgramPhaseMetadata phase : phases) {
-            List<ProgramWeekMetadata> weeks = weekMetadataRepository.findByPhasePhaseNumberOrderByWeekNumberAsc(phase.getPhaseNumber());
+            List<ProgramWeekMetadata> weeks = weekMetadataRepository.findByProtocolIdAndPhasePhaseNumberOrderByWeekNumberAsc(protocolId, phase.getPhaseNumber());
             List<com.product.exe.backend.dto.response.ProgramMetadataResponse.WeekDto> weekDtos = new ArrayList<>();
 
             for (ProgramWeekMetadata week : weeks) {
@@ -469,13 +630,13 @@ public class ProgramServiceImpl implements ProgramService {
                 List<String> wTasks = new ArrayList<>();
                 List<String> wMetrics = new ArrayList<>();
 
-                if (phase.getPhaseNumber() == 1) {
-                    List<ProgramDayMetadata> days = dayMetadataRepository.findByWeekWeekNumberOrderByDayNumberAsc(week.getWeekNumber());
+                List<ProgramDayMetadata> days = dayMetadataRepository.findByProtocolIdAndWeekWeekNumberOrderByDayNumberAsc(protocolId, week.getWeekNumber());
+                if (!days.isEmpty()) {
                     for (ProgramDayMetadata day : days) {
-                        List<String> dTasks = taskMetadataRepository.findByDayDayNumberOrderByTaskIndexAsc(day.getDayNumber()).stream()
+                        List<String> dTasks = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocolId, day.getDayNumber()).stream()
                                 .map(ProgramTaskMetadata::getTitle)
                                 .collect(Collectors.toList());
-                        List<String> dMetrics = metricMetadataRepository.findByDayDayNumber(day.getDayNumber()).stream()
+                        List<String> dMetrics = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocolId, day.getDayNumber()).stream()
                                 .map(ProgramMetricMetadata::getMetricName)
                                 .collect(Collectors.toList());
 
@@ -487,10 +648,10 @@ public class ProgramServiceImpl implements ProgramService {
                                 .build());
                     }
                 } else {
-                    wTasks = taskMetadataRepository.findByWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(week.getWeekNumber()).stream()
+                    wTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
                             .map(ProgramTaskMetadata::getTitle)
                             .collect(Collectors.toList());
-                    wMetrics = metricMetadataRepository.findByWeekWeekNumberAndDayIsNull(week.getWeekNumber()).stream()
+                    wMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
                             .map(ProgramMetricMetadata::getMetricName)
                             .collect(Collectors.toList());
                 }
@@ -520,64 +681,12 @@ public class ProgramServiceImpl implements ProgramService {
         return com.product.exe.backend.dto.response.ProgramMetadataResponse.builder().phases(phaseDtos).build();
     }
 
-    @Override
-    @Transactional
-    public ProgramProgressResponse advanceDayForUser(Long userId) {
-        Customer customer = customerRepository.findByUserId(userId)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
-
-        UserProgramProgress progress = progressRepository.findByCustomerId(customer.getId())
-                .orElseThrow(() -> new BadRequestException("Bạn chưa tham gia lộ trình phác đồ"));
-
-        // Restrict day advancement to once per calendar day
-        LocalDate today = LocalDate.now();
-        if (progress.getStartedAt() != null && progress.getStartedAt().toLocalDate().isEqual(today)) {
-            throw new BadRequestException("Bạn chỉ có thể tiến sang ngày tiếp theo vào ngày mai!");
-        }
-        if (progress.getLastCheckedInAt() != null && progress.getLastCheckedInAt().toLocalDate().isEqual(today)) {
-            throw new BadRequestException("Bạn chỉ có thể tiến sang ngày tiếp theo vào ngày mai!");
-        }
-
-        Integer currentDay = progress.getCurrentDay();
-
-        boolean allCompleted = false;
-        if (currentDay <= 30) {
-            // Check daily tasks count (must be 4 completed)
-            long completedCount = userProgramTaskRepository.countByCustomerIdAndDayNumberAndIsCompletedTrue(customer.getId(), currentDay);
-            allCompleted = (completedCount >= 4);
-        } else {
-            // Check weekly tasks (Week number = (currentDay - 1) / 7 + 1)
-            int currentWeek = (currentDay - 1) / 7 + 1;
-            long completedCount = userProgramTaskRepository.countByCustomerIdAndWeekNumberAndDayNumberIsNullAndIsCompletedTrue(customer.getId(), currentWeek);
-            allCompleted = (completedCount >= 4);
-        }
-
-        if (allCompleted) {
-            // Keep or increase streak
-            progress.setStreakCount(progress.getStreakCount() + 1);
-        } else {
-            // Lost streak
-            progress.setStreakCount(0);
-        }
-
-        // Advance day
-        progress.setCurrentDay(currentDay + 1);
-        if (progress.getCurrentDay() > getMaxProgramDays()) {
-            progress.setStatus(UserProgramStatus.COMPLETED);
-        }
-
-        progress.setLastCheckedInAt(LocalDateTime.now());
-        progressRepository.save(progress);
-
-        return mapToProgressResponse(progress);
-    }
-
-    private int getMaxProgramDays() {
-        int maxDay = dayMetadataRepository.findMaxDayNumber();
+    private int getMaxProgramDays(Long protocolId) {
+        int maxDay = dayMetadataRepository.findMaxDayNumber(protocolId);
         if (maxDay > 0) {
             return maxDay;
         }
-        int maxWeek = weekMetadataRepository.findMaxWeekNumber();
+        int maxWeek = weekMetadataRepository.findMaxWeekNumber(protocolId);
         return maxWeek * 7;
     }
 
@@ -619,15 +728,77 @@ public class ProgramServiceImpl implements ProgramService {
         progressRepository.delete(progress);
         progressRepository.flush();
 
+        Protocol currentProtocol = progress.getProtocol();
+
         UserProgramProgress newProgress = UserProgramProgress.builder()
                 .customer(customer)
+                .protocol(currentProtocol)
                 .currentDay(1)
                 .streakCount(0)
+                .cycleNumber(progress.getCycleNumber())
                 .status(UserProgramStatus.ACTIVE)
+                .switchLockedUntil(LocalDateTime.now().plusDays(Math.min(21, currentProtocol != null ? currentProtocol.getDurationDays() : 120)))
+                .reviewDueAt(LocalDateTime.now().plusDays(Math.min(30, currentProtocol != null ? currentProtocol.getDurationDays() : 120)))
                 .build();
         newProgress = progressRepository.save(newProgress);
         log.info("Customer ID {} restarted program progress.", customer.getId());
 
         return mapToProgressResponse(newProgress);
+    }
+
+    @Override
+    @Transactional
+    public ProgramProgressResponse submitReview(Long userId, com.product.exe.backend.dto.request.ProgramReviewRequest request) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin khách hàng"));
+
+        UserProgramProgress progress = progressRepository.findByCustomerId(customer.getId())
+                .orElseThrow(() -> new BadRequestException("Bạn chưa tham gia lộ trình phác đồ"));
+
+        ProgramReview review = ProgramReview.builder()
+                .userProgramProgress(progress)
+                .reviewCycleNumber(progress.getCycleNumber())
+                .suitabilityRating(request.getSuitabilityRating())
+                .completionConfidence(request.getCompletionConfidence())
+                .difficultyLevel(request.getDifficultyLevel())
+                .wantsToSwitch(request.getWantsToSwitch() != null ? request.getWantsToSwitch() : false)
+                .userNotes(request.getUserNotes())
+                .nextAction(request.getNextAction())
+                .createdAt(LocalDateTime.now())
+                .build();
+        programReviewRepository.save(review);
+
+        if ("SWITCH_PROTOCOL".equalsIgnoreCase(request.getNextAction()) && request.getSwitchProtocolId() != null) {
+            Protocol newProtocol = protocolRepository.findById(request.getSwitchProtocolId())
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy phác đồ mới để chuyển đổi"));
+
+            // Clear previous tasks/logs so the user starts fresh on the new protocol
+            userProgramTaskRepository.deleteByCustomerId(customer.getId());
+            userDailyLogRepository.deleteByCustomerId(customer.getId());
+            userWeeklyLogRepository.deleteByCustomerId(customer.getId());
+
+            progress.setProtocol(newProtocol);
+            progress.setCurrentDay(1);
+            progress.setStreakCount(0);
+            progress.setCycleNumber(progress.getCycleNumber() + 1);
+            progress.setStartedAt(LocalDateTime.now());
+            progress.setLastCheckedInAt(null);
+            progress.setSwitchLockedUntil(LocalDateTime.now().plusDays(Math.min(21, newProtocol.getDurationDays())));
+            progress.setReviewDueAt(LocalDateTime.now().plusDays(Math.min(30, newProtocol.getDurationDays())));
+            progress.setStatus(UserProgramStatus.ACTIVE);
+            
+            log.info("Customer ID {} switched to protocol {} at cycle {}.", customer.getId(), newProtocol.getCode(), progress.getCycleNumber());
+        } else {
+            // Keep current protocol: just extend the review due date and increment cycle
+            progress.setCycleNumber(progress.getCycleNumber() + 1);
+            Protocol currentProtocol = progress.getProtocol();
+            int duration = currentProtocol != null ? currentProtocol.getDurationDays() : 120;
+            progress.setReviewDueAt(LocalDateTime.now().plusDays(Math.min(30, duration)));
+            
+            log.info("Customer ID {} kept current protocol. Set cycle to {}.", customer.getId(), progress.getCycleNumber());
+        }
+
+        progress = progressRepository.save(progress);
+        return mapToProgressResponse(progress);
     }
 }

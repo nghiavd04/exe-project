@@ -67,18 +67,25 @@ export const adminApi = {
   // Admin Subscriptions History
   getPayments: (params) => apiClient.get('/v1/admin/subscriptions/payments', { params }),
 
-  // Admin Program Metadata
-  getProgramMetadata: () => apiClient.get('/v1/admin/program/metadata'),
-  createProgramPhase: (data) => apiClient.post('/v1/admin/program/phases', data),
-  deleteProgramPhase: (phaseNum) => apiClient.delete(`/v1/admin/program/phases/${phaseNum}`),
-  updateProgramPhase: (phaseNum, data) => apiClient.put(`/v1/admin/program/phases/${phaseNum}`, data),
-  updateProgramWeek: (weekNum, data) => apiClient.put(`/v1/admin/program/weeks/${weekNum}`, data),
-  createProgramTask: (data) => apiClient.post('/v1/admin/program/tasks', data),
-  updateProgramTask: (id, data) => apiClient.put(`/v1/admin/program/tasks/${id}`, data),
-  deleteProgramTask: (id) => apiClient.delete(`/v1/admin/program/tasks/${id}`),
-  createProgramMetric: (data) => apiClient.post('/v1/admin/program/metrics', data),
-  updateProgramMetric: (id, data) => apiClient.put(`/v1/admin/program/metrics/${id}`, data),
-  deleteProgramMetric: (id) => apiClient.delete(`/v1/admin/program/metrics/${id}`),
+  // Admin Program Metadata (Protocol-Aware)
+  getProgramMetadata: (protocolId) => apiClient.get(`/v1/admin/program/${protocolId}/metadata`),
+  createProgramPhase: (protocolId, data) => apiClient.post(`/v1/admin/program/${protocolId}/phases`, data),
+  deleteProgramPhase: (protocolId, phaseNum) => apiClient.delete(`/v1/admin/program/${protocolId}/phases/${phaseNum}`),
+  updateProgramPhase: (protocolId, phaseNum, data) => apiClient.put(`/v1/admin/program/${protocolId}/phases/${phaseNum}`, data),
+  updateProgramWeek: (protocolId, weekNum, data) => apiClient.put(`/v1/admin/program/${protocolId}/weeks/${weekNum}`, data),
+  createProgramTask: (protocolId, data) => apiClient.post(`/v1/admin/program/${protocolId}/tasks`, data),
+  updateProgramTask: (protocolId, id, data) => apiClient.put(`/v1/admin/program/${protocolId}/tasks/${id}`, data),
+  deleteProgramTask: (protocolId, id) => apiClient.delete(`/v1/admin/program/${protocolId}/tasks/${id}`),
+  createProgramMetric: (protocolId, data) => apiClient.post(`/v1/admin/program/${protocolId}/metrics`, data),
+  updateProgramMetric: (protocolId, id, data) => apiClient.put(`/v1/admin/program/${protocolId}/metrics/${id}`, data),
+  deleteProgramMetric: (protocolId, id) => apiClient.delete(`/v1/admin/program/${protocolId}/metrics/${id}`),
+
+  // Protocols CRUD for Admin
+  getProtocols: () => apiClient.get('/v1/admin/protocols'),
+  getProtocolDetail: (id) => apiClient.get(`/v1/admin/protocols/${id}`),
+  createProtocol: (data) => apiClient.post('/v1/admin/protocols', data),
+  updateProtocol: (id, data) => apiClient.put(`/v1/admin/protocols/${id}`, data),
+  deleteProtocol: (id) => apiClient.delete(`/v1/admin/protocols/${id}`),
 
   // Admin AI Chat Configurations & Logs
   getAiPrompt: () => apiClient.get('/v1/admin/ai-chat/prompt'),

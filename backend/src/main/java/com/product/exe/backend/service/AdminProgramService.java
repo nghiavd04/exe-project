@@ -7,19 +7,19 @@ import com.product.exe.backend.entity.ProgramPhaseMetadata;
 import com.product.exe.backend.entity.ProgramTaskMetadata;
 
 public interface AdminProgramService {
-    AdminProgramMetadataResponse getProgramMetadata();
+    AdminProgramMetadataResponse getProgramMetadata(Long protocolId);
     
-    ProgramPhaseMetadata createPhase(AdminPhaseCreateRequest request);
-    void updatePhase(Integer phaseNumber, AdminPhaseUpdateRequest request);
-    void deletePhase(Integer phaseNumber);
+    ProgramPhaseMetadata createPhase(Long protocolId, AdminPhaseCreateRequest request);
+    void updatePhase(Long protocolId, Integer phaseNumber, AdminPhaseUpdateRequest request);
+    void deletePhase(Long protocolId, Integer phaseNumber);
     
-    void updateWeek(Integer weekNumber, AdminWeekUpdateRequest request);
+    void updateWeek(Long protocolId, Integer weekNumber, AdminWeekUpdateRequest request);
     
-    ProgramTaskMetadata createTask(AdminTaskRequest request);
-    ProgramTaskMetadata updateTask(Long id, AdminTaskRequest request);
-    void deleteTask(Long id);
+    ProgramTaskMetadata createTask(Long protocolId, AdminTaskRequest request);
+    ProgramTaskMetadata updateTask(Long protocolId, Long id, AdminTaskRequest request);
+    void deleteTask(Long protocolId, Long id);
     
-    ProgramMetricMetadata createMetric(AdminMetricRequest request);
-    ProgramMetricMetadata updateMetric(Long id, AdminMetricRequest request);
-    void deleteMetric(Long id);
+    ProgramMetricMetadata createMetric(Long protocolId, AdminMetricRequest request);
+    ProgramMetricMetadata updateMetric(Long protocolId, Long id, AdminMetricRequest request);
+    void deleteMetric(Long protocolId, Long id);
 }

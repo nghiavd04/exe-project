@@ -16,6 +16,10 @@ export default function AdminProgramPage() {
   const [expandedWeeks, setExpandedWeeks] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
 
+  // Protocols state
+  const [protocols, setProtocols] = useState([]);
+  const [selectedProtocolId, setSelectedProtocolId] = useState('');
+
   // Phase metadata edits
   const [phaseFocus, setPhaseFocus] = useState('');
   const [phaseScience, setPhaseScience] = useState('');
@@ -67,13 +71,34 @@ export default function AdminProgramPage() {
   });
 
   useEffect(() => {
-    fetchProgramData();
+    const loadProtocols = async () => {
+      try {
+        const res = await adminApi.getProtocols();
+        if (res.data.success) {
+          setProtocols(res.data.data);
+          const defaultProto = res.data.data.find(p => p.code === 'P_INTENSIVE_120') || res.data.data[0];
+          if (defaultProto) {
+            setSelectedProtocolId(defaultProto.id);
+          }
+        }
+      } catch (err) {
+        toast.error('Không thể tải danh sách phác đồ');
+      }
+    };
+    loadProtocols();
   }, []);
 
-  const fetchProgramData = async (targetPhaseNum = null) => {
+  useEffect(() => {
+    if (selectedProtocolId) {
+      fetchProgramData(selectedProtocolId);
+    }
+  }, [selectedProtocolId]);
+
+  const fetchProgramData = async (protocolId, targetPhaseNum = null) => {
+    if (!protocolId) return;
     try {
       setLoading(true);
-      const res = await adminApi.getProgramMetadata();
+      const res = await adminApi.getProgramMetadata(protocolId);
       if (res.data.success) {
         const data = res.data.data;
         setProgramData(data);
@@ -172,7 +197,7 @@ export default function AdminProgramPage() {
     }
 
     try {
-      const res = await adminApi.createProgramPhase({
+      const res = await adminApi.createProgramPhase(selectedProtocolId, {
         phaseNumber: phaseModal.phaseNumber,
         label: phaseModal.label,
         rangeText: phaseModal.rangeText,
@@ -185,7 +210,7 @@ export default function AdminProgramPage() {
         toast.success(`Đã thêm Giai đoạn ${phaseModal.phaseNumber} thành công!`);
         setPhaseModal(prev => ({ ...prev, isOpen: false }));
         // Refresh and select the newly created phase
-        fetchProgramData(phaseModal.phaseNumber);
+        fetchProgramData(selectedProtocolId, phaseModal.phaseNumber);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Lỗi khi tạo giai đoạn';
@@ -203,10 +228,10 @@ export default function AdminProgramPage() {
       message: `CẢNH BÁO CỰC KỲ QUAN TRỌNG: Bạn có chắc chắn muốn xóa Giai đoạn ${selectedPhaseNum}? Hành động này sẽ tự động xóa sạch tất cả các Tuần, Ngày, Nhiệm vụ và Chỉ số nằm trong giai đoạn này. Dữ liệu lịch sử nhật ký của người dùng cũ sẽ ĐƯỢC BẢO TOÀN, không bị xóa theo.`,
       onConfirm: async () => {
         try {
-          const res = await adminApi.deleteProgramPhase(selectedPhaseNum);
+          const res = await adminApi.deleteProgramPhase(selectedProtocolId, selectedPhaseNum);
           if (res.data.success) {
             toast.success(`Đã xóa Giai đoạn ${selectedPhaseNum} thành công`);
-            fetchProgramData();
+            fetchProgramData(selectedProtocolId);
           }
         } catch (err) {
           toast.error('Lỗi khi xóa giai đoạn');
@@ -223,7 +248,7 @@ export default function AdminProgramPage() {
     }
     try {
       setPhaseSaving(true);
-      const res = await adminApi.updateProgramPhase(selectedPhaseNum, {
+      const res = await adminApi.updateProgramPhase(selectedProtocolId, selectedPhaseNum, {
         focus: phaseFocus,
         science: phaseScience
       });
@@ -251,7 +276,7 @@ export default function AdminProgramPage() {
   const handleSaveWeekDesc = async (weekNum) => {
     const desc = weekDescriptions[weekNum] || '';
     try {
-      const res = await adminApi.updateProgramWeek(weekNum, { description: desc });
+      const res = await adminApi.updateProgramWeek(selectedProtocolId, weekNum, { description: desc });
       if (res.data.success) {
         toast.success(`Cập nhật mô tả Tuần ${weekNum} thành công`);
         // Refresh local memory data
@@ -324,19 +349,19 @@ export default function AdminProgramPage() {
 
       let res;
       if (taskModal.mode === 'create') {
-        res = await adminApi.createProgramTask(data);
+        res = await adminApi.createProgramTask(selectedProtocolId, data);
         if (res.data.success) {
           toast.success('Thêm nhiệm vụ thành công');
         }
       } else {
-        res = await adminApi.updateProgramTask(taskModal.id, data);
+        res = await adminApi.updateProgramTask(selectedProtocolId, taskModal.id, data);
         if (res.data.success) {
           toast.success('Cập nhật nhiệm vụ thành công');
         }
       }
 
       setTaskModal(prev => ({ ...prev, isOpen: false }));
-      fetchProgramData();
+      fetchProgramData(selectedProtocolId);
     } catch (err) {
       toast.error('Lỗi khi lưu nhiệm vụ');
     }
@@ -349,10 +374,10 @@ export default function AdminProgramPage() {
       message: 'Bạn có chắc chắn muốn xóa nhiệm vụ này khỏi phác đồ? Dữ liệu lưu vết của người dùng cũ sẽ không bị ảnh hưởng.',
       onConfirm: async () => {
         try {
-          const res = await adminApi.deleteProgramTask(taskId);
+          const res = await adminApi.deleteProgramTask(selectedProtocolId, taskId);
           if (res.data.success) {
             toast.success('Đã xóa nhiệm vụ');
-            fetchProgramData();
+            fetchProgramData(selectedProtocolId);
           }
         } catch (err) {
           toast.error('Lỗi khi xóa nhiệm vụ');
@@ -403,19 +428,19 @@ export default function AdminProgramPage() {
 
       let res;
       if (metricModal.mode === 'create') {
-        res = await adminApi.createProgramMetric(data);
+        res = await adminApi.createProgramMetric(selectedProtocolId, data);
         if (res.data.success) {
           toast.success('Thêm chỉ số thành công');
         }
       } else {
-        res = await adminApi.updateProgramMetric(metricModal.id, data);
+        res = await adminApi.updateProgramMetric(selectedProtocolId, metricModal.id, data);
         if (res.data.success) {
           toast.success('Cập nhật chỉ số thành công');
         }
       }
 
       setMetricModal(prev => ({ ...prev, isOpen: false }));
-      fetchProgramData();
+      fetchProgramData(selectedProtocolId);
     } catch (err) {
       toast.error('Lỗi khi lưu chỉ số');
     }
@@ -428,10 +453,10 @@ export default function AdminProgramPage() {
       message: 'Bạn có chắc chắn muốn xóa chỉ số này khỏi phác đồ?',
       onConfirm: async () => {
         try {
-          const res = await adminApi.deleteProgramMetric(metricId);
+          const res = await adminApi.deleteProgramMetric(selectedProtocolId, metricId);
           if (res.data.success) {
             toast.success('Đã xóa chỉ số thành công');
-            fetchProgramData();
+            fetchProgramData(selectedProtocolId);
           }
         } catch (err) {
           toast.error('Lỗi khi xóa chỉ số');
@@ -468,10 +493,35 @@ export default function AdminProgramPage() {
         <span>QUẢN LÝ PHÁC ĐỒ</span>
       </div>
 
-      <header className="subscription-header">
+      <header className="subscription-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>Lộ trình & Phác đồ điều trị</h1>
           <p>Thiết lập chi tiết cấu trúc giai đoạn, tuần, ngày, nhiệm vụ daily và các chỉ số đo lường.</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <label style={{ fontWeight: '600', color: 'var(--muted)', fontSize: '0.95rem' }}>Chọn phác đồ quản lý:</label>
+          <select
+            value={selectedProtocolId}
+            onChange={(e) => setSelectedProtocolId(e.target.value)}
+            style={{
+              padding: '0.6rem 1.2rem',
+              borderRadius: 'var(--radius)',
+              border: '1.5px solid rgba(13, 122, 110, 0.2)',
+              fontSize: '0.95rem',
+              fontWeight: '700',
+              color: 'var(--teal-dark)',
+              background: '#fff',
+              cursor: 'pointer',
+              outline: 'none',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            {protocols.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name} ({p.durationDays} ngày)
+              </option>
+            ))}
+          </select>
         </div>
       </header>
 

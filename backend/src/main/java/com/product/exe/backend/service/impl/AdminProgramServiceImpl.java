@@ -26,14 +26,15 @@ public class AdminProgramServiceImpl implements AdminProgramService {
     private final ProgramDayMetadataRepository dayMetadataRepository;
     private final ProgramTaskMetadataRepository taskMetadataRepository;
     private final ProgramMetricMetadataRepository metricMetadataRepository;
+    private final ProtocolRepository protocolRepository;
 
     @Override
-    public AdminProgramMetadataResponse getProgramMetadata() {
-        List<ProgramPhaseMetadata> phases = phaseMetadataRepository.findAll();
+    public AdminProgramMetadataResponse getProgramMetadata(Long protocolId) {
+        List<ProgramPhaseMetadata> phases = phaseMetadataRepository.findByProtocolIdOrderByPhaseNumberAsc(protocolId);
         List<AdminProgramMetadataResponse.PhaseDto> phaseDtos = new ArrayList<>();
 
         for (ProgramPhaseMetadata phase : phases) {
-            List<ProgramWeekMetadata> weeks = weekMetadataRepository.findByPhasePhaseNumberOrderByWeekNumberAsc(phase.getPhaseNumber());
+            List<ProgramWeekMetadata> weeks = weekMetadataRepository.findByProtocolIdAndPhasePhaseNumberOrderByWeekNumberAsc(protocolId, phase.getPhaseNumber());
             List<AdminProgramMetadataResponse.WeekDto> weekDtos = new ArrayList<>();
 
             for (ProgramWeekMetadata week : weeks) {
@@ -41,10 +42,10 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                 List<AdminProgramMetadataResponse.TaskDto> wTasks = new ArrayList<>();
                 List<AdminProgramMetadataResponse.MetricDto> wMetrics = new ArrayList<>();
 
-                if (phase.getPhaseNumber() == 1) {
-                    List<ProgramDayMetadata> days = dayMetadataRepository.findByWeekWeekNumberOrderByDayNumberAsc(week.getWeekNumber());
+                List<ProgramDayMetadata> days = dayMetadataRepository.findByProtocolIdAndWeekWeekNumberOrderByDayNumberAsc(protocolId, week.getWeekNumber());
+                if (!days.isEmpty()) {
                     for (ProgramDayMetadata day : days) {
-                        List<AdminProgramMetadataResponse.TaskDto> dTasks = taskMetadataRepository.findByDayDayNumberOrderByTaskIndexAsc(day.getDayNumber()).stream()
+                        List<AdminProgramMetadataResponse.TaskDto> dTasks = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocolId, day.getDayNumber()).stream()
                                 .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
                                         .id(t.getId())
                                         .taskIndex(t.getTaskIndex())
@@ -54,7 +55,7 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                                         .build())
                                 .collect(Collectors.toList());
 
-                        List<AdminProgramMetadataResponse.MetricDto> dMetrics = metricMetadataRepository.findByDayDayNumber(day.getDayNumber()).stream()
+                        List<AdminProgramMetadataResponse.MetricDto> dMetrics = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocolId, day.getDayNumber()).stream()
                                 .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
                                         .id(m.getId())
                                         .metricName(m.getMetricName())
@@ -69,7 +70,7 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                                 .build());
                     }
                 } else {
-                    wTasks = taskMetadataRepository.findByWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(week.getWeekNumber()).stream()
+                    wTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
                             .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
                                     .id(t.getId())
                                     .taskIndex(t.getTaskIndex())
@@ -79,7 +80,7 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                                     .build())
                             .collect(Collectors.toList());
 
-                    wMetrics = metricMetadataRepository.findByWeekWeekNumberAndDayIsNull(week.getWeekNumber()).stream()
+                    wMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
                             .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
                                     .id(m.getId())
                                     .metricName(m.getMetricName())
@@ -114,11 +115,16 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Override
     @Transactional
-    public ProgramPhaseMetadata createPhase(AdminPhaseCreateRequest request) {
-        if (phaseMetadataRepository.existsById(request.getPhaseNumber())) {
-            throw new BadRequestException("Giai đoạn số " + request.getPhaseNumber() + " đã tồn tại");
+    public ProgramPhaseMetadata createPhase(Long protocolId, AdminPhaseCreateRequest request) {
+        Protocol protocol = protocolRepository.findById(protocolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phác đồ với ID: " + protocolId));
+
+        if (phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, request.getPhaseNumber()).isPresent()) {
+            throw new BadRequestException("Giai đoạn số " + request.getPhaseNumber() + " đã tồn tại cho phác đồ này");
         }
+
         ProgramPhaseMetadata phase = ProgramPhaseMetadata.builder()
+                .protocol(protocol)
                 .phaseNumber(request.getPhaseNumber())
                 .label(request.getLabel())
                 .rangeText(request.getRangeText())
@@ -131,49 +137,53 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Override
     @Transactional
-    public void deletePhase(Integer phaseNumber) {
-        ProgramPhaseMetadata phase = phaseMetadataRepository.findById(phaseNumber)
+    public void deletePhase(Long protocolId, Integer phaseNumber) {
+        ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, phaseNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn thứ " + phaseNumber));
         phaseMetadataRepository.delete(phase);
-        log.info("Admin deleted Phase metadata for Phase {}", phaseNumber);
+        log.info("Admin deleted Phase metadata for Protocol {} Phase {}", protocolId, phaseNumber);
     }
 
     @Override
     @Transactional
-    public void updatePhase(Integer phaseNumber, AdminPhaseUpdateRequest request) {
-        ProgramPhaseMetadata phase = phaseMetadataRepository.findById(phaseNumber)
+    public void updatePhase(Long protocolId, Integer phaseNumber, AdminPhaseUpdateRequest request) {
+        ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, phaseNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn thứ " + phaseNumber));
         phase.setFocus(request.getFocus());
         phase.setScience(request.getScience());
         phaseMetadataRepository.save(phase);
-        log.info("Admin updated Phase metadata for Phase {}", phaseNumber);
+        log.info("Admin updated Phase metadata for Protocol {} Phase {}", protocolId, phaseNumber);
     }
 
     @Override
     @Transactional
-    public void updateWeek(Integer weekNumber, AdminWeekUpdateRequest request) {
-        ProgramWeekMetadata week = weekMetadataRepository.findById(weekNumber)
+    public void updateWeek(Long protocolId, Integer weekNumber, AdminWeekUpdateRequest request) {
+        ProgramWeekMetadata week = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocolId, weekNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần thứ " + weekNumber));
         week.setDescription(request.getDescription());
         weekMetadataRepository.save(week);
-        log.info("Admin updated Week metadata for Week {}", weekNumber);
+        log.info("Admin updated Week metadata for Protocol {} Week {}", protocolId, weekNumber);
     }
 
     @Override
     @Transactional
-    public ProgramTaskMetadata createTask(AdminTaskRequest request) {
-        ProgramPhaseMetadata phase = phaseMetadataRepository.findById(request.getPhaseNumber())
+    public ProgramTaskMetadata createTask(Long protocolId, AdminTaskRequest request) {
+        Protocol protocol = protocolRepository.findById(protocolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phác đồ với ID: " + protocolId));
+
+        ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, request.getPhaseNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn " + request.getPhaseNumber()));
-        ProgramWeekMetadata week = weekMetadataRepository.findById(request.getWeekNumber())
+        ProgramWeekMetadata week = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocolId, request.getWeekNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber()));
 
         ProgramDayMetadata day = null;
         if (request.getDayNumber() != null) {
-            day = dayMetadataRepository.findById(request.getDayNumber())
+            day = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, request.getDayNumber())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber()));
         }
 
         ProgramTaskMetadata task = ProgramTaskMetadata.builder()
+                .protocol(protocol)
                 .phase(phase)
                 .week(week)
                 .day(day)
@@ -188,9 +198,13 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Override
     @Transactional
-    public ProgramTaskMetadata updateTask(Long id, AdminTaskRequest request) {
+    public ProgramTaskMetadata updateTask(Long protocolId, Long id, AdminTaskRequest request) {
         ProgramTaskMetadata task = taskMetadataRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhiệm vụ ID " + id));
+
+        if (!task.getProtocol().getId().equals(protocolId)) {
+            throw new BadRequestException("Nhiệm vụ không thuộc về phác đồ này");
+        }
 
         task.setTitle(request.getTitle());
         task.setSubText(request.getSubText());
@@ -202,28 +216,37 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Override
     @Transactional
-    public void deleteTask(Long id) {
+    public void deleteTask(Long protocolId, Long id) {
         ProgramTaskMetadata task = taskMetadataRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhiệm vụ ID " + id));
+
+        if (!task.getProtocol().getId().equals(protocolId)) {
+            throw new BadRequestException("Nhiệm vụ không thuộc về phác đồ này");
+        }
+
         taskMetadataRepository.delete(task);
-        log.info("Admin deleted Task ID {}", id);
+        log.info("Admin deleted Task ID {} from Protocol {}", id, protocolId);
     }
 
     @Override
     @Transactional
-    public ProgramMetricMetadata createMetric(AdminMetricRequest request) {
-        ProgramPhaseMetadata phase = phaseMetadataRepository.findById(request.getPhaseNumber())
+    public ProgramMetricMetadata createMetric(Long protocolId, AdminMetricRequest request) {
+        Protocol protocol = protocolRepository.findById(protocolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phác đồ với ID: " + protocolId));
+
+        ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, request.getPhaseNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn " + request.getPhaseNumber()));
-        ProgramWeekMetadata week = weekMetadataRepository.findById(request.getWeekNumber())
+        ProgramWeekMetadata week = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocolId, request.getWeekNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber()));
 
         ProgramDayMetadata day = null;
         if (request.getDayNumber() != null) {
-            day = dayMetadataRepository.findById(request.getDayNumber())
+            day = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, request.getDayNumber())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber()));
         }
 
         ProgramMetricMetadata metric = ProgramMetricMetadata.builder()
+                .protocol(protocol)
                 .phase(phase)
                 .week(week)
                 .day(day)
@@ -235,19 +258,29 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
     @Override
     @Transactional
-    public ProgramMetricMetadata updateMetric(Long id, AdminMetricRequest request) {
+    public ProgramMetricMetadata updateMetric(Long protocolId, Long id, AdminMetricRequest request) {
         ProgramMetricMetadata metric = metricMetadataRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ số ID " + id));
+
+        if (!metric.getProtocol().getId().equals(protocolId)) {
+            throw new BadRequestException("Chỉ số không thuộc về phác đồ này");
+        }
+
         metric.setMetricName(request.getMetricName());
         return metricMetadataRepository.save(metric);
     }
 
     @Override
     @Transactional
-    public void deleteMetric(Long id) {
+    public void deleteMetric(Long protocolId, Long id) {
         ProgramMetricMetadata metric = metricMetadataRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ số ID " + id));
+
+        if (!metric.getProtocol().getId().equals(protocolId)) {
+            throw new BadRequestException("Chỉ số không thuộc về phác đồ này");
+        }
+
         metricMetadataRepository.delete(metric);
-        log.info("Admin deleted Metric ID {}", id);
+        log.info("Admin deleted Metric ID {} from Protocol {}", id, protocolId);
     }
 }

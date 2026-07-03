@@ -14,4 +14,13 @@ public class ProgramProgressResponse {
     private LocalDateTime lastCheckedInAt;
     private String status;
     private Boolean isCheckedInToday;
+
+    // Multi-protocol fields
+    private Long protocolId;
+    private String protocolCode;
+    private String protocolName;
+    private Integer durationDays;
+    private Integer cycleNumber;
+    private LocalDateTime reviewDueAt;
+    private LocalDateTime switchLockedUntil;
 }

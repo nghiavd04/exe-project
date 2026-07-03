@@ -38,6 +38,8 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final CustomerRepository customerRepository;
+    private final ProtocolRepository protocolRepository;
+    private final QuizRecommendationRepository quizRecommendationRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -232,6 +234,218 @@ public class QuizServiceImpl implements QuizService {
         }
         attempt.setTotalScore(totalScore);
 
+        // Calculate multi-dimensional scores (SEVERITY, MOTIVATION, ADHERENCE_RISK, LIFESTYLE)
+        Map<String, List<UserAnswer>> answersByDimension = userAnswers.stream()
+                .collect(Collectors.groupingBy(ua -> {
+                    String dim = ua.getQuestion().getDimension();
+                    if (dim == null || dim.trim().isEmpty()) {
+                        return "SEVERITY";
+                    }
+                    return dim.trim().toUpperCase();
+                }));
+
+        Map<String, Double> dimensionScores = new java.util.HashMap<>();
+        for (String dim : List.of("SEVERITY", "MOTIVATION", "ADHERENCE_RISK", "LIFESTYLE")) {
+            List<UserAnswer> dimAnswers = answersByDimension.getOrDefault(dim, List.of());
+            if (dimAnswers.isEmpty()) {
+                dimensionScores.put(dim, 50.0); // Default middle score if no questions in this dimension
+                continue;
+            }
+            double actualSum = 0;
+            double maxPossibleSum = 0;
+            for (UserAnswer ua : dimAnswers) {
+                int val = 0;
+                if (ua.getAnswer() != null && ua.getAnswer().getValue() != null) {
+                    try {
+                        val = Integer.parseInt(ua.getAnswer().getValue());
+                    } catch (NumberFormatException ignored) {}
+                }
+                actualSum += val;
+
+                int maxVal = 0;
+                if (ua.getQuestion().getAnswers() != null) {
+                    for (Answer a : ua.getQuestion().getAnswers()) {
+                        try {
+                            int av = Integer.parseInt(a.getValue());
+                            if (av > maxVal) {
+                                maxVal = av;
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+                if (maxVal == 0) maxVal = 1;
+                maxPossibleSum += maxVal;
+            }
+            double normalizedScore = (actualSum / maxPossibleSum) * 100.0;
+            dimensionScores.put(dim, normalizedScore);
+        }
+
+        // Match protocols and save recommendations
+        List<Protocol> allProtocols = protocolRepository.findAll();
+        List<QuizRecommendation> recommendations = new java.util.ArrayList<>();
+
+        double severityScore = dimensionScores.getOrDefault("SEVERITY", 50.0);
+        double motivationDifficultyScore = dimensionScores.getOrDefault("MOTIVATION", 50.0);
+        double adherenceRiskScore = dimensionScores.getOrDefault("ADHERENCE_RISK", 50.0);
+        double lifestyleDifficultyScore = dimensionScores.getOrDefault("LIFESTYLE", 50.0);
+
+        boolean hasSeverity = answersByDimension.containsKey("SEVERITY") && !answersByDimension.get("SEVERITY").isEmpty();
+        boolean hasMotivation = answersByDimension.containsKey("MOTIVATION") && !answersByDimension.get("MOTIVATION").isEmpty();
+        boolean hasAdherence = answersByDimension.containsKey("ADHERENCE_RISK") && !answersByDimension.get("ADHERENCE_RISK").isEmpty();
+        boolean hasLifestyle = answersByDimension.containsKey("LIFESTYLE") && !answersByDimension.get("LIFESTYLE").isEmpty();
+
+        for (Protocol p : allProtocols) {
+            if (!p.getIsActive()) continue;
+
+            double idealSeverity = 15.0;
+            double idealMotivationDifficulty = 25.0;
+            double idealAdherence = 15.0;
+            double idealLifestyle = 20.0;
+
+            if (p.getCode().equals("P_MODERATE_45")) {
+                idealSeverity = 45.0;
+                idealMotivationDifficulty = 45.0;
+                idealAdherence = 35.0;
+                idealLifestyle = 45.0;
+            } else if (p.getCode().equals("P_SEVERE_90")) {
+                idealSeverity = 72.5;
+                idealMotivationDifficulty = 70.0;
+                idealAdherence = 65.0;
+                idealLifestyle = 65.0;
+            } else if (p.getCode().equals("P_INTENSIVE_120")) {
+                idealSeverity = 90.0;
+                idealMotivationDifficulty = 88.0;
+                idealAdherence = 85.0;
+                idealLifestyle = 85.0;
+            }
+
+            double diffSeverity = Math.abs(severityScore - idealSeverity);
+            double diffMotivation = Math.abs(motivationDifficultyScore - idealMotivationDifficulty);
+            double diffAdherence = Math.abs(adherenceRiskScore - idealAdherence);
+            double diffLifestyle = Math.abs(lifestyleDifficultyScore - idealLifestyle);
+
+            double simSeverity = 100.0 - diffSeverity;
+            double simMotivation = 100.0 - diffMotivation;
+            double simAdherence = 100.0 - diffAdherence;
+            double simLifestyle = 100.0 - diffLifestyle;
+
+            double wSeverity = 0.4;
+            double wMotivation = 0.2;
+            double wAdherence = 0.2;
+            double wLifestyle = 0.2;
+            try {
+                Map<String, Object> wMap = objectMapper.readValue(p.getWeightsJson(), Map.class);
+                wSeverity = ((Number) wMap.getOrDefault("severity", 0.25)).doubleValue();
+                wMotivation = ((Number) wMap.getOrDefault("motivation", 0.25)).doubleValue();
+                wAdherence = ((Number) wMap.getOrDefault("adherenceRisk", 0.25)).doubleValue();
+                wLifestyle = ((Number) wMap.getOrDefault("lifestyleConstraint", 0.25)).doubleValue();
+            } catch (Exception ignored) {}
+
+            double sumSimWeights = 0;
+            double sumWeights = 0;
+
+            if (hasSeverity) {
+                sumSimWeights += simSeverity * wSeverity;
+                sumWeights += wSeverity;
+            }
+            if (hasMotivation) {
+                sumSimWeights += simMotivation * wMotivation;
+                sumWeights += wMotivation;
+            }
+            if (hasAdherence) {
+                sumSimWeights += simAdherence * wAdherence;
+                sumWeights += wAdherence;
+            }
+            if (hasLifestyle) {
+                sumSimWeights += simLifestyle * wLifestyle;
+                sumWeights += wLifestyle;
+            }
+
+            double matchScore = sumWeights > 0 ? (sumSimWeights / sumWeights) : 0.0;
+
+            if (p.getCode().equals("P_INTENSIVE_120")) {
+                if (severityScore >= 80.0) {
+                    matchScore += 8.0;
+                }
+                if (adherenceRiskScore >= 80.0) {
+                    matchScore += 6.0;
+                }
+                if (lifestyleDifficultyScore >= 80.0) {
+                    matchScore += 6.0;
+                }
+                if (motivationDifficultyScore >= 75.0) {
+                    matchScore += 4.0;
+                }
+            } else if (p.getCode().equals("P_SEVERE_90")) {
+                if (severityScore >= 70.0) {
+                    matchScore += 4.0;
+                }
+                if (adherenceRiskScore >= 70.0) {
+                    matchScore += 3.0;
+                }
+            }
+
+            matchScore = Math.max(0.0, Math.min(100.0, matchScore));
+
+            String confidenceLevel = "HIGH";
+            if (matchScore < 70) {
+                confidenceLevel = "MEDIUM";
+            }
+            if (matchScore < 50) {
+                confidenceLevel = "LOW";
+            }
+
+            String reasonText = "";
+            if (p.getCode().equals("P_MILD_21")) {
+                reasonText = "Phù hợp cho mức độ phụ thuộc nhẹ. Bạn vẫn giữ được động lực cao và tự chủ tốt.";
+            } else if (p.getCode().equals("P_MODERATE_45")) {
+                reasonText = "Dành cho mức độ trung bình. Bạn bắt đầu có dấu hiệu giảm sút tập trung nhưng vẫn có khả năng tự phục hồi tốt.";
+            } else if (p.getCode().equals("P_SEVERE_90")) {
+                reasonText = "Khuyên dùng cho mức độ phụ thuộc nặng. Các thói quen lướt web đã bắt đầu ảnh hưởng sâu tới giấc ngủ và các hoạt động đời thực.";
+            } else if (p.getCode().equals("P_INTENSIVE_120")) {
+                reasonText = "Chương trình chuyên sâu nhất. Phù hợp cho trường hợp mất kiểm soát hành vi nghiêm trọng, cần tái cấu trúc lối sống toàn diện.";
+            }
+
+            try {
+                QuizRecommendation rec = QuizRecommendation.builder()
+                        .quizAttempt(attempt)
+                        .customer(customer)
+                        .protocol(p)
+                        .rankOrder(0)
+                        .matchScore(matchScore)
+                        .confidenceLevel(confidenceLevel)
+                        .reasonText(reasonText)
+                        .dimensionSnapshotJson(objectMapper.writeValueAsString(dimensionScores))
+                        .ruleVersion(1)
+                        .status("PENDING")
+                        .build();
+                recommendations.add(rec);
+            } catch (JsonProcessingException ignored) {}
+        }
+
+        recommendations.sort((r1, r2) -> Double.compare(r2.getMatchScore(), r1.getMatchScore()));
+
+        quizRecommendationRepository.supersedeAllPendingForCustomer(customer.getId());
+
+        List<QuizResultResponse.RecommendedProtocolDto> recDtos = new java.util.ArrayList<>();
+        for (int rank = 0; rank < Math.min(recommendations.size(), 2); rank++) {
+            QuizRecommendation r = recommendations.get(rank);
+            r.setRankOrder(rank + 1);
+            quizRecommendationRepository.save(r);
+
+            recDtos.add(QuizResultResponse.RecommendedProtocolDto.builder()
+                    .protocolId(r.getProtocol().getId())
+                    .code(r.getProtocol().getCode())
+                    .name(r.getProtocol().getName())
+                    .description(r.getProtocol().getDescription())
+                    .durationDays(r.getProtocol().getDurationDays())
+                    .matchScore(r.getMatchScore())
+                    .confidenceLevel(r.getConfidenceLevel())
+                    .reasonText(r.getReasonText())
+                    .rankOrder(r.getRankOrder())
+                    .build());
+        }
+
         // 4. Determine assessment result
         String resultText = attempt.getQuiz().getOverallAssessment(); // Default fallback
         if (attempt.getQuiz().getAssessmentRules() != null) {
@@ -255,6 +469,7 @@ public class QuizServiceImpl implements QuizService {
                 .status(attempt.getStatus().name())
                 .totalScore(attempt.getTotalScore())
                 .assessmentResult(attempt.getAssessmentResult())
+                .recommendations(recDtos)
                 .build();
     }
 

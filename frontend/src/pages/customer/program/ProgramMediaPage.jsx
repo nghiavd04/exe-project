@@ -288,7 +288,8 @@ export default function ProgramMediaPage() {
 
   // Removed client side filter
 
-  const progressPct = Math.round(((userProgress?.currentDay || 0) / 120) * 100);
+  const totalDays = userProgress?.durationDays || 120;
+  const progressPct = Math.round(((userProgress?.currentDay || 0) / totalDays) * 100);
 
   return (
     <div className="pd-page">
@@ -307,7 +308,7 @@ export default function ProgramMediaPage() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              ← Xem Lộ trình 120 Ngày
+              ← Xem Lộ trình {totalDays} Ngày
             </button>
           </div>
           <div className="pd-roadmap-hero-right-badge media-right-badge">
@@ -458,11 +459,11 @@ export default function ProgramMediaPage() {
               <span className="pd-roadmap-progress-icon">🎯</span>
               <div>
                 <span className="pd-roadmap-progress-title">Tiến Trình Tổng</span>
-                <span className="pd-roadmap-progress-sub">Chương trình 120 Ngày</span>
+                <span className="pd-roadmap-progress-sub">{userProgress?.protocolName || 'Giải Độc Dopamine'}</span>
               </div>
             </div>
             <div className="pd-roadmap-progress-body">
-              <div className="pd-roadmap-progress-number">Ngày {userProgress?.currentDay || 0} / 120</div>
+              <div className="pd-roadmap-progress-number">Ngày {userProgress?.currentDay || 0} / {totalDays}</div>
               <div className="pd-roadmap-progress-bar-wrap">
                 <div className="pd-roadmap-progress-bar-fill" style={{ width: `${progressPct}%` }} />
               </div>
@@ -477,7 +478,7 @@ export default function ProgramMediaPage() {
             <HelpCircle size={20} className="guide-icon" />
             <h4>Hướng dẫn sử dụng</h4>
             <p>
-              Các bài thiền và podcast được lập trình khớp với nhịp sinh học và tâm lý học từng giai đoạn của lộ trình 120 ngày detox dopamine. Hãy sử dụng đều đặn để làm dịu các cơn lo lắng và xây dựng thói quen chánh niệm dài hạn.
+              Các bài thiền và podcast được lập trình khớp với nhịp sinh học và tâm lý học từng giai đoạn của lộ trình detox dopamine. Hãy sử dụng đều đặn để làm dịu các cơn lo lắng và xây dựng thói quen chánh niệm dài hạn.
             </p>
           </div>
         </div>

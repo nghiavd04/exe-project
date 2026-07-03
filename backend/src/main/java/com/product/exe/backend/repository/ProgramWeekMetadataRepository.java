@@ -4,13 +4,16 @@ import com.product.exe.backend.entity.ProgramWeekMetadata;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface ProgramWeekMetadataRepository extends JpaRepository<ProgramWeekMetadata, Integer> {
-    List<ProgramWeekMetadata> findByPhasePhaseNumberOrderByWeekNumberAsc(Integer phaseNumber);
+public interface ProgramWeekMetadataRepository extends JpaRepository<ProgramWeekMetadata, Long> {
+    List<ProgramWeekMetadata> findByProtocolIdAndPhasePhaseNumberOrderByWeekNumberAsc(Long protocolId, Integer phaseNumber);
+    List<ProgramWeekMetadata> findByProtocolIdOrderByWeekNumberAsc(Long protocolId);
 
-    @Query("SELECT COALESCE(MAX(w.weekNumber), 0) FROM ProgramWeekMetadata w")
-    int findMaxWeekNumber();
+    Optional<ProgramWeekMetadata> findByProtocolIdAndWeekNumber(Long protocolId, Integer weekNumber);
+
+    @Query("SELECT COALESCE(MAX(w.weekNumber), 0) FROM ProgramWeekMetadata w WHERE w.protocol.id = :protocolId")
+    int findMaxWeekNumber(Long protocolId);
 }

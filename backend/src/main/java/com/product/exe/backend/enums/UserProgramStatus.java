@@ -6,7 +6,9 @@ import lombok.Getter;
 public enum UserProgramStatus {
     ACTIVE("ACTIVE"),
     COMPLETED("COMPLETED"),
-    PAUSED("PAUSED");
+    PAUSED("PAUSED"),
+    SWITCHED("SWITCHED"),
+    CANCELLED("CANCELLED");
 
     private final String dbValue;
 
