@@ -5,7 +5,7 @@ import { profileApi, programApi } from '../../../apis/customerApi';
 import AppState from '../../../components/AppState';
 import './ProgramDashboardPage.css';
 
-const ProgramContext = createContext();
+const ProgramContext = createContext({});
 
 export const useProgram = () => useContext(ProgramContext);
 
@@ -15,7 +15,7 @@ const isTierAllowedForProgram = (tier) => {
 };
 
 const LOCK_FEATURES = [
-  { ico: '📅', text: 'Chương trình 120 ngày có cấu trúc chi tiết' },
+  { ico: '📅', text: 'Chương trình phác đồ cá nhân hóa có cấu trúc chi tiết' },
   { ico: '✅', text: 'Nhiệm vụ hàng ngày & theo dõi tiến trình tự điều chỉnh' },
   { ico: '📊', text: 'Chỉ số tự theo dõi: thời gian màn hình, tâm trạng, giấc ngủ' },
   { ico: '📓', text: 'Nhật ký viết tự do nâng cao nhận thức' },
@@ -195,7 +195,7 @@ export default function ProgramLayout() {
 
   const handleToggleTask = async (taskIndex, isCompleted) => {
     if (!isEnrolled || !userProgress || !dayDetail) return;
-    const dayNum = userProgress.currentDay;
+    const dayNum = dayDetail.dayNumber || userProgress.currentDay;
     const weekNum = dayDetail.weekNumber;
     try {
       await programApi.toggleTask(dayNum, weekNum, taskIndex, isCompleted);
@@ -212,8 +212,8 @@ export default function ProgramLayout() {
   };
 
   const handleSaveLogs = async () => {
-    if (!isEnrolled || !userProgress) return;
-    const dayNum = userProgress.currentDay;
+    if (!isEnrolled || !userProgress || !dayDetail) return;
+    const dayNum = dayDetail.dayNumber || userProgress.currentDay;
     const payload = {
       screenTimeMinutes: metrics.screenTime,
       unconsciousOpenCount: metrics.unconsciousOpenCount ?? 0,
@@ -263,7 +263,7 @@ export default function ProgramLayout() {
       <div className="pd-page pd-state-page">
         <AppState
           variant="paywall"
-          title="Chương trình 120 ngày dành cho thành viên"
+          title="Chương trình phác đồ dành cho thành viên"
           description="Mở khóa toàn bộ lộ trình, nhiệm vụ hằng ngày, nhật ký và các chỉ số theo dõi để bắt đầu hành trình tự cân bằng của bạn."
           actionLabel="Xem các gói dịch vụ"
           onAction={() => navigate('/goi-dich-vu')}

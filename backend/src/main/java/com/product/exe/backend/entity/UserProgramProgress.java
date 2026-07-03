@@ -24,6 +24,10 @@ public class UserProgramProgress {
     @JoinColumn(name = "customer_id", nullable = false, unique = true)
     private Customer customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "protocol_id")
+    private Protocol protocol;
+
     @Column(name = "current_day", nullable = false)
     @Builder.Default
     private Integer currentDay = 1;
@@ -32,12 +36,28 @@ public class UserProgramProgress {
     @Builder.Default
     private Integer streakCount = 0;
 
+    @Column(name = "cycle_number", nullable = false)
+    @Builder.Default
+    private Integer cycleNumber = 1;
+
     @CreationTimestamp
     @Column(name = "started_at", nullable = false, updatable = false)
     private LocalDateTime startedAt;
 
+    @Column(name = "ended_at")
+    private LocalDateTime endedAt;
+
+    @Column(name = "completion_reason", length = 100)
+    private String completionReason;
+
     @Column(name = "last_checked_in_at")
     private LocalDateTime lastCheckedInAt;
+
+    @Column(name = "review_due_at")
+    private LocalDateTime reviewDueAt;
+
+    @Column(name = "switch_locked_until")
+    private LocalDateTime switchLockedUntil;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

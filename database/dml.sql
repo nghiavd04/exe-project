@@ -41,9 +41,9 @@ INSERT INTO quizzes (admin_id, title, description, overall_assessment, status, i
 -- --------------------------------------------------------
 -- 5. Questions & Answers (Quiz 1)
 -- --------------------------------------------------------
-INSERT INTO questions (quiz_id, content, type, order_index, is_active, created_at) VALUES
-(1, 'Bạn dùng điện thoại bao nhiêu tiếng mỗi ngày?', 'SINGLE_CHOICE', 1, TRUE, NOW()),
-(1, 'Bạn check thông báo bao nhiêu lần trong lúc làm việc?', 'SINGLE_CHOICE', 2, TRUE, NOW());
+INSERT INTO questions (quiz_id, content, type, order_index, dimension, is_active, created_at) VALUES 
+(1, 'Bạn dùng điện thoại bao nhiêu tiếng mỗi ngày?', 'SINGLE_CHOICE', 1, 'SEVERITY', TRUE, NOW()),
+(1, 'Bạn check thông báo bao nhiêu lần trong lúc làm việc?', 'SINGLE_CHOICE', 2, 'ADHERENCE_RISK', TRUE, NOW());
 
 INSERT INTO answers (question_id, content, value, order_index, is_active) VALUES
 (1, 'Dưới 1 tiếng', '0', 1, TRUE),
@@ -58,9 +58,10 @@ INSERT INTO answers (question_id, content, value, order_index, is_active) VALUES
 -- 6. Quiz Assessment Rules (Quiz 1)
 -- --------------------------------------------------------
 INSERT INTO quiz_assessment_rules (quiz_id, min_score, max_score, result_text, is_active) VALUES
-(1, 0, 10, 'Bạn có khả năng tự chủ công nghệ rất tốt. Hãy tiếp tục duy trì thói quen này!', TRUE),
-(1, 11, 20, 'Bạn đang ở mức độ trung bình. Hãy thử áp dụng quy tắc "không điện thoại 1 giờ trước khi ngủ".', TRUE),
-(1, 21, 30, 'Mức độ lệ thuộc cao! Bạn nên thực hiện một đợt "Dopamine Detox" để cân bằng lại.', TRUE);
+(1, 0, 9, 'Việc sử dụng Internet hiện chưa gây ảnh hưởng lớn, nhưng đã có một vài dấu hiệu cần chú ý.', TRUE),
+(1, 10, 16, 'Việc sử dụng Internet đang bắt đầu ảnh hưởng đến thói quen sinh hoạt, sự tập trung hoặc cảm xúc của bạn.', TRUE),
+(1, 17, 22, 'Việc sử dụng Internet đang gây ảnh hưởng đáng kể đến cuộc sống hằng ngày và cần được điều chỉnh nghiêm túc.', TRUE),
+(1, 23, 30, 'Việc sử dụng Internet đang gây tổn hại nghiêm trọng đến chất lượng cuộc sống của bạn và cần một lộ trình can thiệp chuyên sâu hơn.', TRUE);
 
 -- --------------------------------------------------------
 -- 7. Sample Quiz Attempt

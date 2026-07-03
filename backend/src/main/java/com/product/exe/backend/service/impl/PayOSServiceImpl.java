@@ -17,6 +17,9 @@ import com.product.exe.backend.repository.PaymentRepository;
 import com.product.exe.backend.repository.SubscriptionPlanRepository;
 import com.product.exe.backend.repository.UserRepository;
 import com.product.exe.backend.repository.UserSubscriptionRepository;
+import com.product.exe.backend.entity.ProtocolSelection;
+import com.product.exe.backend.repository.ProtocolSelectionRepository;
+import com.product.exe.backend.service.ProgramService;
 import com.product.exe.backend.service.PayOSService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,8 @@ public class PayOSServiceImpl implements PayOSService {
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final UserSubscriptionRepository userSubscriptionRepository;
     private final PaymentRepository paymentRepository;
+    private final ProtocolSelectionRepository protocolSelectionRepository;
+    private final ProgramService programService;
 
     @Value("${app.payment.return-url}")
     private String returnUrl;
@@ -227,19 +232,19 @@ public class PayOSServiceImpl implements PayOSService {
         }
 
         try {
-            PaymentLink payosDetails = payOS.paymentRequests().get(orderCode);
-            String payosStatus = payosDetails.getStatus().getValue();
+                PaymentLink payosDetails = payOS.paymentRequests().get(orderCode);
+                String payosStatus = payosDetails.getStatus().getValue();
 
-            log.info("PayOS sync status for orderCode {}: {}", orderCode, payosStatus);
+                log.info("PayOS sync status for orderCode {}: {}", orderCode, payosStatus);
 
-            if ("PAID".equalsIgnoreCase(payosStatus)) {
-                processPaymentSuccess(payment, "SYNCED_DIRECTLY");
-            } else if ("CANCELLED".equalsIgnoreCase(payosStatus) || "EXPIRED".equalsIgnoreCase(payosStatus)) {
-                processPaymentFailure(payment);
-            }
+                if ("PAID".equalsIgnoreCase(payosStatus)) {
+                    processPaymentSuccess(payment, "SYNCED_DIRECTLY");
+                } else if ("CANCELLED".equalsIgnoreCase(payosStatus) || "EXPIRED".equalsIgnoreCase(payosStatus)) {
+                    processPaymentFailure(payment);
+                }
         } catch (Exception e) {
             log.error("Failed to sync from PayOS for orderCode " + orderCode, e);
-            throw new BadRequestException("Không thể đồng bộ trạng thái thanh toán từ PayOS");
+            throw new BadRequestException("Không thể đồng bộ trạng thái thanh toán từ PayOS: " + e.getMessage());
         }
 
         return PayOSResponse.builder()
@@ -279,6 +284,20 @@ public class PayOSServiceImpl implements PayOSService {
 
         log.info("Payment SUCCESS: Activated subscription tier {} for customer {}", 
                 payment.getPlan().getTier(), payment.getCustomer().getId());
+
+        // 4. Tìm kiếm lựa chọn phác đồ gần nhất ở trạng thái PENDING_PAYMENT để kích hoạt
+        Optional<ProtocolSelection> selectionOpt = protocolSelectionRepository
+                .findFirstByCustomerIdAndStatusOrderBySelectedAtDesc(payment.getCustomer().getId(), "PENDING_PAYMENT");
+        if (selectionOpt.isPresent()) {
+            ProtocolSelection selection = selectionOpt.get();
+            selection.setStatus("PAID");
+            protocolSelectionRepository.save(selection);
+            log.info("Activating selected protocol {} for customer {}", selection.getSelectedProtocol().getCode(), payment.getCustomer().getId());
+            programService.enroll(payment.getCustomer().getUser().getId(), selection.getSelectedProtocol().getId());
+        } else {
+            log.info("No selected protocol found for customer {}. Enrolling to default intensive protocol.", payment.getCustomer().getId());
+            programService.enroll(payment.getCustomer().getUser().getId());
+        }
     }
 
     private void processPaymentFailure(Payment payment) {

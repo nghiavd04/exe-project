@@ -1,6 +1,7 @@
 package com.product.exe.backend.controller.customer;
 import com.product.exe.backend.dto.request.UserDailyLogRequest;
 import com.product.exe.backend.dto.request.UserWeeklyLogRequest;
+import com.product.exe.backend.dto.request.ProgramReviewRequest;
 import com.product.exe.backend.dto.response.*;
 import com.product.exe.backend.entity.User;
 import com.product.exe.backend.enums.SubscriptionTier;
@@ -8,6 +9,9 @@ import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.repository.UserRepository;
 import com.product.exe.backend.service.ProgramService;
 import com.product.exe.backend.service.SubscriptionService;
+import com.product.exe.backend.service.ProtocolService;
+import com.product.exe.backend.entity.Protocol;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +26,7 @@ public class CustomerProgramController {
     private final ProgramService programService;
     private final UserRepository userRepository;
     private final SubscriptionService subscriptionService;
+    private final ProtocolService protocolService;
 
     private Long getUserId(Authentication authentication) {
         String email = authentication.getName();
@@ -44,6 +49,16 @@ public class CustomerProgramController {
         }
         // Gói FREE không được phép truy cập phác đồ. Các gói khác (BASIC, PREMIUM, ELITE) được truy cập.
         return tier != SubscriptionTier.FREE;
+    }
+
+    @PostMapping("/select-protocol")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<String>> selectProtocol(
+            @RequestParam Long protocolId,
+            Authentication authentication) {
+        Long userId = getUserId(authentication);
+        programService.selectProtocol(userId, protocolId);
+        return ResponseEntity.ok(ApiResponse.success("Chọn phác đồ thành công", "Thành công"));
     }
 
     @PostMapping("/enroll")
@@ -140,7 +155,8 @@ public class CustomerProgramController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<ProgramMetadataResponse>> getMetadata(Authentication authentication) {
         checkProgramAccess(authentication);
-        return ResponseEntity.ok(ApiResponse.success("Lấy cấu trúc lộ trình thành công", programService.getProgramMetadata()));
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Lấy cấu trúc lộ trình thành công", programService.getProgramMetadataForUser(userId)));
     }
 
     @PostMapping("/resume")
@@ -157,5 +173,22 @@ public class CustomerProgramController {
         checkProgramAccess(authentication);
         Long userId = getUserId(authentication);
         return ResponseEntity.ok(ApiResponse.success("Đã bắt đầu lại lộ trình phác đồ thành công", programService.restartProgram(userId)));
+    }
+
+    @PostMapping("/review")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<ProgramProgressResponse>> submitReview(
+            @RequestBody ProgramReviewRequest request,
+            Authentication authentication) {
+        checkProgramAccess(authentication);
+        Long userId = getUserId(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Đã gửi đánh giá thành công", programService.submitReview(userId, request)));
+    }
+
+    @GetMapping("/protocols")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<List<Protocol>>> getActiveProtocols(Authentication authentication) {
+        checkProgramAccess(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách phác đồ hoạt động thành công", protocolService.getActiveProtocols()));
     }
 }

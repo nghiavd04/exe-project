@@ -17,15 +17,19 @@ public class ProgramMetricMetadata {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phase_number", nullable = false)
+    @JoinColumn(name = "protocol_id", nullable = false)
+    private Protocol protocol;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "phase_id", nullable = false)
     private ProgramPhaseMetadata phase;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "week_number", nullable = false)
+    @JoinColumn(name = "week_id", nullable = false)
     private ProgramWeekMetadata week;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "day_number")
+    @JoinColumn(name = "day_id")
     private ProgramDayMetadata day;
 
     @Column(name = "metric_name", nullable = false)

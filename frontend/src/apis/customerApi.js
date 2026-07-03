@@ -97,6 +97,10 @@ export const programApi = {
   getProgramMedias: (params) => apiClient.get('/program/medias', { params }),
   resume: () => apiClient.post('/program/resume'),
   restart: () => apiClient.post('/program/restart'),
+  selectProtocol: (protocolId) => apiClient.post('/program/select-protocol', null, { params: { protocolId } }),
+  submitReview: (data) => apiClient.post('/program/review', data),
+  enrollWithProtocol: (protocolId) => apiClient.post('/program/enroll', null, { params: { protocolId } }),
+  getProtocols: () => apiClient.get('/program/protocols'),
 };
 
 export const notificationApi = {

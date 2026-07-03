@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "program_phases")
+@Table(name = "program_phases", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"protocol_id", "phase_number"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +14,14 @@ import lombok.*;
 public class ProgramPhaseMetadata {
 
     @Id
-    @Column(name = "phase_number")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "protocol_id", nullable = false)
+    private Protocol protocol;
+
+    @Column(name = "phase_number", nullable = false)
     private Integer phaseNumber;
 
     @Column(name = "label", nullable = false)

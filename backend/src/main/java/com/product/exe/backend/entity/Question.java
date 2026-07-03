@@ -45,6 +45,9 @@ public class Question {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "dimension", length = 100)
+    private String dimension;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Answer> answers;
