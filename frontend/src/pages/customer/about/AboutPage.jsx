@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Seo, { buildUrl } from '../../../components/Seo';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import './AboutPage.css';
 
@@ -13,6 +14,22 @@ export default function AboutPage() {
 
     return (
         <main className="about-page">
+            <Seo
+                title="Giới thiệu Dopaless - Nền tảng cân bằng dopamine"
+                description="Tìm hiểu sứ mệnh của Dopaless trong việc giúp người trẻ Việt Nam hiểu dopamine, cải thiện thói quen số và xây dựng khả năng tập trung bền vững."
+                canonicalPath="/gioi-thieu"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'AboutPage',
+                    name: 'Giới thiệu Dopaless',
+                    url: buildUrl('/gioi-thieu'),
+                    isPartOf: {
+                        '@type': 'WebSite',
+                        name: 'Dopaless',
+                        url: buildUrl('/'),
+                    },
+                }}
+            />
             {/* ── HERO BANNER ── */}
             <section className="about-hero">
                 <div className="about-hero-content reveal">

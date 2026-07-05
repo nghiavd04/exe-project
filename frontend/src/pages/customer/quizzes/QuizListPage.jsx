@@ -5,6 +5,7 @@ import defaultQuizImg from '../../../assets/dopamine-bg.png';
 import AppState from '../../../components/AppState';
 import { PageSection, PageHeader } from '../../../components/PageSection';
 import Pagination from '../../../components/Pagination';
+import Seo, { buildUrl } from '../../../components/Seo';
 import './QuizListPage.css';
 
 const QuizListPage = () => {
@@ -41,6 +42,18 @@ const QuizListPage = () => {
 
   return (
     <div className="quiz-list-page">
+      <Seo
+        title="Bài test dopamine và thói quen số miễn phí"
+        description="Làm bài test dopamine và các bài trắc nghiệm hành vi để hiểu mức độ lệ thuộc thói quen số, khả năng tập trung và hướng cải thiện phù hợp."
+        canonicalPath="/trac-nghiem"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Bài test Dopaless',
+          url: buildUrl('/trac-nghiem'),
+          description: 'Danh sách bài test dopamine, tâm lý hành vi và thói quen số.',
+        }}
+      />
       <header className="quiz-hero">
         <PageHeader
           align="center"

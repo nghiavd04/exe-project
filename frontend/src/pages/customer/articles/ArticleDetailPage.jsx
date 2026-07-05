@@ -4,6 +4,7 @@ import { articleApi } from '../../../apis/customerApi';
 import AppState from '../../../components/AppState';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
 import { PageSection } from '../../../components/PageSection';
+import Seo, { buildUrl, makeDescription, stripHtml } from '../../../components/Seo';
 import './ArticleDetailPage.css';
 
 const ArticleDetailPage = () => {
@@ -123,6 +124,37 @@ const ArticleDetailPage = () => {
 
   return (
     <div className="article-detail-page-wrapper">
+      <Seo
+        title={article.title}
+        description={makeDescription(article.summary || article.description || article.content, `${article.title} - bài viết chuyên sâu từ Dopaless.`)}
+        canonicalPath={`/bai-viet/${article.slug}`}
+        image={article.thumbnailUrl}
+        type="article"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: article.title,
+          description: makeDescription(article.summary || article.description || article.content, article.title),
+          image: article.thumbnailUrl ? [article.thumbnailUrl] : [buildUrl('/og-image.svg')],
+          datePublished: article.publishedAt,
+          dateModified: article.updatedAt || article.publishedAt,
+          author: {
+            '@type': 'Organization',
+            name: article.authorName || 'Dopaless',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Dopaless',
+            logo: {
+              '@type': 'ImageObject',
+              url: buildUrl('/favicon.svg'),
+            },
+          },
+          mainEntityOfPage: buildUrl(`/bai-viet/${article.slug}`),
+          articleSection: article.categoryDisplayName || article.category,
+          wordCount: stripHtml(article.content || '').split(/\s+/).filter(Boolean).length,
+        }}
+      />
       <ArticleRenderer article={article} />
 
       {relatedArticles.length > 0 && (
