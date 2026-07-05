@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://dopaless.cloud').replace(/\/$/, '');
-const SITE_NAME = 'Dopaless';
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.svg`;
+import { DEFAULT_IMAGE, buildUrl, makeDescription, SITE_NAME } from './seoUtils';
 
 const upsertMeta = (selector, attributes) => {
   let element = document.head.querySelector(selector);
@@ -45,26 +42,6 @@ const upsertJsonLd = (id, data) => {
     document.head.appendChild(element);
   }
   element.textContent = JSON.stringify(data);
-};
-
-export const buildUrl = (path = '/') => {
-  if (/^https?:\/\//i.test(path)) return path;
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${SITE_URL}${normalizedPath}`;
-};
-
-export const stripHtml = (value = '') =>
-  value
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-export const makeDescription = (value, fallback) => {
-  const text = stripHtml(value || fallback || '');
-  return text.length > 160 ? `${text.slice(0, 157).trim()}...` : text;
 };
 
 export default function Seo({
@@ -119,5 +96,3 @@ export default function Seo({
 
   return null;
 }
-
-export { SITE_NAME, SITE_URL, DEFAULT_IMAGE };

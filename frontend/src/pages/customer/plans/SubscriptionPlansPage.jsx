@@ -4,7 +4,8 @@ import { subscriptionApi } from '../../../apis/customerApi';
 import { useAuth } from '../../../hooks/AuthContext';
 import { Check, X, Shield, Sparkles, HelpCircle, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Seo, { buildUrl } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './SubscriptionPlansPage.css';
 
 export default function SubscriptionPlansPage() {

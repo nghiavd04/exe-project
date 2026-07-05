@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Seo, { buildUrl } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import './HomePage.css';
 

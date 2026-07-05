@@ -5,7 +5,8 @@ import defaultQuizImg from '../../../assets/dopamine-bg.png';
 import AppState from '../../../components/AppState';
 import { PageSection, PageHeader } from '../../../components/PageSection';
 import Pagination from '../../../components/Pagination';
-import Seo, { buildUrl } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './QuizListPage.css';
 
 const QuizListPage = () => {

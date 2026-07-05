@@ -6,7 +6,8 @@ import AppState from '../../../components/AppState';
 import { PageSection, PageHeader } from '../../../components/PageSection';
 import FilterChips from '../../../components/FilterChips';
 import Pagination from '../../../components/Pagination';
-import Seo, { buildUrl } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './ArticleListPage.css';
 
 const ArticleListPage = () => {

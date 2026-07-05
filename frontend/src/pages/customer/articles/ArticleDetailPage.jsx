@@ -4,7 +4,8 @@ import { articleApi } from '../../../apis/customerApi';
 import AppState from '../../../components/AppState';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
 import { PageSection } from '../../../components/PageSection';
-import Seo, { buildUrl, makeDescription, stripHtml } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl, makeDescription, stripHtml } from '../../../components/Seo/seoUtils';
 import './ArticleDetailPage.css';
 
 const ArticleDetailPage = () => {

@@ -3,7 +3,8 @@ import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import { useAuth } from '../../../hooks/AuthContext';
 import { contactApi } from '../../../apis/customerApi';
 import { Link } from 'react-router-dom';
-import Seo, { buildUrl } from '../../../components/Seo';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './ContactPage.css';
 
 export default function ContactPage() {
