@@ -106,11 +106,11 @@ export default function AdminLayout() {
   const navItems = [
     { name: 'Tổng quan', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Người dùng', path: '/admin/users', icon: <Users size={20} /> },
-    { name: 'Quản lý Quizzes', path: '/admin/quizzes', icon: <ClipboardList size={20} /> },
-    { name: 'Quản lý Bài viết', path: '/admin/articles', icon: <BookOpen size={20} /> },
-    { name: 'Quản lý Media', path: '/admin/medias', icon: <Music size={20} /> },
+    { name: 'Quản lý bài kiểm tra', path: '/admin/quizzes', icon: <ClipboardList size={20} /> },
+    { name: 'Quản lý bài viết', path: '/admin/articles', icon: <BookOpen size={20} /> },
+    { name: 'Quản lý media', path: '/admin/medias', icon: <Music size={20} /> },
     { name: 'Gói dịch vụ', path: '/admin/subscriptions', icon: <CreditCard size={20} /> },
-    { name: 'Quản lý Phác đồ', path: '/admin/program', icon: <Milestone size={20} /> },
+    { name: 'Quản lý phác đồ', path: '/admin/program', icon: <Milestone size={20} /> },
     { name: 'Lời nhắn liên hệ', path: '/admin/contact-messages', icon: <MessageSquare size={20} /> },
     { name: 'Lịch sử thông báo', path: '/admin/notifications', icon: <Bell size={20} /> },
     { name: 'Chat & Hỗ trợ', path: '/admin/ai-chat/logs', icon: <MessageSquare size={20} /> },
@@ -132,7 +132,9 @@ export default function AdminLayout() {
 
         <nav className="admin-nav">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = item.path === '/admin' 
+              ? location.pathname === '/admin' 
+              : location.pathname.startsWith(item.path);
             return (
               <Link
                 key={item.path}

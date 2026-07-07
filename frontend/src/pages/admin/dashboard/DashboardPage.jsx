@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/AuthContext';
 import {
   Users,
@@ -48,8 +49,8 @@ export default function DashboardPage() {
 
   const stats = [
     { label: 'Tổng doanh thu', value: formatCurrency(dashboardData?.totalRevenue), icon: <DollarSign />, color: '#10b981' }, // emerald
-    { label: 'Gói Premium', value: dashboardData?.activeSubscriptions?.toLocaleString() || '0', icon: <Crown />, color: '#8b5cf6' }, // violet
-    { label: 'Tổng người dùng', value: dashboardData?.totalUsers?.toLocaleString() || '0', icon: <Users />, color: '#3b82f6' }, // blue
+    { label: 'Gói cước hoạt động', value: dashboardData?.activeSubscriptions?.toLocaleString() || '0', icon: <Crown />, color: '#8b5cf6' }, // violet
+    { label: 'Khách hàng', value: dashboardData?.totalUsers?.toLocaleString() || '0', icon: <Users />, color: '#3b82f6' }, // blue
     { label: 'Lời nhắn chờ xử lý', value: dashboardData?.unreadContactMessages?.toLocaleString() || '0', icon: <MessageCircle />, color: dashboardData?.unreadContactMessages > 0 ? '#ef4444' : '#64748b' }, // red or slate
   ];
 
@@ -79,9 +80,43 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <PageHeader
         className="dashboard-header"
-        title="Dashboard"
+        title="Tổng quan"
         description={`Chào mừng trở lại, ${user?.fullName || 'Administrator'}! Đây là những gì đang diễn ra hôm nay.`}
       />
+
+      {/* Quick Actions */}
+      <div className="quick-actions-section">
+        <h3>Hành động nhanh</h3>
+        <div className="quick-actions-grid">
+          <Link to="/admin/contact-messages?tab=unread" className="ui-card quick-action-card">
+            <div className="quick-action-icon-wrap red">
+              <MessageCircle size={20} />
+            </div>
+            <div className="quick-action-info">
+              <span className="quick-action-title">Lời nhắn chưa xử lý</span>
+              <span className="quick-action-desc">Phản hồi tin nhắn chờ</span>
+            </div>
+          </Link>
+          <Link to="/admin/articles/create" className="ui-card quick-action-card">
+            <div className="quick-action-icon-wrap green">
+              <BookOpen size={20} />
+            </div>
+            <div className="quick-action-info">
+              <span className="quick-action-title">Viết bài mới</span>
+              <span className="quick-action-desc">Đăng bài viết kiến thức</span>
+            </div>
+          </Link>
+          <Link to="/admin/program" className="ui-card quick-action-card">
+            <div className="quick-action-icon-wrap blue">
+              <Activity size={20} />
+            </div>
+            <div className="quick-action-info">
+              <span className="quick-action-title">Quản lý phác đồ</span>
+              <span className="quick-action-desc">Cấu hình lộ trình điều trị</span>
+            </div>
+          </Link>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <div className="stats-grid">
@@ -117,22 +152,31 @@ export default function DashboardPage() {
           <div className="chart-body">
             {dashboardData?.chartData?.map((item, i) => (
                <div key={i} className="chart-bar-container">
-                 <div 
-                   onMouseEnter={() => setActiveBar(i)}
-                   onMouseLeave={() => setActiveBar(null)}
-                   className="chart-bar"
-                   style={{ 
-                     background: activeBar === i ? 'var(--teal)' : 'var(--teal-dark)', 
-                     height: `${Math.max((item.value / Math.max(...(dashboardData?.chartData?.map(d => d.value) || [1]))) * 100, 2)}%`, 
-                     opacity: activeBar === i ? 1 : 0.85,
-                   }}
-                 >
-                   {activeBar === i && (
-                     <div className="chart-bar-tooltip">
-                       {formatCurrency(item.value)}
-                     </div>
-                   )}
-                 </div>
+                  <div 
+                    role="button"
+                    tabIndex={0}
+                    onMouseEnter={() => setActiveBar(i)}
+                    onMouseLeave={() => setActiveBar(null)}
+                    onFocus={() => setActiveBar(i)}
+                    onBlur={() => setActiveBar(null)}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      setActiveBar(activeBar === i ? null : i);
+                    }}
+                    className="chart-bar"
+                    style={{ 
+                      background: activeBar === i ? 'var(--teal)' : 'var(--teal-dark)', 
+                      height: `${Math.max((item.value / Math.max(...(dashboardData?.chartData?.map(d => d.value) || [1]))) * 100, 2)}%`, 
+                      opacity: activeBar === i ? 1 : 0.85,
+                      outline: 'none'
+                    }}
+                  >
+                    {activeBar === i && (
+                      <div className="chart-bar-tooltip">
+                        {formatCurrency(item.value)}
+                      </div>
+                    )}
+                  </div>
                  <span className={`chart-label ${activeBar === i ? 'active' : ''}`}>
                     {item.label}
                  </span>
@@ -221,11 +265,13 @@ export default function DashboardPage() {
         <div className="ui-card dashboard-card">
           <h3 className="card-title"><BookOpen size={20} style={{ display: 'inline', marginRight: 8, verticalAlign: 'text-bottom' }} /> Nội dung nổi bật</h3>
           
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
             <h4 style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Top Bài Test</h4>
             {dashboardData?.contentPerformance?.topQuizzes?.map((quiz, idx) => (
               <div key={idx} className="list-item">
-                <span className="list-item-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70%' }}>{quiz.title}</span>
+                <div className="list-item-left">
+                  <span className="list-item-title" title={quiz.title}>{quiz.title}</span>
+                </div>
                 <span className="list-item-right" style={{ fontSize: '0.85rem' }}>{quiz.attemptCount} lượt</span>
               </div>
             ))}
@@ -235,7 +281,9 @@ export default function DashboardPage() {
             <h4 style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Top Bài Viết</h4>
             {dashboardData?.contentPerformance?.topArticles?.map((article, idx) => (
               <div key={idx} className="list-item">
-                <span className="list-item-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70%' }}>{article.title}</span>
+                <div className="list-item-left">
+                  <span className="list-item-title" title={article.title}>{article.title}</span>
+                </div>
                 <span className="list-item-right" style={{ fontSize: '0.85rem' }}>{article.viewCount} view</span>
               </div>
             ))}

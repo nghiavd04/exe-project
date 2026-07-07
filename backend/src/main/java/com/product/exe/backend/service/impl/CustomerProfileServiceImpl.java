@@ -31,6 +31,7 @@ public class CustomerProfileServiceImpl implements CustomerProfileService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public UserProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));

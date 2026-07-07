@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import useDebounce from '../../../hooks/useDebounce';
 import {
-  Search, ChevronLeft, ChevronRight,
+  Search,
   User, Mail, CreditCard, UserX, UserCheck, MoreVertical, ShieldCheck, TrendingUp, ChevronRight as CrumbChevron
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast';
 import AppState from '../../../components/AppState';
 import ConfirmModal from '../../../components/ConfirmModal';
 import { PageHeader } from '../../../components/PageSection';
+import Pagination from '../../../components/Pagination';
 import AdminCreateModal from './AdminCreateModal';
 import AdminUserProgressModal from './AdminUserProgressModal';
 import './AdminManagerAccountPage.css';
@@ -46,9 +48,15 @@ export default function AdminManagerAccountPage() {
     onConfirm: () => {},
   });
 
+  const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
   useEffect(() => {
     fetchUsers();
-  }, [page, role, isActive]);
+  }, [page, role, isActive, debouncedSearch]);
 
   const fetchUsers = async () => {
     try {
@@ -56,7 +64,7 @@ export default function AdminManagerAccountPage() {
       const params = {
         page,
         size: pageSize,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         role,
         isActive: isActive !== '' ? isActive : undefined,
       };
@@ -71,13 +79,6 @@ export default function AdminManagerAccountPage() {
       setUsers([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      setPage(0);
-      fetchUsers();
     }
   };
 
@@ -103,16 +104,14 @@ export default function AdminManagerAccountPage() {
 
   return (
     <div className="admin-page">
-      <div className="account-breadcrumb">
-        <Link to="/admin">ADMIN</Link>
-        <CrumbChevron size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ TÀI KHOẢN</span>
-      </div>
-
       <PageHeader
         className="account-header"
-        title="Quản lý Tài khoản"
+        title="Người dùng"
         description="Quản lý người dùng, phân quyền và theo dõi tiến độ trong hệ thống."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Người dùng' }
+        ]}
         actions={role === 'ADMIN' ? (
           <button onClick={() => setIsCreateModalOpen(true)} className="ui-btn ui-btn--primary btn-add-admin">
             <ShieldCheck size={20} /> Thêm Admin
@@ -137,10 +136,9 @@ export default function AdminManagerAccountPage() {
           <Search className="search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
           <input
             type="text"
-            placeholder={`Tìm theo tên hoặc email ${role.toLowerCase()}...`}
+            placeholder={`Tìm theo tên hoặc email ${role === 'CUSTOMER' ? 'khách hàng' : 'quản trị viên'}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearch}
             className="ui-input search-input-field"
           />
         </div>
@@ -282,21 +280,11 @@ export default function AdminManagerAccountPage() {
           </tbody>
         </table>
 
-        {totalPages > 1 && (
-          <div className="pagination-controls">
-            <button disabled={page === 0} onClick={() => setPage(page - 1)} className="pagination-btn" style={page === 0 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}>
-              <ChevronLeft size={20} />
-            </button>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button key={i} onClick={() => setPage(i)} className={`pagination-btn ${page === i ? 'active' : ''}`}>
-                {i + 1}
-              </button>
-            ))}
-            <button disabled={page === totalPages - 1} onClick={() => setPage(page + 1)} className="pagination-btn" style={page === totalPages - 1 ? { cursor: 'not-allowed', color: '#cbd5e0' } : {}}>
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </div>
 
       <ConfirmModal

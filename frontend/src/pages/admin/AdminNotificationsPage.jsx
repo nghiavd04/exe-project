@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { adminApi } from '../../apis/adminApi';
 import toast from 'react-hot-toast';
 import AdminSendNotificationModal from './contact/AdminSendNotificationModal';
+import AdminSendEmailModal from './contact/AdminSendEmailModal';
 
 export default function AdminNotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -15,10 +16,12 @@ export default function AdminNotificationsPage() {
   const [totalPages, setTotalPages] = useState(0);
   
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'MANUAL_BROADCAST' | 'EMAIL_ONLY'
 
   useEffect(() => {
     fetchNotifications();
-  }, [page]);
+  }, [page, filterType]);
 
   const fetchNotifications = async () => {
     try {
@@ -27,6 +30,9 @@ export default function AdminNotificationsPage() {
         page,
         size: pageSize
       };
+      if (filterType !== 'ALL') {
+        params.type = filterType;
+      }
 
       const response = await adminApi.getSentNotifications(params);
       if (response.data.success) {
@@ -42,6 +48,13 @@ export default function AdminNotificationsPage() {
   };
 
   const getTargetBadge = (notif) => {
+    if (notif.type === 'EMAIL_ONLY') {
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#e0f2fe', color: '#0369a1', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '500' }}>
+          <Mail size={14} /> Email tới Gói: {notif.targetPlanTier}
+        </span>
+      );
+    }
     if (notif.targetEmail) {
       return (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#fef3c7', color: '#d97706', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '500' }}>
@@ -76,29 +89,81 @@ export default function AdminNotificationsPage() {
           <h1>Lịch sử thông báo</h1>
           <p>Quản lý các thông báo đã gửi cho khách hàng.</p>
         </div>
-        <button
-          onClick={() => setIsNotificationModalOpen(true)}
-          className="btn-add-admin"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'var(--teal)',
-            color: '#fff',
-            border: 'none',
-            padding: '0.65rem 1.25rem',
-            borderRadius: '8px',
-            fontWeight: '600',
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--teal-dark)'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--teal)'}
-        >
-          <Bell size={18} /> Gửi thông báo mới
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => setIsNotificationModalOpen(true)}
+            className="btn-add-admin"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'var(--teal)',
+              color: '#fff',
+              border: 'none',
+              padding: '0.65rem 1.25rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--teal-dark)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--teal)'}
+          >
+            <Bell size={18} /> Gửi thông báo mới
+          </button>
+
+          <button
+            onClick={() => setIsEmailModalOpen(true)}
+            className="btn-add-admin"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#0284c7',
+              color: '#fff',
+              border: 'none',
+              padding: '0.65rem 1.25rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0369a1'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0284c7'}
+          >
+            <Mail size={18} /> Soạn Email mới
+          </button>
+        </div>
       </header>
+
+      {/* Filter Options */}
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '15px', gap: '8px' }}>
+        <span style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-light)' }}>Lọc theo loại:</span>
+        <select
+          value={filterType}
+          onChange={(e) => {
+            setFilterType(e.target.value);
+            setPage(0);
+          }}
+          style={{
+            padding: '0.45rem 1.8rem 0.45rem 0.8rem',
+            borderRadius: '8px',
+            border: '1px solid #cbd5e1',
+            fontSize: '0.88rem',
+            color: 'var(--text)',
+            backgroundColor: '#fff',
+            outline: 'none',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}
+        >
+          <option value="ALL">📋 Tất cả (Web & Email)</option>
+          <option value="MANUAL_BROADCAST">🔔 Thông báo trên Web</option>
+          <option value="EMAIL_ONLY">✉️ Thư gửi qua Email</option>
+        </select>
+      </div>
 
       {/* Messages Table */}
       <div className="table-wrapper-card">
@@ -194,6 +259,14 @@ export default function AdminNotificationsPage() {
         isOpen={isNotificationModalOpen}
         onClose={() => {
           setIsNotificationModalOpen(false);
+          fetchNotifications(); // Refresh list after sending
+        }}
+      />
+
+      <AdminSendEmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => {
+          setIsEmailModalOpen(false);
           fetchNotifications(); // Refresh list after sending
         }}
       />

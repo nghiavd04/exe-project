@@ -39,13 +39,28 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
             for (ProgramWeekMetadata week : weeks) {
                 List<AdminProgramMetadataResponse.DayDto> dayDtos = new ArrayList<>();
-                List<AdminProgramMetadataResponse.TaskDto> wTasks = new ArrayList<>();
-                List<AdminProgramMetadataResponse.MetricDto> wMetrics = new ArrayList<>();
 
-                List<ProgramDayMetadata> days = dayMetadataRepository.findByProtocolIdAndWeekWeekNumberOrderByDayNumberAsc(protocolId, week.getWeekNumber());
+                List<AdminProgramMetadataResponse.TaskDto> wTasks = taskMetadataRepository.findByWeekIdAndDayIsNullOrderByTaskIndexAsc(week.getId()).stream()
+                        .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
+                                .id(t.getId())
+                                .taskIndex(t.getTaskIndex())
+                                .title(t.getTitle())
+                                .subText(t.getSubText())
+                                .badge(t.getBadge())
+                                .build())
+                        .collect(Collectors.toList());
+
+                List<AdminProgramMetadataResponse.MetricDto> wMetrics = metricMetadataRepository.findByWeekIdAndDayIsNull(week.getId()).stream()
+                        .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
+                                .id(m.getId())
+                                .metricName(m.getMetricName())
+                                .build())
+                        .collect(Collectors.toList());
+
+                List<ProgramDayMetadata> days = dayMetadataRepository.findByWeekIdOrderByDayNumberAsc(week.getId());
                 if (!days.isEmpty()) {
                     for (ProgramDayMetadata day : days) {
-                        List<AdminProgramMetadataResponse.TaskDto> dTasks = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocolId, day.getDayNumber()).stream()
+                        List<AdminProgramMetadataResponse.TaskDto> dTasks = taskMetadataRepository.findByDayIdOrderByTaskIndexAsc(day.getId()).stream()
                                 .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
                                         .id(t.getId())
                                         .taskIndex(t.getTaskIndex())
@@ -54,13 +69,32 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                                         .badge(t.getBadge())
                                         .build())
                                 .collect(Collectors.toList());
+                        if (dTasks.isEmpty()) {
+                            dTasks = taskMetadataRepository.findByWeekIdAndDayIsNullOrderByTaskIndexAsc(week.getId()).stream()
+                                    .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
+                                            .id(t.getId())
+                                            .taskIndex(t.getTaskIndex())
+                                            .title(t.getTitle())
+                                            .subText(t.getSubText())
+                                            .badge(t.getBadge() != null ? t.getBadge() : "Hàng tuần")
+                                            .build())
+                                    .collect(Collectors.toList());
+                        }
 
-                        List<AdminProgramMetadataResponse.MetricDto> dMetrics = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocolId, day.getDayNumber()).stream()
+                        List<AdminProgramMetadataResponse.MetricDto> dMetrics = metricMetadataRepository.findByDayId(day.getId()).stream()
                                 .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
                                         .id(m.getId())
                                         .metricName(m.getMetricName())
                                         .build())
                                 .collect(Collectors.toList());
+                        if (dMetrics.isEmpty()) {
+                            dMetrics = metricMetadataRepository.findByWeekIdAndDayIsNull(week.getId()).stream()
+                                    .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
+                                            .id(m.getId())
+                                            .metricName(m.getMetricName())
+                                            .build())
+                                    .collect(Collectors.toList());
+                        }
 
                         dayDtos.add(AdminProgramMetadataResponse.DayDto.builder()
                                 .num(day.getDayNumber())
@@ -69,23 +103,6 @@ public class AdminProgramServiceImpl implements AdminProgramService {
                                 .metrics(dMetrics)
                                 .build());
                     }
-                } else {
-                    wTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
-                            .map(t -> AdminProgramMetadataResponse.TaskDto.builder()
-                                    .id(t.getId())
-                                    .taskIndex(t.getTaskIndex())
-                                    .title(t.getTitle())
-                                    .subText(t.getSubText())
-                                    .badge(t.getBadge())
-                                    .build())
-                            .collect(Collectors.toList());
-
-                    wMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
-                            .map(m -> AdminProgramMetadataResponse.MetricDto.builder()
-                                    .id(m.getId())
-                                    .metricName(m.getMetricName())
-                                    .build())
-                            .collect(Collectors.toList());
                 }
 
                 weekDtos.add(AdminProgramMetadataResponse.WeekDto.builder()
@@ -173,13 +190,13 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
         ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, request.getPhaseNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn " + request.getPhaseNumber()));
-        ProgramWeekMetadata week = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocolId, request.getWeekNumber())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber()));
+        ProgramWeekMetadata week = weekMetadataRepository.findByPhaseIdAndWeekNumber(phase.getId(), request.getWeekNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber() + " trong giai đoạn " + request.getPhaseNumber()));
 
         ProgramDayMetadata day = null;
         if (request.getDayNumber() != null) {
-            day = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, request.getDayNumber())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber()));
+            day = dayMetadataRepository.findByWeekIdAndDayNumber(week.getId(), request.getDayNumber())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber() + " trong tuần " + request.getWeekNumber()));
         }
 
         ProgramTaskMetadata task = ProgramTaskMetadata.builder()
@@ -236,13 +253,13 @@ public class AdminProgramServiceImpl implements AdminProgramService {
 
         ProgramPhaseMetadata phase = phaseMetadataRepository.findByProtocolIdAndPhaseNumber(protocolId, request.getPhaseNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giai đoạn " + request.getPhaseNumber()));
-        ProgramWeekMetadata week = weekMetadataRepository.findByProtocolIdAndWeekNumber(protocolId, request.getWeekNumber())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber()));
+        ProgramWeekMetadata week = weekMetadataRepository.findByPhaseIdAndWeekNumber(phase.getId(), request.getWeekNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tuần " + request.getWeekNumber() + " trong giai đoạn " + request.getPhaseNumber()));
 
         ProgramDayMetadata day = null;
         if (request.getDayNumber() != null) {
-            day = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, request.getDayNumber())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber()));
+            day = dayMetadataRepository.findByWeekIdAndDayNumber(week.getId(), request.getDayNumber())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngày " + request.getDayNumber() + " trong tuần " + request.getWeekNumber()));
         }
 
         ProgramMetricMetadata metric = ProgramMetricMetadata.builder()

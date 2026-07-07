@@ -7,6 +7,7 @@ import {
 import { useProgram } from './ProgramLayout';
 import { programApi } from '../../../apis/customerApi';
 import toast from 'react-hot-toast';
+import Pagination from '../../../components/Pagination';
 import './ProgramMediaPage.css';
 
 // Thẻ xem trước Audio gọn gàng (Premium UI/UX)
@@ -390,65 +391,12 @@ export default function ProgramMediaPage() {
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && !loading && (
-            <div className="pagination-container" style={{ marginTop: '2rem', justifyContent: 'center' }}>
-              <button 
-                disabled={page === 0}
-                onClick={() => setPage(page - 1)}
-                className="pagination-arrow"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
-              {(() => {
-                const pages = [];
-                const maxVisible = 5;
-                let start = Math.max(0, page - 2);
-                let end = Math.min(totalPages - 1, start + maxVisible - 1);
-                
-                if (end - start < maxVisible - 1) {
-                  start = Math.max(0, end - maxVisible + 1);
-                }
-
-                if (start > 0) {
-                  pages.push(
-                    <button key={0} onClick={() => setPage(0)} className="pagination-btn">1</button>
-                  );
-                  if (start > 1) pages.push(<span key="sp1" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
-                }
-
-                for (let i = start; i <= end; i++) {
-                  pages.push(
-                    <button 
-                      key={i} 
-                      onClick={() => setPage(i)}
-                      className={`pagination-btn ${page === i ? 'active' : ''}`}
-                    >
-                      {i + 1}
-                    </button>
-                  );
-                }
-
-                if (end < totalPages - 1) {
-                  if (end < totalPages - 2) pages.push(<span key="sp2" style={{ color: 'var(--muted)', padding: '0 0.5rem' }}>...</span>);
-                  pages.push(
-                    <button key={totalPages - 1} onClick={() => setPage(totalPages - 1)} className="pagination-btn">
-                      {totalPages}
-                    </button>
-                  );
-                }
-
-                return pages;
-              })()}
-
-              <button 
-                disabled={page === totalPages - 1}
-                onClick={() => setPage(page + 1)}
-                className="pagination-arrow"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
+          {!loading && (
+            <Pagination 
+              page={page} 
+              totalPages={totalPages} 
+              onPageChange={setPage} 
+            />
           )}
         </div>
 

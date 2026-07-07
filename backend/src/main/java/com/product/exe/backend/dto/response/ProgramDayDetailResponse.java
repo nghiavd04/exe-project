@@ -30,6 +30,7 @@ public class ProgramDayDetailResponse {
         private Integer taskIndex;
         private String title;
         private Boolean isCompleted;
+        private Integer dayNumber;
     }
 
     @Data

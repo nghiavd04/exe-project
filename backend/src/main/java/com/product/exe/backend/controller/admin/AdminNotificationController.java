@@ -30,7 +30,9 @@ public class AdminNotificationController {
                     request.getTitle(),
                     request.getContent(),
                     request.getTargetEmail(),
-                    request.getTargetPlanTier()
+                    request.getTargetPlanTier(),
+                    request.getSendEmail(),
+                    request.getType()
             );
             return ResponseEntity.ok(ApiResponse.success("Gửi thông báo thành công!"));
         } catch (Exception e) {
@@ -40,9 +42,10 @@ public class AdminNotificationController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AdminNotificationResponse>>> getSentNotifications(
+            @RequestParam(required = false) com.product.exe.backend.enums.NotificationType type,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            Page<AdminNotificationResponse> notifications = notificationService.getSentNotifications(pageable);
+            Page<AdminNotificationResponse> notifications = notificationService.getSentNotifications(type, pageable);
             return ResponseEntity.ok(ApiResponse.success(notifications));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Lỗi hệ thống: " + e.getMessage()));

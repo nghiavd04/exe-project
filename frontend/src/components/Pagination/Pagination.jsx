@@ -1,11 +1,11 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import './Pagination.css';
 
 export default function Pagination({ page, totalPages, onPageChange, className = '' }) {
   if (totalPages <= 1) return null;
 
-  const maxVisible = 5;
+  const maxVisible = 3;
   let start = Math.max(0, page - Math.floor(maxVisible / 2));
   let end = Math.min(totalPages - 1, start + maxVisible - 1);
 
@@ -79,6 +79,16 @@ export default function Pagination({ page, totalPages, onPageChange, className =
       <button
         type="button"
         disabled={page === 0}
+        onClick={() => onPageChange(0)}
+        className="page-btn page-btn-first"
+        aria-label="Trang đầu"
+      >
+        <ChevronsLeft size={16} />
+      </button>
+
+      <button
+        type="button"
+        disabled={page === 0}
         onClick={() => onPageChange(page - 1)}
         className="page-btn page-btn-prev"
         aria-label="Trang trước"
@@ -98,6 +108,16 @@ export default function Pagination({ page, totalPages, onPageChange, className =
         aria-label="Trang sau"
       >
         <ChevronRight size={16} />
+      </button>
+
+      <button
+        type="button"
+        disabled={page === totalPages - 1}
+        onClick={() => onPageChange(totalPages - 1)}
+        className="page-btn page-btn-last"
+        aria-label="Trang cuối"
+      >
+        <ChevronsRight size={16} />
       </button>
     </nav>
   );

@@ -38,13 +38,40 @@ public class EmailServiceImpl implements EmailService {
                     "</div>" +
                     "<p style='color: #64748b; font-size: 14px;'>Mã này sẽ hết hạn trong vòng 10 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>" +
                     "<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;'>" +
-                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>© 2024 EXE Project. Bảo lưu mọi quyền.</p>" +
+                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>© 2026 Dopaless. Bảo lưu mọi quyền.</p>" +
                     "</div>";
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi gửi email xác thực: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendNotificationEmail(String to, String title, String htmlContent) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(senderEmail, "Dopaless Support");
+            helper.setTo(to);
+            helper.setSubject(title);
+
+            String template = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;'>" +
+                    "<h2 style='color: #0d9488; text-align: center; margin-bottom: 20px;'>" + title + "</h2>" +
+                    "<div style='color: #334155; font-size: 16px; line-height: 1.6;'>" +
+                    htmlContent +
+                    "</div>" +
+                    "<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;'>" +
+                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>Đây là email tự động từ hệ thống Dopaless. Vui lòng không phản hồi email này.</p>" +
+                    "<p style='text-align: center; color: #94a3b8; font-size: 12px;'>© 2026 Dopaless. Bảo lưu mọi quyền.</p>" +
+                    "</div>";
+
+            helper.setText(template, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi gửi email thông báo: " + e.getMessage());
         }
     }
 }

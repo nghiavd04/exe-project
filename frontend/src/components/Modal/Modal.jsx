@@ -6,6 +6,11 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
   const modalRef = useRef(null);
   const previousActiveElement = useRef(null);
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -14,7 +19,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -25,7 +30,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', c
         previousActiveElement.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Focus Trap logic
   useEffect(() => {

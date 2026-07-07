@@ -18,5 +18,6 @@ public class AdminNotificationResponse {
     private String content;
     private String targetEmail;
     private SubscriptionTier targetPlanTier;
+    private com.product.exe.backend.enums.NotificationType type;
     private LocalDateTime createdAt;
 }

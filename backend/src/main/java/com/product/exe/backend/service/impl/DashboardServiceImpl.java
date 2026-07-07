@@ -4,6 +4,7 @@ import com.product.exe.backend.dto.response.DashboardStatsResponse;
 import com.product.exe.backend.enums.SubscriptionStatus;
 import com.product.exe.backend.enums.PaymentStatus;
 import com.product.exe.backend.enums.UserProgramStatus;
+import com.product.exe.backend.enums.Role;
 import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.DashboardService;
 import com.product.exe.backend.entity.Payment;
@@ -39,7 +40,7 @@ public class DashboardServiceImpl implements DashboardService {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
 
         return DashboardStatsResponse.builder()
-                .totalUsers(userRepository.count())
+                .totalUsers(userRepository.countByRole(Role.CUSTOMER))
                 .activeSubscriptions(userSubscriptionRepository.countByStatus(SubscriptionStatus.ACTIVE))
                 .totalRevenue(paymentRepository.sumAmountByStatus(PaymentStatus.SUCCESS))
                 .unreadContactMessages(contactMessageRepository.countByIsReadFalse())

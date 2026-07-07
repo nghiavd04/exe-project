@@ -3,24 +3,29 @@ import {
   Search, ChevronRight, ChevronLeft, Mail, MessageSquare, 
   Trash2, Eye, Send, FileText, CheckCircle2, AlertCircle, HelpCircle, Bell
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import Modal from '../../../components/Modal';
 import ReactQuill from 'react-quill-new';
+import useDebounce from '../../../hooks/useDebounce';
+import AppState from '../../../components/AppState';
+import { PageHeader } from '../../../components/PageSection';
 import 'react-quill-new/dist/quill.snow.css';
 import './AdminContactMessagesPage.css';
 
 export default function AdminContactMessagesPage() {
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || '';
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [search, setSearch] = useState('');
-  const [isReadFilter, setIsReadFilter] = useState(''); // '', 'unread', 'read_unreplied', 'replied'
+  const [isReadFilter, setIsReadFilter] = useState(initialTab); // '', 'unread', 'read_unreplied', 'replied'
   
   // Selected Message for Details / Reply Modal
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -42,9 +47,15 @@ export default function AdminContactMessagesPage() {
     { label: 'Đã phản hồi', value: 'replied' }
   ];
 
+  const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
   useEffect(() => {
     fetchMessages();
-  }, [page, isReadFilter]);
+  }, [page, isReadFilter, debouncedSearch]);
 
   const fetchMessages = async () => {
     try {
@@ -65,7 +76,7 @@ export default function AdminContactMessagesPage() {
       const params = {
         page,
         size: pageSize,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         isRead,
         isReplied
       };
@@ -83,12 +94,7 @@ export default function AdminContactMessagesPage() {
     }
   };
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      setPage(0);
-      fetchMessages();
-    }
-  };
+
 
   const handleOpenDetailModal = async (msg) => {
     setSelectedMessage(msg);
@@ -202,18 +208,15 @@ export default function AdminContactMessagesPage() {
 
   return (
     <div className="admin-page">
-      <div className="account-breadcrumb">
-        <Link to="/admin">ADMIN</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ LỜI NHẮN</span>
-      </div>
-
-      <header className="account-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1>Lời nhắn liên hệ</h1>
-          <p>Xem, quản lý và gửi phản hồi thông báo trực tiếp cho các tin nhắn hỗ trợ từ khách hàng.</p>
-        </div>
-      </header>
+      <PageHeader
+        className="account-header"
+        title="Lời nhắn liên hệ"
+        description="Xem, quản lý và gửi phản hồi thông báo trực tiếp cho các tin nhắn hỗ trợ từ khách hàng."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Lời nhắn liên hệ' }
+        ]}
+      />
 
       {/* Tabs UI */}
       <div className="tabs-container">
@@ -235,10 +238,9 @@ export default function AdminContactMessagesPage() {
           <Search className="search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
           <input
             type="text"
-            placeholder="Tìm theo tên, email hoặc nội dung lời nhắn... (Nhấn Enter)"
+            placeholder="Tìm theo tên, email hoặc nội dung lời nhắn..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearch}
             className="search-input-field"
           />
         </div>
@@ -274,9 +276,13 @@ export default function AdminContactMessagesPage() {
               ))
             ) : (!messages || messages.length === 0) ? (
               <tr>
-                <td colSpan={6} style={{ padding: '5rem 1rem', textAlign: 'center', color: 'var(--muted)' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✉️</div>
-                  Không tìm thấy lời nhắn nào.
+                <td colSpan={6} style={{ padding: '2rem' }}>
+                  <AppState
+                    variant="empty"
+                    compact
+                    title="Không tìm thấy lời nhắn nào"
+                    description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+                  />
                 </td>
               </tr>
             ) : messages.map((msg, index) => (

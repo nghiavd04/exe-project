@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Milestone, ChevronRight, ChevronDown, Edit2, Trash2, Plus, Save,
   CheckCircle2, XCircle, AlertCircle, Info, BookOpen, BarChart2
 } from 'lucide-react';
@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
+import { PageHeader } from '../../../components/PageSection';
+import AppState from '../../../components/AppState';
 import './AdminProgramPage.css';
 
 export default function AdminProgramPage() {
@@ -15,6 +17,7 @@ export default function AdminProgramPage() {
   const [selectedPhaseNum, setSelectedPhaseNum] = useState(1);
   const [expandedWeeks, setExpandedWeeks] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
+  const [activeTreeItem, setActiveTreeItem] = useState(null);
 
   // Protocols state
   const [protocols, setProtocols] = useState([]);
@@ -67,7 +70,7 @@ export default function AdminProgramPage() {
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
 
   useEffect(() => {
@@ -102,10 +105,10 @@ export default function AdminProgramPage() {
       if (res.data.success) {
         const data = res.data.data;
         setProgramData(data);
-        
+
         // Choose which phase tab to open
         let activePhaseNum = targetPhaseNum !== null ? targetPhaseNum : selectedPhaseNum;
-        
+
         // If the selected phase no longer exists (e.g. was deleted), default to the first available phase
         if (data.phases && data.phases.length > 0) {
           const exists = data.phases.some(p => p.num === activePhaseNum);
@@ -123,7 +126,23 @@ export default function AdminProgramPage() {
           if (currentPhase) {
             setPhaseFocus(currentPhase.focus || '');
             setPhaseScience(currentPhase.science || '');
+
+            // Auto-expand the first week and select first day
+            if (currentPhase.weeks && currentPhase.weeks.length > 0) {
+              const firstWeek = currentPhase.weeks[0];
+              setExpandedWeeks({ [firstWeek.num]: true });
+              if (firstWeek.days && firstWeek.days.length > 0) {
+                const firstDay = firstWeek.days[0];
+                setActiveTreeItem({ type: 'day', num: firstDay.num, weekNum: firstWeek.num, phaseNum: activePhaseNum });
+              } else {
+                setActiveTreeItem({ type: 'week', num: firstWeek.num, phaseNum: activePhaseNum });
+              }
+            } else {
+              setActiveTreeItem({ type: 'phase', num: activePhaseNum });
+            }
           }
+        } else {
+          setActiveTreeItem(null);
         }
 
         // Initialize week descriptions state
@@ -150,9 +169,28 @@ export default function AdminProgramPage() {
       if (targetPhase) {
         setPhaseFocus(targetPhase.focus || '');
         setPhaseScience(targetPhase.science || '');
+
+        // Auto-expand the first week of the new phase
+        if (targetPhase.weeks && targetPhase.weeks.length > 0) {
+          const firstWeek = targetPhase.weeks[0];
+          setExpandedWeeks({ [firstWeek.num]: true });
+
+          // If first week has days, select the first day automatically
+          if (firstWeek.days && firstWeek.days.length > 0) {
+            const firstDay = firstWeek.days[0];
+            setActiveTreeItem({ type: 'day', num: firstDay.num, weekNum: firstWeek.num, phaseNum });
+          } else {
+            // Otherwise select the week itself
+            setActiveTreeItem({ type: 'week', num: firstWeek.num, phaseNum });
+          }
+        } else {
+          setExpandedWeeks({});
+          setActiveTreeItem({ type: 'phase', num: phaseNum });
+        }
       }
     }
   };
+
 
   // Toggle week accordion
   const toggleWeek = (weekNum) => {
@@ -177,7 +215,7 @@ export default function AdminProgramPage() {
       const maxPhase = Math.max(...programData.phases.map(p => p.num));
       nextPhaseNum = maxPhase + 1;
     }
-    
+
     setPhaseModal({
       isOpen: true,
       phaseNumber: nextPhaseNum,
@@ -221,7 +259,7 @@ export default function AdminProgramPage() {
   // Delete Phase Trigger
   const handleDeletePhase = () => {
     if (!selectedPhaseNum) return;
-    
+
     setConfirmModal({
       isOpen: true,
       title: `Xác nhận xóa Giai đoạn ${selectedPhaseNum}`,
@@ -474,61 +512,448 @@ export default function AdminProgramPage() {
     return { backgroundColor: '#f1f5f9', color: '#475569' };
   };
 
-  if (loading) {
+  if (loading && !programData) {
     return (
-      <div className="admin-page text-center" style={{ padding: '8rem 2rem' }}>
-        <div className="skeleton" style={{ height: '40px', width: '200px', margin: '0 auto 1.5rem', borderRadius: '8px' }}></div>
-        <div className="skeleton" style={{ height: '300px', width: '100%', borderRadius: '16px' }}></div>
-      </div>
+      <AppState
+        variant="loading"
+        title="Đang tải cấu trúc phác đồ"
+        description="Chúng tôi đang lấy thông tin các giai đoạn, tuần và ngày kiểm tra mới nhất."
+      />
     );
   }
 
   const selectedPhase = programData && programData.phases ? programData.phases.find(p => p.num === selectedPhaseNum) : null;
 
+  const renderTreeNavigator = () => {
+    if (!programData || !selectedPhase) return null;
+    return (
+      <div className="program-tree-nav">
+        {/* Phase Node */}
+        <div
+          className={`tree-item tree-phase-item ${activeTreeItem?.type === 'phase' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTreeItem({ type: 'phase', num: selectedPhaseNum });
+            setPhaseFocus(selectedPhase.focus || '');
+            setPhaseScience(selectedPhase.science || '');
+          }}
+        >
+          <span className="tree-item-icon">{selectedPhase.icon || '🧠'}</span>
+          <span className="tree-item-label font-bold">Giai đoạn {selectedPhase.num}: {selectedPhase.label}</span>
+        </div>
+
+        {/* Weeks & Days Tree */}
+        <div className="tree-weeks-container" style={{ marginTop: '0.75rem' }}>
+          <div className="tree-title" style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0.25rem 0.5rem', marginBottom: '0.5rem' }}>
+            Tuần & Ngày
+          </div>
+          {selectedPhase.weeks && selectedPhase.weeks.map(week => {
+            const isWeekExpanded = !!expandedWeeks[week.num];
+            const isWeekActive = activeTreeItem?.type === 'week' && activeTreeItem?.num === week.num;
+            return (
+              <div key={week.num} className="tree-week-node">
+                <div
+                  className={`tree-item tree-week-item ${isWeekActive ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTreeItem({ type: 'week', num: week.num, phaseNum: selectedPhaseNum });
+                    toggleWeek(week.num);
+                  }}
+                >
+                  <span className="tree-chevron" onClick={(e) => { e.stopPropagation(); toggleWeek(week.num); }}>
+                    {isWeekExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </span>
+                  <span className="tree-item-label">Tuần {week.num}: {week.label}</span>
+                </div>
+
+                {isWeekExpanded && (
+                  <div className="tree-days-list animate-fade-in">
+                    {week.days && week.days.length > 0 ? (
+                      week.days.map(day => {
+                        const isDayActive = activeTreeItem?.type === 'day' && activeTreeItem?.num === day.num;
+                        return (
+                          <div
+                            key={day.num}
+                            className={`tree-item tree-day-item ${isDayActive ? 'active' : ''}`}
+                            onClick={() => {
+                              setActiveTreeItem({ type: 'day', num: day.num, weekNum: week.num, phaseNum: selectedPhaseNum });
+                            }}
+                          >
+                            <span className="tree-day-dot"></span>
+                            <span className="tree-item-label">Ngày {day.num}: {day.label}</span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <span className="tree-empty-hint">Không có ngày (Xem tuần)</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEditorPanel = () => {
+    if (!activeTreeItem || !selectedPhase) {
+      return (
+        <div className="editor-placeholder-card">
+          <Info size={32} color="var(--muted)" />
+          <p>Vui lòng chọn một mục từ cây thư mục bên trái để bắt đầu cấu hình.</p>
+        </div>
+      );
+    }
+
+    if (activeTreeItem.type === 'phase') {
+      return (
+        <div className="phase-metadata-card animate-fade-in">
+          <h3 className="section-title">
+            <Info size={18} /> Cấu hình thông tin Giai đoạn {selectedPhase.num}: {selectedPhase.label}
+          </h3>
+
+          <div className="form-group-row" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="form-field" style={{ width: '100%' }}>
+              <label className="field-label">Mục tiêu Giai đoạn (Focus)</label>
+              <textarea
+                className="field-textarea"
+                value={phaseFocus}
+                onChange={(e) => setPhaseFocus(e.target.value)}
+                placeholder="Nhập mục tiêu hành vi chính của giai đoạn này..."
+                rows={3}
+              />
+            </div>
+            <div className="form-field" style={{ width: '100%' }}>
+              <label className="field-label">Cơ sở Khoa học (Science)</label>
+              <textarea
+                className="field-textarea"
+                value={phaseScience}
+                onChange={(e) => setPhaseScience(e.target.value)}
+                placeholder="Nhập các cơ sở nghiên cứu khoa học hỗ trợ..."
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div className="btn-align-right" style={{ gap: '0.75rem', marginTop: '1.5rem' }}>
+            <button
+              onClick={handleDeletePhase}
+              className="btn-save-meta"
+              style={{ backgroundColor: '#ef4444', boxShadow: '0 4px 10px rgba(239, 68, 68, 0.2)' }}
+            >
+              <Trash2 size={16} /> Xóa giai đoạn này
+            </button>
+            <button
+              onClick={handleSavePhase}
+              disabled={phaseSaving}
+              className="btn-save-meta"
+            >
+              <Save size={16} /> {phaseSaving ? 'Đang lưu...' : 'Lưu thông tin giai đoạn'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTreeItem.type === 'week') {
+      const week = selectedPhase.weeks.find(w => w.num === activeTreeItem.num);
+      if (!week) return <p className="no-data-placeholder">Không tìm thấy thông tin tuần.</p>;
+
+      const hasDays = week.days && week.days.length > 0;
+
+      return (
+        <div className="week-editor-card animate-fade-in">
+          <div className="editor-card-header" style={{ borderBottom: '1px solid #edf2f7', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+            <h3 style={{ margin: 0, color: 'var(--teal-dark)' }}>Tuần {week.num}: {week.label} <span className="week-range-text">({week.range})</span></h3>
+          </div>
+
+          {/* Week Description Editor */}
+          <div className="week-desc-edit-box">
+            <label className="field-label-small">Mô tả định hướng của tuần:</label>
+            <div className="input-with-button-flex">
+              <input
+                type="text"
+                className="week-desc-input"
+                value={weekDescriptions[week.num] || ''}
+                onChange={(e) => setWeekDescriptions({
+                  ...weekDescriptions,
+                  [week.num]: e.target.value
+                })}
+                placeholder="Nhập hướng dẫn mục tiêu cho tuần này..."
+              />
+              <button
+                onClick={() => handleSaveWeekDesc(week.num)}
+                className="btn-save-week-desc"
+                title="Lưu mô tả tuần"
+              >
+                <Save size={16} /> Lưu
+              </button>
+            </div>
+          </div>
+
+          {hasDays && (
+            <div className="week-navigation-helper" style={{ marginTop: '1.5rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--teal-dark)', fontSize: '0.95rem', fontWeight: 700 }}>Danh sách ngày điều trị:</h4>
+              <p style={{ color: 'var(--muted)', fontSize: '0.85rem', margin: '0 0 1.25rem 0', lineHeight: 1.5 }}>Tuần này được phân chia thành {week.days.length} ngày trị liệu. Vui lòng bấm vào từng ngày ở cây điều hướng bên trái hoặc dùng các nút nhanh bên dưới để cấu hình chi tiết Nhiệm vụ & Chỉ số.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.6rem' }}>
+                {week.days.map(day => (
+                  <button
+                    key={day.num}
+                    onClick={() => setActiveTreeItem({ type: 'day', num: day.num, weekNum: week.num, phaseNum: selectedPhaseNum })}
+                    className="day-quick-nav-btn"
+                  >
+                    Ngày {day.num}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Weekly Tasks & Metrics (Always display to support editing weekly metadata) */}
+          <div className="crud-two-columns-layout no-border mt-3">
+            {/* Tasks Column */}
+            <div className="crud-column">
+              <div className="column-header-row">
+                <h4><BookOpen size={16} /> Nhiệm vụ trong tuần</h4>
+                <button
+                  onClick={() => openCreateTask(selectedPhase.num, week.num, null, week.tasks.length)}
+                  className="btn-add-meta-item"
+                >
+                  <Plus size={14} /> Thêm nhiệm vụ
+                </button>
+              </div>
+              <div className="meta-items-list">
+                {week.tasks.length === 0 ? (
+                  <p className="no-data-placeholder">Chưa có nhiệm vụ nào.</p>
+                ) : week.tasks.map((task) => (
+                  <div key={task.id} className="meta-item-card">
+                    <div className="meta-item-details">
+                      <div className="meta-item-index-badge">#{task.taskIndex + 1}</div>
+                      <div className="meta-item-text-group">
+                        <div className="meta-item-title-flex">
+                          <span className="meta-item-title">{task.title}</span>
+                          {task.badge && (
+                            <span className="meta-badge" style={getBadgeStyle(task.badge)}>
+                              {task.badge}
+                            </span>
+                          )}
+                        </div>
+                        {task.subText && <p className="meta-item-subtext">{task.subText}</p>}
+                      </div>
+                    </div>
+                    <div className="meta-item-actions">
+                      <button
+                        onClick={() => openEditTask(task, selectedPhase.num, week.num, null)}
+                        className="btn-icon-edit"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="btn-icon-delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Metrics Column */}
+            <div className="crud-column">
+              <div className="column-header-row">
+                <h4><BarChart2 size={16} /> Chỉ số đo lường tuần</h4>
+                <button
+                  onClick={() => openCreateMetric(selectedPhase.num, week.num, null)}
+                  className="btn-add-meta-item"
+                >
+                  <Plus size={14} /> Thêm chỉ số
+                </button>
+              </div>
+              <div className="meta-items-list">
+                {week.metrics.length === 0 ? (
+                  <p className="no-data-placeholder">Chưa có chỉ số theo dõi.</p>
+                ) : week.metrics.map((metric) => (
+                  <div key={metric.id} className="meta-item-card font-small">
+                    <span className="metric-name-text">✓ {metric.metricName}</span>
+                    <div className="meta-item-actions">
+                      <button
+                        onClick={() => openEditMetric(metric, selectedPhase.num, week.num, null)}
+                        className="btn-icon-edit"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMetric(metric.id)}
+                        className="btn-icon-delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTreeItem.type === 'day') {
+      const week = selectedPhase.weeks.find(w => w.num === activeTreeItem.weekNum);
+      const day = week?.days?.find(d => d.num === activeTreeItem.num);
+      if (!day) return <p className="no-data-placeholder">Không tìm thấy thông tin ngày.</p>;
+
+      return (
+        <div className="day-editor-card animate-fade-in">
+          <div className="editor-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #edf2f7', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+            <h3 style={{ margin: 0, color: 'var(--teal-dark)' }}>Ngày {day.num}: {day.label}</h3>
+            <button
+              onClick={() => setActiveTreeItem({ type: 'week', num: week.num, phaseNum: selectedPhaseNum })}
+              className="ui-btn ui-btn--ghost"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+            >
+              Xem Tuần {week.num}
+            </button>
+          </div>
+
+          <div className="crud-two-columns-layout no-border">
+            {/* Tasks Column */}
+            <div className="crud-column">
+              <div className="column-header-row">
+                <h4><BookOpen size={16} /> Nhiệm vụ trong ngày</h4>
+                <button
+                  onClick={() => openCreateTask(selectedPhase.num, week.num, day.num, day.tasks.length)}
+                  className="btn-add-meta-item"
+                >
+                  <Plus size={14} /> Thêm nhiệm vụ
+                </button>
+              </div>
+              <div className="meta-items-list">
+                {day.tasks.length === 0 ? (
+                  <p className="no-data-placeholder">Chưa có nhiệm vụ nào.</p>
+                ) : day.tasks.map((task) => (
+                  <div key={task.id} className="meta-item-card">
+                    <div className="meta-item-details">
+                      <div className="meta-item-index-badge">#{task.taskIndex + 1}</div>
+                      <div className="meta-item-text-group">
+                        <div className="meta-item-title-flex">
+                          <span className="meta-item-title">{task.title}</span>
+                          {task.badge && (
+                            <span className="meta-badge" style={getBadgeStyle(task.badge)}>
+                              {task.badge}
+                            </span>
+                          )}
+                        </div>
+                        {task.subText && <p className="meta-item-subtext">{task.subText}</p>}
+                      </div>
+                    </div>
+                    <div className="meta-item-actions">
+                      <button
+                        onClick={() => openEditTask(task, selectedPhase.num, week.num, day.num)}
+                        className="btn-icon-edit"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="btn-icon-delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Metrics Column */}
+            <div className="crud-column">
+              <div className="column-header-row">
+                <h4><BarChart2 size={16} /> Chỉ số đo lường</h4>
+                <button
+                  onClick={() => openCreateMetric(selectedPhase.num, week.num, day.num)}
+                  className="btn-add-meta-item"
+                >
+                  <Plus size={14} /> Thêm chỉ số
+                </button>
+              </div>
+              <div className="meta-items-list">
+                {day.metrics.length === 0 ? (
+                  <p className="no-data-placeholder">Chưa có chỉ số theo dõi.</p>
+                ) : day.metrics.map((metric) => (
+                  <div key={metric.id} className="meta-item-card font-small">
+                    <span className="metric-name-text">✓ {metric.metricName}</span>
+                    <div className="meta-item-actions">
+                      <button
+                        onClick={() => openEditMetric(metric, selectedPhase.num, week.num, day.num)}
+                        className="btn-icon-edit"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMetric(metric.id)}
+                        className="btn-icon-delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="admin-page">
-      <div className="subscription-breadcrumb">
-        <Link to="/admin">QUẢN TRỊ</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ PHÁC ĐỒ</span>
-      </div>
-
-      <header className="subscription-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>Lộ trình & Phác đồ điều trị</h1>
-          <p>Thiết lập chi tiết cấu trúc giai đoạn, tuần, ngày, nhiệm vụ daily và các chỉ số đo lường.</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <label style={{ fontWeight: '600', color: 'var(--muted)', fontSize: '0.95rem' }}>Chọn phác đồ quản lý:</label>
-          <select
-            value={selectedProtocolId}
-            onChange={(e) => setSelectedProtocolId(e.target.value)}
-            style={{
-              padding: '0.6rem 1.2rem',
-              borderRadius: 'var(--radius)',
-              border: '1.5px solid rgba(13, 122, 110, 0.2)',
-              fontSize: '0.95rem',
-              fontWeight: '700',
-              color: 'var(--teal-dark)',
-              background: '#fff',
-              cursor: 'pointer',
-              outline: 'none',
-              boxShadow: 'var(--shadow-sm)'
-            }}
-          >
-            {protocols.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.name} ({p.durationDays} ngày)
-              </option>
-            ))}
-          </select>
-        </div>
-      </header>
+      <PageHeader
+        className="subscription-header"
+        title="Lộ trình & Phác đồ điều trị"
+        description="Thiết lập chi tiết cấu trúc giai đoạn, tuần, ngày, nhiệm vụ daily và các chỉ số đo lường."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Quản lý phác đồ' }
+        ]}
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <label style={{ fontWeight: '600', color: 'var(--muted)', fontSize: '0.95rem' }}>Chọn phác đồ:</label>
+            <select
+              value={selectedProtocolId}
+              onChange={(e) => setSelectedProtocolId(e.target.value)}
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: 'var(--radius)',
+                border: '1.5px solid rgba(13, 122, 110, 0.2)',
+                fontSize: '0.95rem',
+                fontWeight: '700',
+                color: 'var(--teal-dark)',
+                background: '#fff',
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              {protocols.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.durationDays} ngày)
+                </option>
+              ))}
+            </select>
+          </div>
+        }
+      />
 
       {/* Phase Tabs */}
-      <div className="subscription-tabs" style={{ flexWrap: 'wrap' }}>
+      <div className="subscription-tabs" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
         {programData && programData.phases && programData.phases.map(p => (
-          <button 
+          <button
             key={p.num}
             onClick={() => handlePhaseChange(p.num)}
             className={`subscription-tab-btn ${selectedPhaseNum === p.num ? 'active' : ''}`}
@@ -536,7 +961,7 @@ export default function AdminProgramPage() {
             {p.icon} Giai đoạn {p.num} ({p.range})
           </button>
         ))}
-        <button 
+        <button
           onClick={openCreatePhaseModal}
           className="subscription-tab-btn"
           style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--teal-dark)', fontWeight: 'bold' }}
@@ -546,319 +971,19 @@ export default function AdminProgramPage() {
       </div>
 
       {selectedPhase ? (
-        <div className="phase-edit-container">
-          {/* Phase Header Editor */}
-          <div className="phase-metadata-card">
-            <h3 className="section-title">
-              <Info size={18} /> Cấu hình thông tin Giai đoạn {selectedPhase.num}: {selectedPhase.label}
-            </h3>
-            
-            <div className="form-group-row">
-              <div className="form-field flex-1">
-                <label className="field-label">Mục tiêu Giai đoạn (Focus)</label>
-                <textarea
-                  className="field-textarea"
-                  value={phaseFocus}
-                  onChange={(e) => setPhaseFocus(e.target.value)}
-                  placeholder="Nhập mục tiêu hành vi chính của giai đoạn này..."
-                  rows={2}
-                />
-              </div>
-              <div className="form-field flex-1">
-                <label className="field-label">Cơ sở Khoa học (Science)</label>
-                <textarea
-                  className="field-textarea"
-                  value={phaseScience}
-                  onChange={(e) => setPhaseScience(e.target.value)}
-                  placeholder="Nhập các cơ sở nghiên cứu khoa học hỗ trợ..."
-                  rows={2}
-                />
-              </div>
-            </div>
+        <div className="program-split-layout">
+          {/* Left Navigation Tree */}
+          <aside className="program-layout-sidebar">
+            {renderTreeNavigator()}
+          </aside>
 
-            <div className="btn-align-right" style={{ gap: '0.75rem' }}>
-              <button 
-                onClick={handleDeletePhase}
-                className="btn-save-meta"
-                style={{ backgroundColor: '#ef4444', boxShadow: '0 4px 10px rgba(239, 68, 68, 0.2)' }}
-              >
-                <Trash2 size={16} /> Xóa giai đoạn này
-              </button>
-              <button 
-                onClick={handleSavePhase} 
-                disabled={phaseSaving}
-                className="btn-save-meta"
-              >
-                <Save size={16} /> {phaseSaving ? 'Đang lưu...' : 'Lưu thông tin giai đoạn'}
-              </button>
-            </div>
-          </div>
-
-          {/* Weeks list */}
-          <div className="weeks-list-header">
-            <h3>Danh sách Tuần</h3>
-          </div>
-
-          <div className="weeks-container">
-            {selectedPhase.weeks && selectedPhase.weeks.length === 0 ? (
-              <div className="no-data-placeholder" style={{ padding: '3rem' }}>
-                <AlertCircle size={36} style={{ margin: '0 auto 1rem', color: 'var(--muted)', opacity: 0.5 }} />
-                <p>Chưa có tuần nào được tạo trong giai đoạn này.</p>
-              </div>
-            ) : selectedPhase.weeks && selectedPhase.weeks.map(week => {
-              const isWeekExpanded = !!expandedWeeks[week.num];
-              return (
-                <div key={week.num} className={`week-accordion-card ${isWeekExpanded ? 'expanded' : ''}`}>
-                  {/* Week Accordion Header */}
-                  <div className="week-header-click" onClick={() => toggleWeek(week.num)}>
-                    <div className="week-title-area">
-                      {isWeekExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                      <span className="week-label">Tuần {week.num}: {week.label}</span>
-                      <span className="week-range-text">({week.range})</span>
-                    </div>
-                  </div>
-
-                  {/* Week Accordion Content */}
-                  {isWeekExpanded && (
-                    <div className="week-body-content">
-                      {/* Week Description Editor */}
-                      <div className="week-desc-edit-box">
-                        <label className="field-label-small">Mô tả định hướng của tuần:</label>
-                        <div className="input-with-button-flex">
-                          <input 
-                            type="text" 
-                            className="week-desc-input"
-                            value={weekDescriptions[week.num] || ''}
-                            onChange={(e) => setWeekDescriptions({
-                              ...weekDescriptions,
-                              [week.num]: e.target.value
-                            })}
-                            placeholder="Nhập hướng dẫn mục tiêu cho tuần này..."
-                          />
-                          <button 
-                            onClick={() => handleSaveWeekDesc(week.num)}
-                            className="btn-save-week-desc"
-                            title="Lưu mô tả tuần"
-                          >
-                            <Save size={16} /> Lưu
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Phase 1 Detail (By Days) */}
-                      {selectedPhase.num === 1 ? (
-                        <div className="days-accordion-list">
-                          {week.days && week.days.map(day => {
-                            const isDayExpanded = !!expandedDays[day.num];
-                            return (
-                              <div key={day.num} className={`day-accordion-card ${isDayExpanded ? 'expanded' : ''}`}>
-                                <div className="day-header-click" onClick={() => toggleDay(day.num)}>
-                                  <div className="day-title-flex">
-                                    {isDayExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                    <span className="day-title-text">Ngày {day.num}: {day.label}</span>
-                                  </div>
-                                </div>
-
-                                {isDayExpanded && (
-                                  <div className="day-body-content">
-                                    <div className="crud-two-columns-layout">
-                                      {/* Tasks Column */}
-                                      <div className="crud-column">
-                                        <div className="column-header-row">
-                                          <h4><BookOpen size={16} /> Nhiệm vụ trong ngày</h4>
-                                          <button 
-                                            onClick={() => openCreateTask(selectedPhase.num, week.num, day.num, day.tasks.length)}
-                                            className="btn-add-meta-item"
-                                          >
-                                            <Plus size={14} /> Thêm nhiệm vụ
-                                          </button>
-                                        </div>
-                                        <div className="meta-items-list">
-                                          {day.tasks.length === 0 ? (
-                                            <p className="no-data-placeholder">Chưa có nhiệm vụ nào.</p>
-                                          ) : day.tasks.map((task, idx) => {
-                                            return (
-                                              <div key={task.id} className="meta-item-card">
-                                                <div className="meta-item-details">
-                                                  <div className="meta-item-index-badge">#{task.taskIndex + 1}</div>
-                                                  <div className="meta-item-text-group">
-                                                    <div className="meta-item-title-flex">
-                                                      <span className="meta-item-title">{task.title}</span>
-                                                      {task.badge && (
-                                                        <span className="meta-badge" style={getBadgeStyle(task.badge)}>
-                                                          {task.badge}
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                    {task.subText && <p className="meta-item-subtext">{task.subText}</p>}
-                                                  </div>
-                                                </div>
-                                                <div className="meta-item-actions">
-                                                  <button 
-                                                    onClick={() => openEditTask(task, selectedPhase.num, week.num, day.num)}
-                                                    className="btn-icon-edit"
-                                                  >
-                                                    <Edit2 size={14} />
-                                                  </button>
-                                                  <button 
-                                                    onClick={() => handleDeleteTask(task.id)}
-                                                    className="btn-icon-delete"
-                                                  >
-                                                    <Trash2 size={14} />
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </div>
-
-                                      {/* Metrics Column */}
-                                      <div className="crud-column">
-                                        <div className="column-header-row">
-                                          <h4><BarChart2 size={16} /> Chỉ số đo lường</h4>
-                                          <button 
-                                            onClick={() => openCreateMetric(selectedPhase.num, week.num, day.num)}
-                                            className="btn-add-meta-item"
-                                          >
-                                            <Plus size={14} /> Thêm chỉ số
-                                          </button>
-                                        </div>
-                                        <div className="meta-items-list">
-                                          {day.metrics.length === 0 ? (
-                                            <p className="no-data-placeholder">Chưa có chỉ số theo dõi.</p>
-                                          ) : day.metrics.map((metric) => {
-                                            return (
-                                              <div key={metric.id} className="meta-item-card font-small">
-                                                <span className="metric-name-text">✓ {metric.metricName}</span>
-                                                <div className="meta-item-actions">
-                                                  <button 
-                                                    onClick={() => openEditMetric(metric, selectedPhase.num, week.num, day.num)}
-                                                    className="btn-icon-edit"
-                                                  >
-                                                    <Edit2 size={14} />
-                                                  </button>
-                                                  <button 
-                                                    onClick={() => handleDeleteMetric(metric.id)}
-                                                    className="btn-icon-delete"
-                                                  >
-                                                    <Trash2 size={14} />
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        /* Phase 2, 3, 4 Detail (Weekly Directly) */
-                        <div className="crud-two-columns-layout no-border mt-3">
-                          {/* Tasks Column */}
-                          <div className="crud-column">
-                            <div className="column-header-row">
-                              <h4><BookOpen size={16} /> Nhiệm vụ trong tuần</h4>
-                              <button 
-                                onClick={() => openCreateTask(selectedPhase.num, week.num, null, week.tasks.length)}
-                                className="btn-add-meta-item"
-                              >
-                                <Plus size={14} /> Thêm nhiệm vụ
-                              </button>
-                            </div>
-                            <div className="meta-items-list">
-                              {week.tasks.length === 0 ? (
-                                <p className="no-data-placeholder">Chưa có nhiệm vụ nào.</p>
-                              ) : week.tasks.map((task) => {
-                                return (
-                                  <div key={task.id} className="meta-item-card">
-                                    <div className="meta-item-details">
-                                      <div className="meta-item-index-badge">#{task.taskIndex + 1}</div>
-                                      <div className="meta-item-text-group">
-                                        <div className="meta-item-title-flex">
-                                          <span className="meta-item-title">{task.title}</span>
-                                          {task.badge && (
-                                            <span className="meta-badge" style={getBadgeStyle(task.badge)}>
-                                              {task.badge}
-                                            </span>
-                                          )}
-                                        </div>
-                                        {task.subText && <p className="meta-item-subtext">{task.subText}</p>}
-                                      </div>
-                                    </div>
-                                    <div className="meta-item-actions">
-                                      <button 
-                                        onClick={() => openEditTask(task, selectedPhase.num, week.num, null)}
-                                        className="btn-icon-edit"
-                                      >
-                                        <Edit2 size={14} />
-                                      </button>
-                                      <button 
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className="btn-icon-delete"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Metrics Column */}
-                          <div className="crud-column">
-                            <div className="column-header-row">
-                              <h4><BarChart2 size={16} /> Chỉ số đo lường tuần</h4>
-                              <button 
-                                onClick={() => openCreateMetric(selectedPhase.num, week.num, null)}
-                                className="btn-add-meta-item"
-                              >
-                                <Plus size={14} /> Thêm chỉ số
-                              </button>
-                            </div>
-                            <div className="meta-items-list">
-                              {week.metrics.length === 0 ? (
-                                <p className="no-data-placeholder">Chưa có chỉ số theo dõi.</p>
-                              ) : week.metrics.map((metric) => {
-                                return (
-                                  <div key={metric.id} className="meta-item-card font-small">
-                                    <span className="metric-name-text">✓ {metric.metricName}</span>
-                                    <div className="meta-item-actions">
-                                      <button 
-                                        onClick={() => openEditMetric(metric, selectedPhase.num, week.num, null)}
-                                        className="btn-icon-edit"
-                                      >
-                                        <Edit2 size={14} />
-                                      </button>
-                                      <button 
-                                        onClick={() => handleDeleteMetric(metric.id)}
-                                        className="btn-icon-delete"
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {/* Right Editor Panel */}
+          <main className="program-layout-editor">
+            {renderEditorPanel()}
+          </main>
         </div>
       ) : (
-        <div className="no-data-placeholder" style={{ padding: '5rem', background: 'white', borderRadius: '16px' }}>
+        <div className="no-data-placeholder" style={{ padding: '5rem', background: 'white', borderRadius: '16px', marginTop: '1.5rem', border: '1px solid #edf2f7' }}>
           <AlertCircle size={48} style={{ margin: '0 auto 1.5rem', color: 'var(--muted)', opacity: 0.5 }} />
           <p>Chưa có giai đoạn nào trong phác đồ. Bấm "+ Thêm giai đoạn" để bắt đầu thiết kế.</p>
         </div>
@@ -870,7 +995,7 @@ export default function AdminProgramPage() {
           <div className="admin-modal-container">
             <div className="admin-modal-header">
               <h2>Thêm Giai đoạn phác đồ mới</h2>
-              <button 
+              <button
                 onClick={() => setPhaseModal(prev => ({ ...prev, isOpen: false }))}
                 className="admin-modal-close"
               >
@@ -954,8 +1079,8 @@ export default function AdminProgramPage() {
                 </div>
               </div>
               <div className="admin-modal-footer">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setPhaseModal(prev => ({ ...prev, isOpen: false }))}
                   className="btn-cancel-modal"
                 >
@@ -976,7 +1101,7 @@ export default function AdminProgramPage() {
           <div className="admin-modal-container">
             <div className="admin-modal-header">
               <h2>{taskModal.mode === 'create' ? 'Thêm nhiệm vụ mới' : 'Chỉnh sửa nhiệm vụ'}</h2>
-              <button 
+              <button
                 onClick={() => setTaskModal(prev => ({ ...prev, isOpen: false }))}
                 className="admin-modal-close"
               >
@@ -1023,7 +1148,7 @@ export default function AdminProgramPage() {
                   </div>
                   <div className="form-field flex-1">
                     <label className="field-label-small">Thứ tự ưu tiên (Index)</label>
-                    <input 
+                    <input
                       type="number"
                       min={0}
                       className="week-desc-input w-full"
@@ -1035,8 +1160,8 @@ export default function AdminProgramPage() {
                 </div>
               </div>
               <div className="admin-modal-footer">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setTaskModal(prev => ({ ...prev, isOpen: false }))}
                   className="btn-cancel-modal"
                 >
@@ -1057,7 +1182,7 @@ export default function AdminProgramPage() {
           <div className="admin-modal-container max-w-sm">
             <div className="admin-modal-header">
               <h2>{metricModal.mode === 'create' ? 'Thêm chỉ số đo lường' : 'Sửa tên chỉ số'}</h2>
-              <button 
+              <button
                 onClick={() => setMetricModal(prev => ({ ...prev, isOpen: false }))}
                 className="admin-modal-close"
               >
@@ -1079,8 +1204,8 @@ export default function AdminProgramPage() {
                 </div>
               </div>
               <div className="admin-modal-footer">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setMetricModal(prev => ({ ...prev, isOpen: false }))}
                   className="btn-cancel-modal"
                 >
@@ -1096,7 +1221,7 @@ export default function AdminProgramPage() {
       )}
 
       {/* Confirm Modal */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmModal.isOpen}
         title={confirmModal.title}
         message={confirmModal.message}

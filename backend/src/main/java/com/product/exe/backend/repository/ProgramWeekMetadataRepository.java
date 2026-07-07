@@ -14,6 +14,8 @@ public interface ProgramWeekMetadataRepository extends JpaRepository<ProgramWeek
 
     Optional<ProgramWeekMetadata> findByProtocolIdAndWeekNumber(Long protocolId, Integer weekNumber);
 
+    Optional<ProgramWeekMetadata> findByPhaseIdAndWeekNumber(Long phaseId, Integer weekNumber);
+
     @Query("SELECT COALESCE(MAX(w.weekNumber), 0) FROM ProgramWeekMetadata w WHERE w.protocol.id = :protocolId")
     int findMaxWeekNumber(Long protocolId);
 }

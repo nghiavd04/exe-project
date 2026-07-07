@@ -1,20 +1,21 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../hooks/AuthContext';
 
 export default function AdminRoute() {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
+  const { user, loading } = useAuth();
 
-  if (!token || !userStr) {
+  // Loading chỉ true vài ms (đọc localStorage đồng bộ)
+  // Trả về div trong suốt để tránh layout shift
+  if (loading) {
+    return <div style={{ minHeight: '100vh' }} />;
+  }
+
+  if (!user) {
     return <Navigate to="/dang-nhap" replace />;
   }
 
-  try {
-    const user = JSON.parse(userStr);
-    if (user.role !== 'ADMIN') {
-      return <Navigate to="/" replace />;
-    }
-  } catch (error) {
-    return <Navigate to="/dang-nhap" replace />;
+  if (user.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

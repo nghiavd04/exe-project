@@ -144,7 +144,7 @@ export default function AdminUserProgressModal({ isOpen, onClose, user }) {
               <div className="admin-progress-spinner" />
               <span>Đang tải thông tin tiến trình & chỉ số...</span>
             </div>
-          ) : !data ? (
+          ) : (!data || data.status === 'NOT_STARTED') ? (
             <div className="admin-progress-empty-state">
               <span className="admin-progress-empty-icon">⚠️</span>
               <h4>Chưa có dữ liệu tiến trình</h4>

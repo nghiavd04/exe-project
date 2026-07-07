@@ -22,6 +22,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
+    Page<Notification> findByTypeIn(java.util.List<NotificationType> types, Pageable pageable);
+
     Page<Notification> findByType(NotificationType type, Pageable pageable);
 
     long countByUserIdAndIsReadFalse(Long userId);
@@ -31,28 +33,32 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markAllAsReadForUser(@Param("userId") Long userId);
 
     @Query("SELECT n FROM Notification n " +
-           "WHERE (n.user.id = :userId) " +
+           "WHERE n.type <> 'EMAIL_ONLY' AND (" +
+           "(n.user.id = :userId) " +
            "OR (n.planTier = :userTier AND :userCreatedAt <= n.createdAt) " +
            "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt) " +
-           "ORDER BY n.createdAt DESC")
+           ") ORDER BY n.createdAt DESC")
     List<Notification> findAllForUser(
             @Param("userId") Long userId,
             @Param("userTier") SubscriptionTier userTier, 
             @Param("userCreatedAt") LocalDateTime userCreatedAt);
 
     @Query("SELECT count(n) FROM Notification n " +
-           "WHERE (n.user.id = :userId AND n.isRead = false) " +
+           "WHERE n.type <> 'EMAIL_ONLY' AND (" +
+           "(n.user.id = :userId AND n.isRead = false) " +
            "OR (n.planTier = :userTier AND :userCreatedAt <= n.createdAt AND " +
            "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)) " +
            "OR (n.user IS NULL AND n.planTier IS NULL AND :userCreatedAt <= n.createdAt AND " +
-           "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id))")
+           "NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id))" +
+           ")")
     long countUnreadForUser(
             @Param("userId") Long userId,
             @Param("userTier") SubscriptionTier userTier, 
             @Param("userCreatedAt") LocalDateTime userCreatedAt);
 
     @Query("SELECT n FROM Notification n " +
-           "WHERE (:userCreatedAt <= n.createdAt) " +
+           "WHERE n.type <> 'EMAIL_ONLY' " +
+           "AND (:userCreatedAt <= n.createdAt) " +
            "AND (n.planTier = :userTier OR (n.user IS NULL AND n.planTier IS NULL)) " +
            "AND NOT EXISTS (SELECT unr FROM UserNotificationRead unr WHERE unr.user.id = :userId AND unr.notification.id = n.id)")
     List<Notification> findUnreadGlobalAndGroupNotificationsForUser(

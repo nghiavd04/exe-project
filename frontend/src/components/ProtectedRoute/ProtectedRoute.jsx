@@ -1,13 +1,18 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/AuthContext';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (!token) {
-    // Lưu lại vị trí trang hiện tại để sau khi đăng nhập có thể quay lại
+  // Loading chỉ true vài ms (đọc localStorage đồng bộ)
+  // Trả về div trong suốt thay vì null để tránh layout shift
+  if (loading) {
+    return <div style={{ minHeight: '100vh' }} />;
+  }
+
+  if (!user) {
     return <Navigate to="/dang-nhap" state={{ from: location }} replace />;
   }
 

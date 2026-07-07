@@ -9,6 +9,9 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
+import useDebounce from '../../../hooks/useDebounce';
+import AppState from '../../../components/AppState';
+import { PageHeader } from '../../../components/PageSection';
 import './AdminMediaListPage.css';
 
 export default function AdminMediaListPage() {
@@ -45,9 +48,15 @@ export default function AdminMediaListPage() {
     onConfirm: () => {}
   });
 
+  const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
   useEffect(() => {
     fetchMedias();
-  }, [page, filterType, filterTier]);
+  }, [page, filterType, filterTier, debouncedSearch]);
 
   useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null);
@@ -60,7 +69,7 @@ export default function AdminMediaListPage() {
       setLoading(true);
       const params = {
         page,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         type: filterType || undefined,
         tier: filterTier || undefined
       };
@@ -74,13 +83,6 @@ export default function AdminMediaListPage() {
       toast.error('Không thể tải danh sách tài nguyên đa phương tiện');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSearchKey = (e) => {
-    if (e.key === 'Enter') {
-      setPage(0);
-      fetchMedias();
     }
   };
 
@@ -230,24 +232,23 @@ export default function AdminMediaListPage() {
 
   return (
     <div className="admin-page">
-      <div className="media-breadcrumb">
-        <Link to="/admin">QUẢN TRỊ</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ TÀI NGUYÊN AUDIO/VIDEO</span>
-      </div>
-
-      <header className="media-header">
-        <div>
-          <h1>Thư Viện Audio/Video</h1>
-          <p>Quản lý các bài thiền, podcast và video chánh niệm cho các gói dịch vụ.</p>
-        </div>
-        <button 
-          onClick={handleOpenCreateModal}
-          className="btn-create-media"
-        >
-          <Plus size={20} /> Thêm tài nguyên mới
-        </button>
-      </header>
+      <PageHeader
+        className="media-header"
+        title="Thư viện Media"
+        description="Quản lý các bài thiền, podcast và video chánh niệm cho các gói dịch vụ."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Quản lý media' }
+        ]}
+        actions={
+          <button 
+            onClick={handleOpenCreateModal}
+            className="ui-btn ui-btn--primary btn-create-media"
+          >
+            <Plus size={20} /> Thêm tài nguyên mới
+          </button>
+        }
+      />
 
       {/* Filters & Search */}
       <div className="media-filters-row">
@@ -258,7 +259,6 @@ export default function AdminMediaListPage() {
             placeholder="Tìm kiếm tiêu đề, mô tả..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearchKey}
             className="search-media-input"
           />
         </div>
@@ -305,9 +305,13 @@ export default function AdminMediaListPage() {
               ))
             ) : medias.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
-                  <Music size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                  <p>Không tìm thấy tài nguyên đa phương tiện nào.</p>
+                <td colSpan="7" style={{ padding: '2rem' }}>
+                  <AppState
+                    variant="empty"
+                    compact
+                    title="Không tìm thấy tài nguyên nào"
+                    description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+                  />
                 </td>
               </tr>
             ) : medias.map((item, index) => (

@@ -80,3 +80,45 @@
     flex-direction: column;
   }
 }
+
+.page-header-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.page-header-wrapper .page-header {
+  margin-bottom: 0;
+}
+
+.page-header__breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.breadcrumb-link {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: var(--teal);
+}
+
+.breadcrumb-current {
+  color: var(--text);
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.breadcrumb-separator {
+  color: var(--muted);
+  opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+}
+

@@ -18,4 +18,7 @@ public class BroadcastNotificationRequest {
 
     private SubscriptionTier targetPlanTier;
 
+    private Boolean sendEmail = false;
+
+    private com.product.exe.backend.enums.NotificationType type;
 }

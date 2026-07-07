@@ -9,6 +9,9 @@ import { adminApi } from '../../../apis/adminApi';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import ArticleRenderer from '../../../components/ArticleRenderer/ArticleRenderer';
+import useDebounce from '../../../hooks/useDebounce';
+import AppState from '../../../components/AppState';
+import { PageHeader } from '../../../components/PageSection';
 import './ArticleListPage.css';
 
 export default function ArticleListPage() {
@@ -48,9 +51,15 @@ export default function ArticleListPage() {
     fetchStats();
   }, []);
 
+  const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
   useEffect(() => {
     fetchArticles();
-  }, [page, status, sortBy, sortOrder]);
+  }, [page, status, sortBy, sortOrder, debouncedSearch]);
 
   const fetchStats = async () => {
     try {
@@ -72,7 +81,7 @@ export default function ArticleListPage() {
       const params = {
         page,
         status: status || undefined,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         sort: `${sortBy},${sortOrder}`
       };
       const response = await adminApi.getArticles(params);
@@ -85,13 +94,6 @@ export default function ArticleListPage() {
       console.error('Error fetching articles:', err);
     } finally {
       setListLoading(false);
-    }
-  };
-
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      setPage(0);
-      fetchArticles();
     }
   };
 
@@ -224,20 +226,20 @@ export default function ArticleListPage() {
 
   return (
     <div className="admin-page">
-      <div className="admin-breadcrumb">
-        <Link to="/admin">ADMIN</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ BÀI VIẾT</span>
-      </div>
-      <header className="admin-header">
-        <div>
-          <h1>Quản lý Bài viết</h1>
-          <p>Xem và quản lý tất cả nội dung bài viết trong hệ thống.</p>
-        </div>
-        <Link to="/admin/articles/create" className="ui-btn ui-btn--primary btn-create-new">
-          <Plus size={20} /> Viết Bài Mới
-        </Link>
-      </header>
+      <PageHeader
+        className="admin-header"
+        title="Bài viết"
+        description="Xem và quản lý tất cả nội dung bài viết trong hệ thống."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Quản lý bài viết' }
+        ]}
+        actions={
+          <Link to="/admin/articles/create" className="ui-btn ui-btn--primary btn-create-new">
+            <Plus size={20} /> Viết bài mới
+          </Link>
+        }
+      />
 
       {/* Stats Widgets */}
       <div className="article-stats-grid">
@@ -255,7 +257,7 @@ export default function ArticleListPage() {
         <div className="ui-card stat-widget-card">
           <div className="stat-icon-box blue"><Eye size={24} /></div>
           <div>
-            <p className="stat-info-p">Tổng lượt xem</p>
+            <p className="stat-info-p">Lượt xem tháng này</p>
             {statsLoading ? (
               <div className="skeleton" style={{ height: '1.5rem', width: '80px', marginTop: '0.25rem' }}></div>
             ) : (
@@ -285,7 +287,6 @@ export default function ArticleListPage() {
             placeholder="Tìm kiếm bài viết..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearch}
             className="ui-input search-input"
           />
         </div>
@@ -332,7 +333,14 @@ export default function ArticleListPage() {
               ))
             ) : articles.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted)' }}>Không tìm thấy bài viết nào.</td>
+                <td colSpan="7" style={{ padding: '2rem' }}>
+                  <AppState
+                    variant="empty"
+                    compact
+                    title="Không tìm thấy bài viết nào"
+                    description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+                  />
+                </td>
               </tr>
             ) : articles.map((article, index) => (
               <tr key={article.id}>

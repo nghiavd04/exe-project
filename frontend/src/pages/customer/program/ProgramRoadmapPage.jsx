@@ -63,9 +63,9 @@ export default function ProgramRoadmapPage() {
   const [selectedPhaseNum, setSelectedPhaseNum] = useState(currentPhaseNum);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'today' | 'uncompleted'
 
-  // Accordion state for weeks
-  const [expandedWeeks, setExpandedWeeks] = useState({
-    [currentWeekVal]: true // Expand today's week by default
+  // Accordion state for weeks — mở tuần hiện tại theo mặc định
+  const [expandedWeeks, setExpandedWeeks] = useState(() => {
+    return { [currentWeekVal]: true };
   });
 
   const toggleWeek = (weekNum) => {
@@ -73,6 +73,22 @@ export default function ProgramRoadmapPage() {
       ...prev,
       [weekNum]: !prev[weekNum]
     }));
+  };
+
+  // Khi chọn phase mới → tự động mở tuần đầu tiên của phase đó
+  const handleSelectPhase = (phaseNum) => {
+    setSelectedPhaseNum(phaseNum);
+    const phase = (programMetadata?.phases || []).find(p => p.num === phaseNum);
+    if (phase && phase.weeks && phase.weeks.length > 0) {
+      // Nếu tuần hiện tại nằm trong phase này thì giữ nó, ngược lại mở tuần đầu
+      const phaseWeekNums = phase.weeks.map(w => w.num);
+      const hasCurrentWeek = phaseWeekNums.includes(currentWeekVal);
+      const firstWeekOfPhase = phase.weeks[0].num;
+      setExpandedWeeks(prev => ({
+        ...prev,
+        [hasCurrentWeek ? currentWeekVal : firstWeekOfPhase]: true
+      }));
+    }
   };
 
   // Update selected phase once metadata loads
@@ -232,7 +248,7 @@ export default function ProgramRoadmapPage() {
                 <div 
                   key={phase.num} 
                   className={`pd-phase-timeline-node ${isSelected ? 'selected' : ''} ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                  onClick={() => setSelectedPhaseNum(phase.num)}
+                  onClick={() => handleSelectPhase(phase.num)}
                 >
                   <div className="pd-node-circle">
                     {isCompleted ? '✓' : phase.num}
@@ -373,12 +389,29 @@ export default function ProgramRoadmapPage() {
 
                       {!isWeekLocked && isExpanded && (
                         <div className="pd-week-timeline-content-legacy">
+                          {/* Show weekly tasks if present */}
+                          {week.tasks && week.tasks.length > 0 && (
+                            <div className="pd-weekly-tasks-summary" style={{ marginBottom: daysToRender.length > 0 ? '1.25rem' : '0' }}>
+                              <p className="pd-weekly-tasks-desc">{week.description || 'Hoàn thành các nhiệm vụ tuần để tiếp tục lộ trình.'}</p>
+                              <div className="pd-weekly-tasks-box">
+                                <div className="pd-weekly-box-title">📋 Việc giữ nhịp tuần:</div>
+                                <ul className="pd-weekly-tasks-list">
+                                  {week.tasks.map((task, i) => (
+                                    <li key={i}>{task}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Always show day cards — Hướng C: hiển thị ngày ngay cả khi tasks rỗng */}
                           {daysToRender.length > 0 ? (
                             <div className="pd-days-list-legacy">
                               {daysToRender.map((day) => {
                                 const isDayLocked = day.num > currentDayVal;
                                 const isDayCompleted = day.num < currentDayVal;
                                 const isDayToday = day.num === currentDayVal;
+                                const hasDailyContent = (day.tasks && day.tasks.length > 0) || (day.metrics && day.metrics.length > 0);
 
                                 let statusText = "Chưa mở";
                                 let statusClass = "locked";
@@ -400,6 +433,9 @@ export default function ProgramRoadmapPage() {
                                     <div className="pd-day-card-row">
                                       <div className="pd-day-card-left">
                                         <span className="pd-day-card-badge">Ngày {day.num}</span>
+                                        {!hasDailyContent && !isDayLocked && (
+                                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Nội dung tuần</span>
+                                        )}
                                       </div>
                                       <div className="pd-day-card-center">
                                         <h4 className="pd-day-card-title">
@@ -428,11 +464,17 @@ export default function ProgramRoadmapPage() {
                                             ))}
                                           </ul>
                                         )}
+                                        {/* Hướng C: nếu không có task theo ngày, hiện gợi ý xem task tuần */}
+                                        {isDayToday && !hasDailyContent && week.tasks && week.tasks.length > 0 && (
+                                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
+                                            📋 Thực hiện nhiệm vụ tuần này hôm nay
+                                          </p>
+                                        )}
                                       </div>
                                       <div className="pd-day-card-right">
                                         <span className="pd-day-card-duration">
                                           <Clock size={12} />
-                                          <span>{(day.tasks?.length || 2) * 10} phút</span>
+                                          <span>{hasDailyContent ? (day.tasks?.length || 2) * 10 : 15} phút</span>
                                         </span>
                                         <span className={`pd-day-card-status-chip ${statusClass}`}>{statusText}</span>
                                       </div>
@@ -442,19 +484,14 @@ export default function ProgramRoadmapPage() {
                               })}
                             </div>
                           ) : (
-                            <div className="pd-weekly-tasks-summary">
-                              <p className="pd-weekly-tasks-desc">{week.description || 'Hoàn thành các nhiệm vụ tuần để tiếp tục lộ trình.'}</p>
-                              {week.tasks && week.tasks.length > 0 && (
-                                <div className="pd-weekly-tasks-box">
-                                  <div className="pd-weekly-box-title">📋 Việc giữ nhịp tuần:</div>
-                                  <ul className="pd-weekly-tasks-list">
-                                    {week.tasks.map((task, i) => (
-                                      <li key={i}>{task}</li>
-                                    ))}
-                                  </ul>
+                            (!week.tasks || week.tasks.length === 0) && (
+                              <div className="pd-weekly-tasks-summary">
+                                <p className="pd-weekly-tasks-desc">{week.description || 'Hoàn thành các nhiệm vụ tuần để tiếp tục lộ trình.'}</p>
+                                <div className="pd-no-tasks-state" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                  Không có nhiệm vụ nào cho tuần này.
                                 </div>
-                              )}
-                            </div>
+                              </div>
+                            )
                           )}
                         </div>
                       )}

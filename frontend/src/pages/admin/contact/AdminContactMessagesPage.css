@@ -267,3 +267,68 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* Tabs Styling */
+.tabs-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #edf2f7;
+}
+
+.tab-btn {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: var(--teal);
+}
+
+.tab-btn.active {
+  border-bottom-color: var(--teal-dark);
+  color: var(--teal-dark);
+}
+
+/* Filters Bar */
+.account-filters-bar {
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-wrapper-relative {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-input-field {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid rgba(13, 122, 110, 0.15);
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  background: var(--white);
+  transition: all 0.2s;
+}
+
+.search-input-field:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-pale);
+}

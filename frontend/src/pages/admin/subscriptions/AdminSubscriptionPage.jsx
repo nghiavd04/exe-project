@@ -10,6 +10,9 @@ import toast from 'react-hot-toast';
 import ConfirmModal from '../../../components/ConfirmModal';
 import SubscriptionPlanModal from './SubscriptionPlanModal';
 import Pagination from '../../../components/Pagination';
+import useDebounce from '../../../hooks/useDebounce';
+import AppState from '../../../components/AppState';
+import { PageHeader } from '../../../components/PageSection';
 import './AdminSubscriptionPage.css';
 
 export default function AdminSubscriptionPage() {
@@ -42,19 +45,30 @@ export default function AdminSubscriptionPage() {
     onConfirm: () => {}
   });
 
+  const debouncedPaymentsSearch = useDebounce(paymentsSearch, 500);
+  const debouncedPlansSearch = useDebounce(plansSearch, 500);
+
+  useEffect(() => {
+    setPlansPage(0);
+  }, [debouncedPlansSearch]);
+
+  useEffect(() => {
+    setPaymentsPage(0);
+  }, [debouncedPaymentsSearch]);
+
   // Fetch plans when tab is 'plans' or related params change
   useEffect(() => {
     if (activeTab === 'plans') {
       fetchPlans();
     }
-  }, [activeTab, plansPage, plansSearch]);
+  }, [activeTab, plansPage, debouncedPlansSearch]);
 
   // Fetch payments when tab is 'payments' or related params change
   useEffect(() => {
     if (activeTab === 'payments') {
       fetchPayments();
     }
-  }, [activeTab, paymentsPage, paymentsSearch, paymentStatus]);
+  }, [activeTab, paymentsPage, debouncedPaymentsSearch, paymentStatus]);
 
   // Handle click outside dropdown menu
   useEffect(() => {
@@ -69,7 +83,7 @@ export default function AdminSubscriptionPage() {
       const params = {
         page: plansPage,
         size: pageSize,
-        search: plansSearch || undefined
+        search: debouncedPlansSearch || undefined
       };
       const response = await adminApi.getSubscriptionPlans(params);
       if (response.data.success) {
@@ -89,7 +103,7 @@ export default function AdminSubscriptionPage() {
       const params = {
         page: paymentsPage,
         size: pageSize,
-        search: paymentsSearch || undefined,
+        search: debouncedPaymentsSearch || undefined,
         status: paymentStatus || undefined
       };
       const response = await adminApi.getPayments(params);
@@ -181,26 +195,23 @@ export default function AdminSubscriptionPage() {
 
   return (
     <div className="admin-page">
-      <div className="subscription-breadcrumb">
-        <Link to="/admin">QUẢN TRỊ</Link>
-        <ChevronRight size={14} style={{ opacity: 0.5 }} />
-        <span>QUẢN LÝ GÓI DỊCH VỤ</span>
-      </div>
-
-      <header className="subscription-header">
-        <div>
-          <h1>Gói Dịch Vụ & Đăng Ký</h1>
-          <p>Theo dõi lịch sử giao dịch mua gói và quản lý cấu hình các gói đăng ký.</p>
-        </div>
-        {activeTab === 'plans' && (
+      <PageHeader
+        className="subscription-header"
+        title="Gói dịch vụ & Đăng ký"
+        description="Theo dõi lịch sử giao dịch mua gói và quản lý cấu hình các gói đăng ký."
+        breadcrumbs={[
+          { label: 'Tổng quan', to: '/admin' },
+          { label: 'Quản lý gói dịch vụ' }
+        ]}
+        actions={activeTab === 'plans' ? (
           <button 
             onClick={handleCreate}
-            className="btn-create-subscription"
+            className="ui-btn ui-btn--primary btn-create-subscription"
           >
             <Plus size={20} /> Tạo gói mới
           </button>
-        )}
-      </header>
+        ) : null}
+      />
 
       {/* Tabs */}
       <div className="subscription-tabs">
@@ -283,9 +294,13 @@ export default function AdminSubscriptionPage() {
                 ))
               ) : (!payments || payments.length === 0) ? (
                 <tr>
-                  <td colSpan="8" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
-                    <CreditCard size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                    <p>Chưa có lịch sử giao dịch mua gói nào.</p>
+                  <td colSpan="8" style={{ padding: '2rem' }}>
+                    <AppState
+                      variant="empty"
+                      compact
+                      title="Không tìm thấy lịch sử mua gói nào"
+                      description="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+                    />
                   </td>
                 </tr>
               ) : payments.map((payment, index) => (
@@ -351,9 +366,13 @@ export default function AdminSubscriptionPage() {
                 ))
               ) : (!plans || plans.length === 0) ? (
                 <tr>
-                  <td colSpan="8" style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted)' }}>
-                    <CreditCard size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                    <p>Chưa có gói dịch vụ nào được tạo.</p>
+                  <td colSpan="8" style={{ padding: '2rem' }}>
+                    <AppState
+                      variant="empty"
+                      compact
+                      title="Chưa có gói dịch vụ nào"
+                      description="Chưa có gói dịch vụ nào được cấu hình trong hệ thống."
+                    />
                   </td>
                 </tr>
               ) : plans.map((plan, index) => (

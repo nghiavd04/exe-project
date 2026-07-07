@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/AuthContext';
-import { profileApi, programApi } from '../../../apis/customerApi';
+import { programApi } from '../../../apis/customerApi';
 import AppState from '../../../components/AppState';
 import './ProgramDashboardPage.css';
 
@@ -25,7 +25,7 @@ const LOCK_FEATURES = [
 
 export default function ProgramLayout() {
   const navigate = useNavigate();
-  const { user, userTier, updateUser } = useAuth();
+  const { userTier } = useAuth();
 
   const isAllowed = isTierAllowedForProgram(userTier);
   const showLocked = !isAllowed;
@@ -64,8 +64,9 @@ export default function ProgramLayout() {
           id: t.taskIndex,
           title: t.title,
           sub: '',
-          badge: 'Hàng ngày',
-          done: t.isCompleted
+          badge: t.dayNumber === null || t.dayNumber === undefined ? 'Hàng tuần' : 'Hàng ngày',
+          done: t.isCompleted,
+          dayNumber: t.dayNumber
         }));
         setTasks(apiTasks);
 
@@ -128,21 +129,7 @@ export default function ProgramLayout() {
     }
   };
 
-  useEffect(() => {
-    const fetchLatestProfile = async () => {
-      try {
-        const res = await profileApi.getProfile();
-        if (res.data && res.data.success) {
-          updateUser(res.data.data);
-        }
-      } catch (err) {
-        console.error('Error fetching latest profile:', err);
-      }
-    };
-    if (user) {
-      fetchLatestProfile();
-    }
-  }, []);
+
 
   useEffect(() => {
     if (isAllowed) {
@@ -195,7 +182,8 @@ export default function ProgramLayout() {
 
   const handleToggleTask = async (taskIndex, isCompleted) => {
     if (!isEnrolled || !userProgress || !dayDetail) return;
-    const dayNum = dayDetail.dayNumber || userProgress.currentDay;
+    const task = tasks.find(t => t.id === taskIndex);
+    const dayNum = task && task.dayNumber !== undefined ? task.dayNumber : (dayDetail.dayNumber || userProgress.currentDay);
     const weekNum = dayDetail.weekNumber;
     try {
       await programApi.toggleTask(dayNum, weekNum, taskIndex, isCompleted);

@@ -2,30 +2,19 @@ package com.product.exe.backend.service.impl;
 
 import com.product.exe.backend.dto.request.AdminCreateRequest;
 import com.product.exe.backend.dto.response.AdminManagerAccountRespone;
+import com.product.exe.backend.dto.response.AdminUserProgressDetailsResponse;
 import com.product.exe.backend.entity.*;
 import com.product.exe.backend.enums.AuthProvider;
 import com.product.exe.backend.enums.Role;
 import com.product.exe.backend.exception.BadRequestException;
 import com.product.exe.backend.exception.ResourceNotFoundException;
-
-import com.product.exe.backend.repository.AdminRepository;
-import com.product.exe.backend.repository.UserRepository;
-import com.product.exe.backend.repository.UserSubscriptionRepository;
-import com.product.exe.backend.repository.UserProgramProgressRepository;
-import com.product.exe.backend.repository.UserDailyLogRepository;
-import com.product.exe.backend.repository.UserWeeklyLogRepository;
+import com.product.exe.backend.repository.*;
 import com.product.exe.backend.service.AdminManagerAccountService;
-import com.product.exe.backend.dto.response.AdminUserProgressDetailsResponse;
-import com.product.exe.backend.entity.Customer;
-import com.product.exe.backend.entity.UserDailyLog;
-import com.product.exe.backend.entity.UserWeeklyLog;
-import com.product.exe.backend.entity.UserProgramProgress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -155,11 +144,15 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
 
         // Lấy thông tin tiến độ
         UserProgramProgress progress = userProgramProgressRepository.findByCustomerId(customer.getId())
-                .orElseThrow(() -> new BadRequestException("Khách hàng chưa bắt đầu lộ trình phác đồ!"));
+                .orElse(null);
 
         // Lấy danh sách Daily Logs và Weekly Logs
-        List<UserDailyLog> dailyLogs = userDailyLogRepository.findByCustomerIdOrderByDayNumberAsc(customer.getId());
-        List<UserWeeklyLog> weeklyLogs = userWeeklyLogRepository.findByCustomerIdOrderByWeekNumberAsc(customer.getId());
+        List<UserDailyLog> dailyLogs = progress != null 
+                ? userDailyLogRepository.findByCustomerIdOrderByDayNumberAsc(customer.getId())
+                : List.of();
+        List<UserWeeklyLog> weeklyLogs = progress != null 
+                ? userWeeklyLogRepository.findByCustomerIdOrderByWeekNumberAsc(customer.getId())
+                : List.of();
 
         // Map Daily Logs
         List<AdminUserProgressDetailsResponse.DailyLogDto> dailyLogDtos = dailyLogs.stream()
@@ -193,11 +186,11 @@ public class AdminManagerAccountServiceImpl implements AdminManagerAccountServic
                 .collect(Collectors.toList());
 
         return AdminUserProgressDetailsResponse.builder()
-                .currentDay(progress.getCurrentDay())
-                .streakCount(progress.getStreakCount())
-                .startedAt(progress.getStartedAt())
-                .lastCheckedInAt(progress.getLastCheckedInAt())
-                .status(progress.getStatus().name())
+                .currentDay(progress != null ? progress.getCurrentDay() : null)
+                .streakCount(progress != null ? progress.getStreakCount() : null)
+                .startedAt(progress != null ? progress.getStartedAt() : null)
+                .lastCheckedInAt(progress != null ? progress.getLastCheckedInAt() : null)
+                .status(progress != null ? progress.getStatus().name() : "NOT_STARTED")
                 .subscriptionPlan(subscriptionPlan)
                 .dailyLogs(dailyLogDtos)
                 .weeklyLogs(weeklyLogDtos)

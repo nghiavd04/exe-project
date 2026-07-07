@@ -86,6 +86,8 @@
 
 .status-select-filter {
   padding: 0.6rem 1rem;
+  width: auto;
+  min-width: 200px;
 }
 
 .table-wrapper-card {

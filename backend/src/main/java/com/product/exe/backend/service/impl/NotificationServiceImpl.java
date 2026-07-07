@@ -18,6 +18,11 @@ import com.product.exe.backend.enums.NotificationType;
 import com.product.exe.backend.dto.response.AdminNotificationResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import lombok.extern.slf4j.Slf4j;
+import com.product.exe.backend.enums.Role;
+import com.product.exe.backend.service.EmailService;
+import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
 
 
 import java.time.LocalDateTime;
@@ -26,12 +31,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final UserNotificationReadRepository userNotificationReadRepository;
     private final SubscriptionService subscriptionService;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -60,7 +67,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void createTargetedNotification(String title, String content, String targetEmail, com.product.exe.backend.enums.SubscriptionTier targetPlanTier) {
+    public void createTargetedNotification(String title, String content, String targetEmail, com.product.exe.backend.enums.SubscriptionTier targetPlanTier, Boolean sendEmail, NotificationType type) {
         User targetUser = null;
         if (targetEmail != null && !targetEmail.trim().isEmpty()) {
             targetUser = userRepository.findByEmail(targetEmail.trim())
@@ -73,9 +80,32 @@ public class NotificationServiceImpl implements NotificationService {
                 .title(title)
                 .content(content)
                 .isRead(false)
-                .type(NotificationType.MANUAL_BROADCAST)
+                .type(type != null ? type : NotificationType.MANUAL_BROADCAST)
                 .build();
         notificationRepository.save(notification);
+
+        boolean shouldSendEmail = Boolean.TRUE.equals(sendEmail) || type == NotificationType.EMAIL_ONLY;
+        if (shouldSendEmail && targetPlanTier != null) {
+            List<String> emailsToSend = new ArrayList<>();
+            List<User> activeCustomers = userRepository.findByRoleAndIsActive(Role.CUSTOMER, true);
+            for (User customer : activeCustomers) {
+                if (subscriptionService.getUserHighestTier(customer.getId()) == targetPlanTier) {
+                    emailsToSend.add(customer.getEmail());
+                }
+            }
+
+            if (!emailsToSend.isEmpty()) {
+                CompletableFuture.runAsync(() -> {
+                    for (String email : emailsToSend) {
+                        try {
+                            emailService.sendNotificationEmail(email, title, content);
+                        } catch (Exception e) {
+                            log.error("Lỗi khi gửi email thông báo tới: {}", email, e);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -189,14 +219,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminNotificationResponse> getSentNotifications(Pageable pageable) {
-        Page<Notification> notifications = notificationRepository.findByType(NotificationType.MANUAL_BROADCAST, pageable);
+    public Page<AdminNotificationResponse> getSentNotifications(NotificationType type, Pageable pageable) {
+        Page<Notification> notifications;
+        if (type != null) {
+            notifications = notificationRepository.findByType(type, pageable);
+        } else {
+            notifications = notificationRepository.findByTypeIn(
+                    List.of(NotificationType.MANUAL_BROADCAST, NotificationType.EMAIL_ONLY), pageable);
+        }
         return notifications.map(n -> AdminNotificationResponse.builder()
                 .id(n.getId())
                 .title(n.getTitle())
                 .content(n.getContent())
                 .targetEmail(n.getUser() != null ? n.getUser().getEmail() : null)
                 .targetPlanTier(n.getPlanTier())
+                .type(n.getType())
                 .createdAt(n.getCreatedAt())
                 .build());
     }

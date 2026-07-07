@@ -87,7 +87,9 @@ export default function AdminSendNotificationModal({ isOpen, onClose, onSuccess 
         title: title.trim(),
         content: content,
         targetEmail: targetType === 'USER' ? targetEmail.trim() : null,
-        targetPlanTier: targetType === 'PLAN' ? targetPlanTier : null
+        targetPlanTier: targetType === 'PLAN' ? targetPlanTier : null,
+        sendEmail: false,
+        type: 'MANUAL_BROADCAST'
       };
 
       const response = await adminApi.sendNotification(payload);

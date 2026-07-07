@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    long countByRole(Role role);
+    java.util.List<User> findByRoleAndIsActive(Role role, Boolean isActive);
 
     @Query("SELECT u FROM User u " +
             "LEFT JOIN u.customer c " +

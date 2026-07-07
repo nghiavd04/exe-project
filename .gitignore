@@ -15,6 +15,7 @@ frontend/dist
 
 # Java / backend
 backend/target/
+backend/tessdata/
 
 # IDE/editor
 .idea/

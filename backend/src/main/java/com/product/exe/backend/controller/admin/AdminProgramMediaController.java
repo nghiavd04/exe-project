@@ -73,7 +73,7 @@ public class AdminProgramMediaController {
         }
 
         try {
-            // Upload lên thư mục "program_medias" trên Cloudinary
+            // Upload lên thư mục "program_medias" trên Cloudin
             Map<?, ?> result = cloudinaryService.upload(file, "program_medias");
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (IOException e) {

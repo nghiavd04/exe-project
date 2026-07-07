@@ -289,3 +289,27 @@
   border-top-right-radius: 8px;
   background-color: #f8fafc;
 }
+
+.notification-form-group.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.notification-form-group.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--teal, #0d7a6e);
+}
+
+.notification-form-group.checkbox-group .checkbox-label {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

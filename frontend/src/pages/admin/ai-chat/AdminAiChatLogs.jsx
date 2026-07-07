@@ -399,14 +399,14 @@ export default function AdminAiChatLogs() {
       <div className="admin-page-header">
         <div>
           <h1 className="admin-page-title">
-            Quản lý Chat & Hỗ trợ 
+            Quản lý Chat & Hỗ trợ
             {globalUnreadCount > 0 && (
-              <span className="admin-header-unread-badge" style={{ 
-                backgroundColor: '#ef4444', 
-                color: 'white', 
-                fontSize: '14px', 
-                padding: '2px 8px', 
-                borderRadius: '12px', 
+              <span className="admin-header-unread-badge" style={{
+                backgroundColor: '#ef4444',
+                color: 'white',
+                fontSize: '14px',
+                padding: '2px 8px',
+                borderRadius: '12px',
                 marginLeft: '10px',
                 verticalAlign: 'middle'
               }}>
@@ -428,7 +428,7 @@ export default function AdminAiChatLogs() {
           onClick={() => handleTabChange('SUPPORT')}
         >
           <User size={18} />
-          <span>Hỗ trợ Trực tuyến (Real-time)</span>
+          <span>Hỗ trợ Trực tuyến</span>
         </button>
         <button
           type="button"

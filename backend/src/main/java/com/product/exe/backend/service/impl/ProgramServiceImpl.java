@@ -158,8 +158,16 @@ public class ProgramServiceImpl implements ProgramService {
         ProgramPhaseMetadata phaseMeta = weekMeta.getPhase();
 
         // Tasks
-        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocol.getId(), dayNumber);
-        List<UserProgramTask> completedTasks = userProgramTaskRepository.findByCustomerIdAndDayNumber(customer.getId(), dayNumber);
+        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByDayIdOrderByTaskIndexAsc(dayMeta.getId());
+        boolean isWeeklyTasks = false;
+        if (tasksMeta.isEmpty()) {
+            tasksMeta = taskMetadataRepository.findByWeekIdAndDayIsNullOrderByTaskIndexAsc(weekMeta.getId());
+            isWeeklyTasks = true;
+        }
+
+        List<UserProgramTask> completedTasks = isWeeklyTasks
+                ? userProgramTaskRepository.findByCustomerIdAndWeekNumberAndDayNumberIsNull(customer.getId(), weekMeta.getWeekNumber())
+                : userProgramTaskRepository.findByCustomerIdAndDayNumber(customer.getId(), dayNumber);
 
         List<ProgramDayDetailResponse.TaskDetail> tasks = new ArrayList<>();
         for (ProgramTaskMetadata meta : tasksMeta) {
@@ -173,13 +181,19 @@ public class ProgramServiceImpl implements ProgramService {
                     .taskIndex(meta.getTaskIndex())
                     .title(meta.getTitle())
                     .isCompleted(isCompleted)
+                    .dayNumber(isWeeklyTasks ? null : dayNumber)
                     .build());
         }
 
         // Metrics Names
-        List<String> metricsList = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocol.getId(), dayNumber).stream()
+        List<String> metricsList = metricMetadataRepository.findByDayId(dayMeta.getId()).stream()
                 .map(ProgramMetricMetadata::getMetricName)
                 .collect(Collectors.toList());
+        if (metricsList.isEmpty()) {
+            metricsList = metricMetadataRepository.findByWeekIdAndDayIsNull(weekMeta.getId()).stream()
+                    .map(ProgramMetricMetadata::getMetricName)
+                    .collect(Collectors.toList());
+        }
 
         // Logged Daily Data
         Optional<UserDailyLog> dailyLogOpt = userDailyLogRepository.findByCustomerIdAndDayNumber(customer.getId(), dayNumber);
@@ -240,7 +254,7 @@ public class ProgramServiceImpl implements ProgramService {
         ProgramPhaseMetadata phaseMeta = weekMeta.getPhase();
 
         // Tasks (weekly tasks where dayNumber is null)
-        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocol.getId(), weekNumber);
+        List<ProgramTaskMetadata> tasksMeta = taskMetadataRepository.findByWeekIdAndDayIsNullOrderByTaskIndexAsc(weekMeta.getId());
         List<UserProgramTask> completedTasks = userProgramTaskRepository.findByCustomerIdAndWeekNumberAndDayNumberIsNull(customer.getId(), weekNumber);
 
         List<ProgramWeekDetailResponse.TaskDetail> tasks = new ArrayList<>();
@@ -259,7 +273,7 @@ public class ProgramServiceImpl implements ProgramService {
         }
 
         // Metrics Names
-        List<String> metricsList = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocol.getId(), weekNumber).stream()
+        List<String> metricsList = metricMetadataRepository.findByWeekIdAndDayIsNull(weekMeta.getId()).stream()
                 .map(ProgramMetricMetadata::getMetricName)
                 .collect(Collectors.toList());
 
@@ -479,7 +493,7 @@ public class ProgramServiceImpl implements ProgramService {
 
                 boolean hasDailyTasks = false;
                 if (protocolId != null) {
-                    hasDailyTasks = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, currentDay).isPresent();
+                    hasDailyTasks = taskMetadataRepository.existsByProtocolIdAndDayDayNumber(protocolId, currentDay);
                 }
 
                 boolean allCompleted = false;
@@ -539,7 +553,7 @@ public class ProgramServiceImpl implements ProgramService {
         Long protocolId = protocol.getId();
         Integer currentDay = progress.getCurrentDay();
 
-        boolean hasDailyTasks = dayMetadataRepository.findByProtocolIdAndDayNumber(protocolId, currentDay).isPresent();
+        boolean hasDailyTasks = taskMetadataRepository.existsByProtocolIdAndDayDayNumber(protocolId, currentDay);
 
         boolean allCompleted = false;
         if (hasDailyTasks) {
@@ -627,18 +641,34 @@ public class ProgramServiceImpl implements ProgramService {
 
             for (ProgramWeekMetadata week : weeks) {
                 List<com.product.exe.backend.dto.response.ProgramMetadataResponse.DayDto> dayDtos = new ArrayList<>();
-                List<String> wTasks = new ArrayList<>();
-                List<String> wMetrics = new ArrayList<>();
 
-                List<ProgramDayMetadata> days = dayMetadataRepository.findByProtocolIdAndWeekWeekNumberOrderByDayNumberAsc(protocolId, week.getWeekNumber());
+                List<String> wTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
+                        .map(ProgramTaskMetadata::getTitle)
+                        .collect(Collectors.toList());
+
+                List<String> wMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
+                        .map(ProgramMetricMetadata::getMetricName)
+                        .collect(Collectors.toList());
+
+                List<ProgramDayMetadata> days = dayMetadataRepository.findByWeekIdOrderByDayNumberAsc(week.getId());
                 if (!days.isEmpty()) {
                     for (ProgramDayMetadata day : days) {
                         List<String> dTasks = taskMetadataRepository.findByProtocolIdAndDayDayNumberOrderByTaskIndexAsc(protocolId, day.getDayNumber()).stream()
                                 .map(ProgramTaskMetadata::getTitle)
                                 .collect(Collectors.toList());
+                        if (dTasks.isEmpty()) {
+                            dTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
+                                    .map(ProgramTaskMetadata::getTitle)
+                                    .collect(Collectors.toList());
+                        }
                         List<String> dMetrics = metricMetadataRepository.findByProtocolIdAndDayDayNumber(protocolId, day.getDayNumber()).stream()
                                 .map(ProgramMetricMetadata::getMetricName)
                                 .collect(Collectors.toList());
+                        if (dMetrics.isEmpty()) {
+                            dMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
+                                    .map(ProgramMetricMetadata::getMetricName)
+                                    .collect(Collectors.toList());
+                        }
 
                         dayDtos.add(com.product.exe.backend.dto.response.ProgramMetadataResponse.DayDto.builder()
                                 .num(day.getDayNumber())
@@ -647,13 +677,6 @@ public class ProgramServiceImpl implements ProgramService {
                                 .metrics(dMetrics)
                                 .build());
                     }
-                } else {
-                    wTasks = taskMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNullOrderByTaskIndexAsc(protocolId, week.getWeekNumber()).stream()
-                            .map(ProgramTaskMetadata::getTitle)
-                            .collect(Collectors.toList());
-                    wMetrics = metricMetadataRepository.findByProtocolIdAndWeekWeekNumberAndDayIsNull(protocolId, week.getWeekNumber()).stream()
-                            .map(ProgramMetricMetadata::getMetricName)
-                            .collect(Collectors.toList());
                 }
 
                 weekDtos.add(com.product.exe.backend.dto.response.ProgramMetadataResponse.WeekDto.builder()

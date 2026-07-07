@@ -11,26 +11,42 @@ export const TIER_WEIGHTS = {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userTier, setUserTier] = useState('FREE');
+  // Lazy initializer: đọc localStorage TRƯỚC lần render đầu tiên
+  // → loading luôn false, user/tier luôn đúng ngay từ frame đầu tiên
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+  const [loading, setLoading] = useState(false);
+  const [userTier, setUserTier] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      const parsed = saved ? JSON.parse(saved) : null;
+      return parsed?.subscriptionTier || 'FREE';
+    } catch { return 'FREE'; }
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      // In a real app, you'd call a /me endpoint to get user data and subscription status
-      // For now, let's assume we store user in localStorage or fetch it
-      const savedUser = JSON.parse(localStorage.getItem('user'));
-      if (savedUser) {
-        setUser(savedUser);
-        if (savedUser.subscriptionTier) {
-          setUserTier(savedUser.subscriptionTier);
-        } else {
-          setUserTier('FREE');
+    if (!token) return;
+
+    // Fetch profile ngầm (background) để đồng bộ tier mới nhất từ server
+    // Không block UI — chỉ cập nhật state nếu có thay đổi
+    apiClient.get('/v1/customer/profile')
+      .then((res) => {
+        if (res.data && res.data.success) {
+          const freshUser = res.data.data;
+          localStorage.setItem('user', JSON.stringify(freshUser));
+          setUser(freshUser);
+          setUserTier(freshUser.subscriptionTier || 'FREE');
         }
-      }
-    }
-    setLoading(false);
+      })
+      .catch((err) => {
+        // 401 → interceptor xử lý redirect
+        console.error('Background profile refresh failed:', err);
+      });
   }, []);
 
   const login = React.useCallback((userData, token) => {
