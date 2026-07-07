@@ -9,7 +9,6 @@ import java.util.List;
 public interface ProgramMetricMetadataRepository extends JpaRepository<ProgramMetricMetadata, Long> {
     List<ProgramMetricMetadata> findByProtocolIdAndDayDayNumber(Long protocolId, Integer dayNumber);
     List<ProgramMetricMetadata> findByProtocolIdAndWeekWeekNumberAndDayIsNull(Long protocolId, Integer weekNumber);
-
     List<ProgramMetricMetadata> findByDayId(Long dayId);
     List<ProgramMetricMetadata> findByWeekIdAndDayIsNull(Long weekId);
 }

@@ -90,7 +90,6 @@ export default function ProgramRoadmapPage() {
       }));
     }
   };
-
   // Update selected phase once metadata loads
   useEffect(() => {
     if (currentPhaseNum) {

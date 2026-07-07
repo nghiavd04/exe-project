@@ -138,13 +138,12 @@ CREATE TABLE IF NOT EXISTS `program_reviews` (
     FOREIGN KEY (`user_program_progress_id`) REFERENCES `user_program_progress`(`id`) ON DELETE CASCADE
 );
 
--- 4. Safe Alter on existing User Progress table (NO LOSS OF DATA)
--- Note: These columns already exist in the current ddl.sql. If you are migrating an older database, uncomment these.
--- ALTER TABLE `user_program_progress` ADD COLUMN `protocol_id` BIGINT NULL;
--- ALTER TABLE `user_program_progress` ADD CONSTRAINT `fk_progress_protocol` FOREIGN KEY (`protocol_id`) REFERENCES `protocols`(`id`) ON DELETE SET NULL;
--- ALTER TABLE `user_program_progress` ADD COLUMN `cycle_number` INT NOT NULL DEFAULT 1;
--- ALTER TABLE `user_program_progress` ADD COLUMN `review_due_at` TIMESTAMP NULL;
--- ALTER TABLE `user_program_progress` ADD COLUMN `switch_locked_until` TIMESTAMP NULL;
+-- Adds protocol_id connection, cycle count, and review thresholds without affecting user logs
+ALTER TABLE `user_program_progress` ADD COLUMN IF NOT EXISTS `protocol_id` BIGINT NULL;
+ALTER TABLE `user_program_progress` ADD CONSTRAINT `fk_progress_protocol` FOREIGN KEY (`protocol_id`) REFERENCES `protocols`(`id`) ON DELETE SET NULL;
+ALTER TABLE `user_program_progress` ADD COLUMN IF NOT EXISTS `cycle_number` INT NOT NULL DEFAULT 1;
+ALTER TABLE `user_program_progress` ADD COLUMN IF NOT EXISTS `review_due_at` TIMESTAMP NULL;
+ALTER TABLE `user_program_progress` ADD COLUMN IF NOT EXISTS `switch_locked_until` TIMESTAMP NULL;
 
 -- 5. Initialize existing users' protocol assignment to the default 120-day Intensive Protocol
 -- Assuming 'P_INTENSIVE_120' is ID = 4 (since it is inserted as ID = 4 in step 2)

@@ -15,7 +15,6 @@ public interface ProgramDayMetadataRepository extends JpaRepository<ProgramDayMe
     Optional<ProgramDayMetadata> findByProtocolIdAndDayNumber(Long protocolId, Integer dayNumber);
 
     Optional<ProgramDayMetadata> findByWeekIdAndDayNumber(Long weekId, Integer dayNumber);
-
     @Query("SELECT COALESCE(MAX(d.dayNumber), 0) FROM ProgramDayMetadata d WHERE d.protocol.id = :protocolId")
     int findMaxDayNumber(Long protocolId);
 }

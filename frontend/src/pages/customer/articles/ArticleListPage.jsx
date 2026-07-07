@@ -6,6 +6,8 @@ import AppState from '../../../components/AppState';
 import { PageSection, PageHeader } from '../../../components/PageSection';
 import FilterChips from '../../../components/FilterChips';
 import Pagination from '../../../components/Pagination';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './ArticleListPage.css';
 
 const ArticleListPage = () => {
@@ -77,6 +79,18 @@ const ArticleListPage = () => {
 
   return (
     <div className="article-list-page">
+      <Seo
+        title="Bài viết về dopamine, tập trung và thói quen số"
+        description="Đọc các bài viết chuyên sâu về dopamine, tâm lý hành vi, nghiện mạng xã hội và phương pháp cải thiện sự tập trung trong đời sống số."
+        canonicalPath="/bai-viet"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: 'Bài viết Dopaless',
+          url: buildUrl('/bai-viet'),
+          description: 'Kho bài viết về dopamine, thói quen số và sức khỏe tinh thần.',
+        }}
+      />
       <header className="article-hero">
         <PageHeader
           align="center"

@@ -13,7 +13,6 @@ public interface ProgramTaskMetadataRepository extends JpaRepository<ProgramTask
     List<ProgramTaskMetadata> findByDayIdOrderByTaskIndexAsc(Long dayId);
     List<ProgramTaskMetadata> findByWeekIdAndDayIsNullOrderByTaskIndexAsc(Long weekId);
     boolean existsByProtocolIdAndDayDayNumber(Long protocolId, Integer dayNumber);
-    
     // Admin management helper
     List<ProgramTaskMetadata> findByProtocolIdOrderByWeekWeekNumberAscTaskIndexAsc(Long protocolId);
 }

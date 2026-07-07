@@ -4,6 +4,8 @@ import { subscriptionApi } from '../../../apis/customerApi';
 import { useAuth } from '../../../hooks/AuthContext';
 import { Check, X, Shield, Sparkles, HelpCircle, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './SubscriptionPlansPage.css';
 
 export default function SubscriptionPlansPage() {
@@ -119,6 +121,22 @@ export default function SubscriptionPlansPage() {
 
   return (
     <div className="plans-page-container">
+      <Seo
+        title="Gói dịch vụ Dopaless - Lộ trình cải thiện tập trung"
+        description="Chọn gói thành viên Dopaless để mở khóa bài viết chuyên sâu, lộ trình cá nhân hóa và công cụ hỗ trợ cải thiện thói quen số."
+        canonicalPath="/goi-dich-vu"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: 'Gói thành viên Dopaless',
+          url: buildUrl('/goi-dich-vu'),
+          description: 'Các gói thành viên hỗ trợ học kiến thức dopamine, theo dõi tiến trình và cải thiện sự tập trung.',
+          brand: {
+            '@type': 'Brand',
+            name: 'Dopaless',
+          },
+        }}
+      />
       {/* Background decorations */}
       <div className="plans-bg-glow glow-1"></div>
       <div className="plans-bg-glow glow-2"></div>

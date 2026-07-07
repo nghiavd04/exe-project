@@ -3,6 +3,8 @@ import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import { useAuth } from '../../../hooks/AuthContext';
 import { contactApi } from '../../../apis/customerApi';
 import { Link } from 'react-router-dom';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import './ContactPage.css';
 
 export default function ContactPage() {
@@ -63,6 +65,25 @@ export default function ContactPage() {
 
     return (
         <main className="contact-page">
+            <Seo
+                title="Liên hệ Dopaless - Hỗ trợ và tư vấn"
+                description="Liên hệ Dopaless để được hỗ trợ về bài test dopamine, tài khoản, gói dịch vụ và các nội dung liên quan đến sức khỏe số."
+                canonicalPath="/lien-he"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'ContactPage',
+                    name: 'Liên hệ Dopaless',
+                    url: buildUrl('/lien-he'),
+                    contactPoint: {
+                        '@type': 'ContactPoint',
+                        email: 'tcoc24500@gmail.com',
+                        telephone: '+84333086210',
+                        contactType: 'customer support',
+                        areaServed: 'VN',
+                        availableLanguage: ['vi'],
+                    },
+                }}
+            />
             {/* ── HERO SECTION ── */}
             <section className="contact-hero">
                 <div className="contact-hero-content reveal">

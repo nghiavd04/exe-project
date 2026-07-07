@@ -1,0 +1,12 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#f5fbfa"/>
+  <circle cx="985" cy="115" r="170" fill="#c8ece9"/>
+  <circle cx="100" cy="560" r="210" fill="#fed7aa"/>
+  <rect x="88" y="86" width="1024" height="458" rx="36" fill="#ffffff" stroke="#d7ece9" stroke-width="2"/>
+  <text x="136" y="194" fill="#0d7a6e" font-family="Arial, sans-serif" font-size="74" font-weight="800">DOPA<tspan fill="#f97316">LESS</tspan></text>
+  <text x="136" y="292" fill="#162522" font-family="Arial, sans-serif" font-size="54" font-weight="800">Kiểm tra dopamine</text>
+  <text x="136" y="358" fill="#162522" font-family="Arial, sans-serif" font-size="54" font-weight="800">và lấy lại sự tập trung</text>
+  <text x="136" y="438" fill="#5a7a76" font-family="Arial, sans-serif" font-size="30">Bài test, kiến thức khoa học và lộ trình cải thiện thói quen số.</text>
+  <rect x="136" y="476" width="274" height="54" rx="27" fill="#0d7a6e"/>
+  <text x="168" y="512" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="700">dopaless.cloud</text>
+</svg>

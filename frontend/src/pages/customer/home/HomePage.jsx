@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Seo from '../../../components/Seo';
+import { buildUrl } from '../../../components/Seo/seoUtils';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import './HomePage.css';
 
@@ -18,6 +20,50 @@ export default function HomePage() {
 
     return (
         <main>
+            <Seo
+                title="Dopaless - Kiểm tra dopamine và lấy lại sự tập trung"
+                description="Dopaless giúp bạn hiểu cơ chế dopamine, kiểm tra mức độ lệ thuộc thói quen số và bắt đầu lộ trình cải thiện sự tập trung."
+                canonicalPath="/"
+                jsonLd={[
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'Organization',
+                        name: 'Dopaless',
+                        url: buildUrl('/'),
+                        logo: buildUrl('/favicon.svg'),
+                        sameAs: ['https://www.facebook.com/profile.php?id=61590101353841'],
+                    },
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'WebSite',
+                        name: 'Dopaless',
+                        url: buildUrl('/'),
+                        inLanguage: 'vi-VN',
+                    },
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'FAQPage',
+                        mainEntity: [
+                            {
+                                '@type': 'Question',
+                                name: 'Các bài test dopamine có độ chính xác cao không?',
+                                acceptedAnswer: {
+                                    '@type': 'Answer',
+                                    text: 'Các bài test của Dopaless giúp người dùng tự đánh giá thói quen số và nhận diện dấu hiệu mất cân bằng dopamine, không thay thế chẩn đoán y tế.',
+                                },
+                            },
+                            {
+                                '@type': 'Question',
+                                name: 'Khi nào nên làm bài test dopamine?',
+                                acceptedAnswer: {
+                                    '@type': 'Answer',
+                                    text: 'Bạn có thể làm bài test khi cảm thấy khó tập trung, dễ bị phân tâm hoặc thường xuyên dùng mạng xã hội quá mức.',
+                                },
+                            },
+                        ],
+                    },
+                ]}
+            />
             {/* ── HERO ── */}
             <section id="hero">
                 <div className="hero-inner">

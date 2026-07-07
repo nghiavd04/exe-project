@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /ho-so
+Disallow: /phac-do
+Disallow: /payment-success
+Disallow: /payment-cancel
+Disallow: /oauth2
+
+Sitemap: https://dopaless.cloud/sitemap.xml
