@@ -600,19 +600,6 @@ public class DataInitializer implements CommandLineRunner {
         return 0;
     }
 
-    private long getTaskMetadataCount() {
-        String query = "SELECT COUNT(*) FROM program_tasks_metadata";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
-        } catch (Exception e) {
-            log.error("Failed to count tasks: " + e.getMessage());
-        }
-        return 0;
-    }
 
     private long getMetricMetadataCount() {
         String query = "SELECT COUNT(*) FROM program_metrics_metadata";
