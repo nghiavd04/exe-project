@@ -13,7 +13,8 @@ import {
   Music,
   Milestone,
   Bot,
-  Bell
+  Bell,
+  Activity
 } from 'lucide-react';
 import { adminApi } from '../../apis/adminApi';
 import { Client } from '@stomp/stompjs';
@@ -107,6 +108,7 @@ export default function AdminLayout() {
     { name: 'Tổng quan', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Người dùng', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Quản lý bài kiểm tra', path: '/admin/quizzes', icon: <ClipboardList size={20} /> },
+    { name: 'Kết quả bài đánh giá', path: '/admin/quizzes/attempts', icon: <Activity size={20} /> },
     { name: 'Quản lý bài viết', path: '/admin/articles', icon: <BookOpen size={20} /> },
     { name: 'Quản lý media', path: '/admin/medias', icon: <Music size={20} /> },
     { name: 'Gói dịch vụ', path: '/admin/subscriptions', icon: <CreditCard size={20} /> },
@@ -114,7 +116,6 @@ export default function AdminLayout() {
     { name: 'Lời nhắn liên hệ', path: '/admin/contact-messages', icon: <MessageSquare size={20} /> },
     { name: 'Lịch sử thông báo', path: '/admin/notifications', icon: <Bell size={20} /> },
     { name: 'Chat & Hỗ trợ', path: '/admin/ai-chat/logs', icon: <MessageSquare size={20} /> },
-    { name: 'Cài đặt', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
   return (

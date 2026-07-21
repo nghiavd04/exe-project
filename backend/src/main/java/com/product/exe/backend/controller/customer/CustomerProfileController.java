@@ -21,7 +21,7 @@ public class CustomerProfileController {
     private final CustomerProfileService profileService;
 
     @GetMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(Authentication authentication) {
         String email = authentication.getName();
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin cá nhân thành công", profileService.getProfile(email)));

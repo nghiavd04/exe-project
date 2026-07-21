@@ -80,6 +80,8 @@ public class DashboardStatsResponse {
     @Builder
     public static class AiChatStatsData {
         private Long totalSessionsToday;
+        private Long totalAiSessionsToday;
+        private Long totalSupportSessionsToday;
     }
 
     @Data

@@ -42,9 +42,16 @@ public class CustomerAiChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
         }
         
-        if (!checkPremiumAccess(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+        if (type == ChatSessionType.SUPPORT) {
+            if (!checkBasicAccess(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên."));
+            }
+        } else {
+            if (!checkPremiumAccess(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+            }
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -60,12 +67,6 @@ public class CustomerAiChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
         }
 
-        if (!checkPremiumAccess(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
-        }
-
-        String title = body.get("title");
         String typeStr = body.getOrDefault("type", "AI");
         ChatSessionType type;
         try {
@@ -74,6 +75,19 @@ public class CustomerAiChatController {
             type = ChatSessionType.AI;
         }
 
+        if (type == ChatSessionType.SUPPORT) {
+            if (!checkBasicAccess(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên."));
+            }
+        } else {
+            if (!checkPremiumAccess(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+            }
+        }
+
+        String title = body.get("title");
         ChatSession session = aiChatService.createSession(userId, title, type);
         return ResponseEntity.ok(ApiResponse.success("Tạo cuộc trò chuyện mới thành công!", session));
     }
@@ -87,12 +101,20 @@ public class CustomerAiChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
         }
 
-        if (!checkPremiumAccess(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
-        }
-
         try {
+            ChatSession session = aiChatService.getSession(userId, sessionId);
+            if (session.getSessionType() == ChatSessionType.SUPPORT) {
+                if (!checkBasicAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên."));
+                }
+            } else {
+                if (!checkPremiumAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+                }
+            }
+
             List<ChatMessage> messages = aiChatService.getMessages(userId, sessionId, limit);
             return ResponseEntity.ok(ApiResponse.success(messages));
         } catch (Exception e) {
@@ -107,13 +129,21 @@ public class CustomerAiChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
         }
 
-        if (!checkPremiumAccess(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
-        }
-
-        String content = body.get("content");
         try {
+            ChatSession session = aiChatService.getSession(userId, sessionId);
+            if (session.getSessionType() == ChatSessionType.SUPPORT) {
+                if (!checkBasicAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên."));
+                }
+            } else {
+                if (!checkPremiumAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+                }
+            }
+
+            String content = body.get("content");
             AiChatResponseDto message = aiChatService.sendMessage(userId, sessionId, content);
             return ResponseEntity.ok(ApiResponse.success(message));
         } catch (Exception e) {
@@ -128,12 +158,20 @@ public class CustomerAiChatController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Vui lòng đăng nhập"));
         }
 
-        if (!checkPremiumAccess(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
-        }
-
         try {
+            ChatSession session = aiChatService.getSession(userId, sessionId);
+            if (session.getSessionType() == ChatSessionType.SUPPORT) {
+                if (!checkBasicAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng chat với nhân viên hỗ trợ trực tuyến chỉ dành riêng cho thành viên từ gói BASIC trở lên."));
+                }
+            } else {
+                if (!checkPremiumAccess(userId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(ApiResponse.error("Tính năng AI Chat chỉ dành cho gói Premium trở lên!"));
+                }
+            }
+
             aiChatService.deleteSession(userId, sessionId);
             return ResponseEntity.ok(ApiResponse.success("Đã xóa cuộc trò chuyện thành công!", "Đã xóa"));
         } catch (Exception e) {
@@ -164,6 +202,11 @@ public class CustomerAiChatController {
     private boolean checkPremiumAccess(Long userId) {
         SubscriptionTier tier = subscriptionService.getUserHighestTier(userId);
         return tier.getWeight() >= SubscriptionTier.PREMIUM.getWeight();
+    }
+
+    private boolean checkBasicAccess(Long userId) {
+        SubscriptionTier tier = subscriptionService.getUserHighestTier(userId);
+        return tier.getWeight() >= SubscriptionTier.BASIC.getWeight();
     }
 
     private Long getCurrentUserId() {

@@ -4,7 +4,7 @@ import { useAuth } from '../../../hooks/AuthContext';
 import { Client } from '@stomp/stompjs';
 import {
   Search, Eye, MessageSquare, Calendar, User,
-  X, ChevronLeft, ChevronRight, Bot, Sparkles, AlertCircle, Send
+  X, ChevronLeft, ChevronRight, Bot, Sparkles, AlertCircle, Send, Plus
 } from 'lucide-react';
 import './AdminAiChatLogs.css';
 
@@ -14,6 +14,17 @@ export default function AdminAiChatLogs() {
   // Tab State
   const [activeTab, setActiveTab] = useState('SUPPORT'); // 'AI' hoặc 'SUPPORT'
   const [globalUnreadCount, setGlobalUnreadCount] = useState(0);
+
+  // User Search and Start Chat states
+  const [showUserSearch, setShowUserSearch] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [startingChatUserId, setStartingChatUserId] = useState(null);
+
+  // Takeover confirmation states
+  const [showTakeoverConfirm, setShowTakeoverConfirm] = useState(false);
+  const [takeoverSessionId, setTakeoverSessionId] = useState(null);
 
   // Tab 1: AI Chat Logs states
   const [sessions, setSessions] = useState([]);
@@ -247,6 +258,59 @@ export default function AdminAiChatLogs() {
     setMessages([]);
   };
 
+  const handleOpenUserSearch = () => {
+    setShowUserSearch(true);
+    setUserSearchTerm('');
+    setUserSearchResults([]);
+  };
+
+  const handleUserSearchChange = async (val) => {
+    setUserSearchTerm(val);
+    if (!val.trim()) {
+      setUserSearchResults([]);
+      return;
+    }
+    setIsSearchingUsers(true);
+    try {
+      const response = await adminApi.getUsers({
+        search: val,
+        role: 'CUSTOMER',
+        size: 8
+      });
+      if (response.data.success) {
+        setUserSearchResults(response.data.data.content || []);
+      }
+    } catch (err) {
+      console.error('Error searching users:', err);
+    } finally {
+      setIsSearchingUsers(false);
+    }
+  };
+
+  const handleStartSupportSession = async (user) => {
+    setStartingChatUserId(user.id);
+    try {
+      const res = await adminApi.startSupportSession(user.id);
+      if (res.data.success) {
+        const newSession = res.data.data;
+        setSessions(prev => {
+          const exists = prev.some(s => s.id === newSession.id);
+          if (exists) {
+            return prev.map(s => s.id === newSession.id ? newSession : s);
+          }
+          return [newSession, ...prev];
+        });
+        handleSelectSupportSession(newSession);
+        setShowUserSearch(false);
+      }
+    } catch (err) {
+      console.error('Lỗi khi tạo phiên hỗ trợ:', err);
+      alert(err.response?.data?.message || 'Không thể bắt đầu chat với user này. Vui lòng kiểm tra gói thành viên của họ!');
+    } finally {
+      setStartingChatUserId(null);
+    }
+  };
+
   // Tab 2: Live Support Console operations
   const handleSelectSupportSession = async (session) => {
     setSelectedSession(session);
@@ -296,25 +360,31 @@ export default function AdminAiChatLogs() {
     }
   };
 
-  const handleTakeoverSession = async (sessionId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn tiếp quản cuộc trò chuyện này từ nhân viên khác không?')) {
-      return;
-    }
+  const triggerTakeoverConfirm = (sessionId) => {
+    setTakeoverSessionId(sessionId);
+    setShowTakeoverConfirm(true);
+  };
+
+  const confirmTakeover = async () => {
+    if (!takeoverSessionId) return;
     try {
-      const res = await adminApi.takeoverSession(sessionId);
+      const res = await adminApi.takeoverSession(takeoverSessionId);
       if (res.data.success) {
         const updatedSession = res.data.data;
         setSelectedSession(updatedSession);
-        setSessions(prev => prev.map(s => s.id === sessionId ? updatedSession : s));
+        setSessions(prev => prev.map(s => s.id === takeoverSessionId ? updatedSession : s));
 
         // Tải lại tin nhắn để hiển thị câu báo của hệ thống
-        const msgRes = await adminApi.getAiChatMessages(sessionId);
+        const msgRes = await adminApi.getAiChatMessages(takeoverSessionId);
         if (msgRes.data.success) {
           setSupportMessages(msgRes.data.data || []);
         }
       }
     } catch (err) {
       console.error('Lỗi khi tiếp quản phòng chat:', err);
+    } finally {
+      setShowTakeoverConfirm(false);
+      setTakeoverSessionId(null);
     }
   };
 
@@ -446,8 +516,32 @@ export default function AdminAiChatLogs() {
         <div className="admin-support-console">
           {/* Left Sidebar */}
           <div className="console-sidebar">
-            <div className="console-sidebar-header">
-              Danh sách yêu cầu ({sessions.length})
+            <div className="console-sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Danh sách yêu cầu ({sessions.length})</span>
+              <button 
+                type="button" 
+                className="btn-console-new-chat" 
+                onClick={handleOpenUserSearch}
+                style={{
+                  background: 'var(--teal)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'var(--teal-dark)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'var(--teal)'}
+              >
+                <Plus size={12} />
+                <span>Tìm User</span>
+              </button>
             </div>
             <div className="console-sessions-list">
               {sessions.map((s) => {
@@ -525,7 +619,7 @@ export default function AdminAiChatLogs() {
                         <button
                           type="button"
                           className="console-btn-takeover"
-                          onClick={() => handleTakeoverSession(selectedSession.id)}
+                          onClick={() => triggerTakeoverConfirm(selectedSession.id)}
                         >
                           Tiếp quản
                         </button>
@@ -771,6 +865,208 @@ export default function AdminAiChatLogs() {
             </div>
           )}
         </>
+      )}
+
+      {showUserSearch && (
+        <div className="admin-chat-modal-overlay" onClick={() => setShowUserSearch(false)}>
+          <div className="admin-chat-modal" style={{ maxWidth: '500px', height: 'auto', maxHeight: '550px' }} onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="admin-chat-modal-header" style={{ background: '#fff', color: '#1e293b', borderBottom: '1px solid #f1f5f9', padding: '16px 20px' }}>
+              <div className="modal-header-info">
+                <User size={18} style={{ color: 'var(--teal)', flexShrink: 0 }} />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1e293b' }}>Bắt đầu cuộc trò chuyện</h4>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>Tìm kiếm thành viên để chủ động hỗ trợ</p>
+                </div>
+              </div>
+              <button type="button" className="modal-close-btn" style={{ color: '#64748b' }} onClick={() => setShowUserSearch(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="admin-chat-modal-body" style={{ padding: '20px', background: '#fff' }}>
+              <div className="user-search-container" style={{ position: 'relative', width: '100%' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '12px', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    placeholder="Tìm theo tên hoặc email thành viên..."
+                    value={userSearchTerm}
+                    onChange={(e) => handleUserSearchChange(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 36px',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                      background: 'white',
+                      color: 'var(--text)'
+                    }}
+                  />
+                </div>
+
+                {isSearchingUsers && (
+                  <div style={{ marginTop: '15px', color: '#64748b', fontSize: '0.85rem', textAlign: 'center' }}>
+                    Đang tìm kiếm thành viên...
+                  </div>
+                )}
+
+                {!isSearchingUsers && userSearchTerm.trim() && userSearchResults.length === 0 && (
+                  <div style={{ marginTop: '15px', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
+                    Không tìm thấy thành viên nào phù hợp.
+                  </div>
+                )}
+
+                {userSearchResults.length > 0 && (
+                  <div style={{
+                    marginTop: '15px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    maxHeight: '250px',
+                    overflowY: 'auto'
+                  }}>
+                    {userSearchResults.map((u) => (
+                      <div
+                        key={u.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '10px 14px',
+                          borderBottom: '1px solid #f1f5f9',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        onClick={() => handleStartSupportSession(u)}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b' }}>{u.fullName || 'Thành viên'}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{u.email}</div>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={startingChatUserId === u.id}
+                          style={{
+                            background: 'var(--teal)',
+                            border: 'none',
+                            color: 'white',
+                            borderRadius: '6px',
+                            padding: '6px 12px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {startingChatUserId === u.id ? 'Đang tạo...' : 'Nhắn tin'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="admin-chat-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                className="btn-close-footer"
+                onClick={() => setShowUserSearch(false)}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #cbd5e1',
+                  color: '#475569',
+                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTakeoverConfirm && (
+        <div className="admin-chat-modal-overlay" onClick={() => {
+          setShowTakeoverConfirm(false);
+          setTakeoverSessionId(null);
+        }}>
+          <div className="admin-chat-modal" style={{ maxWidth: '450px', height: 'auto', maxHeight: '280px' }} onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="admin-chat-modal-header" style={{ background: '#fff', color: '#1e293b', borderBottom: '1px solid #f1f5f9', padding: '16px 20px' }}>
+              <div className="modal-header-info">
+                <AlertCircle size={20} style={{ color: '#d97706', flexShrink: 0 }} />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1e293b' }}>Xác nhận tiếp quản</h4>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>Chuyển đổi nhân viên hỗ trợ trực tiếp</p>
+                </div>
+              </div>
+              <button type="button" className="modal-close-btn" style={{ color: '#64748b' }} onClick={() => {
+                setShowTakeoverConfirm(false);
+                setTakeoverSessionId(null);
+              }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="admin-chat-modal-body" style={{ padding: '20px', background: '#fff', fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
+              Bạn có chắc chắn muốn tiếp quản cuộc trò chuyện này từ nhân viên khác không? 
+              <br />
+              <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginTop: '6px' }}>
+                * Hành động này sẽ chuyển quyền phụ trách sang tài khoản của bạn và thông báo cho người dùng.
+              </span>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="admin-chat-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowTakeoverConfirm(false);
+                  setTakeoverSessionId(null);
+                }}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #cbd5e1',
+                  color: '#475569',
+                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={confirmTakeover}
+                style={{
+                  background: '#d97706',
+                  border: 'none',
+                  color: 'white',
+                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

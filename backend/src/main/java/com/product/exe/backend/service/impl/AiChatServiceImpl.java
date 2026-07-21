@@ -192,6 +192,12 @@ public class AiChatServiceImpl implements AiChatService {
         chatSessionRepository.delete(session);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ChatSession getSession(Long userId, Long sessionId) {
+        return validateSessionOwnership(userId, sessionId);
+    }
+
     private ChatSession validateSessionOwnership(Long userId, Long sessionId) {
         ChatSession session = chatSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy cuộc hội thoại"));

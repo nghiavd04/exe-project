@@ -38,6 +38,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardStatsResponse getStats(String period) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime startOfWeek = LocalDate.now().with(java.time.DayOfWeek.MONDAY).atStartOfDay();
 
         return DashboardStatsResponse.builder()
                 .totalUsers(userRepository.countByRole(Role.CUSTOMER))
@@ -48,7 +49,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .subscriptionBreakdown(getSubscriptionBreakdown())
                 .recentTransactions(getRecentTransactions())
                 .contentPerformance(getContentPerformance())
-                .aiChatStats(getAiChatStats(startOfDay))
+                .aiChatStats(getAiChatStats(startOfWeek))
                 .programProgress(getProgramProgress(startOfDay))
                 .build();
     }
@@ -95,9 +96,11 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private DashboardStatsResponse.AiChatStatsData getAiChatStats(LocalDateTime startOfDay) {
-        return new DashboardStatsResponse.AiChatStatsData(
-                chatSessionRepository.countByCreatedAtAfter(startOfDay)
-        );
+        return DashboardStatsResponse.AiChatStatsData.builder()
+                .totalSessionsToday(chatSessionRepository.countByCreatedAtAfter(startOfDay))
+                .totalAiSessionsToday(chatSessionRepository.countBySessionTypeAndCreatedAtAfter(com.product.exe.backend.enums.ChatSessionType.AI, startOfDay))
+                .totalSupportSessionsToday(chatSessionRepository.countBySessionTypeAndCreatedAtAfter(com.product.exe.backend.enums.ChatSessionType.SUPPORT, startOfDay))
+                .build();
     }
 
     private DashboardStatsResponse.ProgramProgressData getProgramProgress(LocalDateTime startOfDay) {

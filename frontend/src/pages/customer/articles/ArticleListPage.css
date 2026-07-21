@@ -250,9 +250,18 @@
 }
 
 .article-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.9rem;
     color: var(--muted);
     margin-bottom: 0.8rem;
+}
+
+.article-views {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
 }
 
 .article-content h2 {

@@ -94,8 +94,17 @@ export const adminApi = {
   getAiChatMessages: (sessionId) => apiClient.get(`/v1/admin/ai-chat/sessions/${sessionId}/messages`),
   claimSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/claim`),
   takeoverSession: (sessionId) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/takeover`),
+  startSupportSession: (userId) => apiClient.post('/v1/admin/ai-chat/sessions/start', { userId }),
   sendAdminMessage: (sessionId, content) => apiClient.post(`/v1/admin/ai-chat/sessions/${sessionId}/message`, { content }),
   getAiChatUnreadCount: () => apiClient.get('/v1/admin/ai-chat/unread-count'),
   markSessionAsRead: (sessionId) => apiClient.put(`/v1/admin/ai-chat/sessions/${sessionId}/mark-read`),
+
+  // Quiz attempt analytics endpoints
+  getQuizAttemptStats: () => apiClient.get('/v1/admin/quiz-attempts/stats'),
+  getQuizAttemptChart: (period) => apiClient.get(`/v1/admin/quiz-attempts/chart?period=${period || '7d'}`),
+  getQuizAttemptsByQuiz: () => apiClient.get('/v1/admin/quiz-attempts/by-quiz'),
+  getQuizAttempts: (params) => apiClient.get('/v1/admin/quiz-attempts', { params }),
+  getQuizAttemptDetail: (id) => apiClient.get(`/v1/admin/quiz-attempts/${id}`),
+  getQuizAttemptAssessmentBreakdown: (quizId) => apiClient.get('/v1/admin/quiz-attempts/assessment-breakdown', { params: { quizId } }),
 };
 

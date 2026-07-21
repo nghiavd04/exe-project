@@ -23,4 +23,5 @@ public class ArticleSummaryResponse {
     private SubscriptionTier requiredTier;
     private String requiredTierDisplayName;
     private LocalDateTime publishedAt;
+    private Long viewCount;
 }

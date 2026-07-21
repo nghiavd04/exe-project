@@ -19,8 +19,9 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
            "JOIN c.user u " +
            "WHERE u.id = :userId " +
            "AND us.status = :status " +
-           "AND us.endDate > :now")
-    Optional<UserSubscription> findFirstByUserIdAndStatusAndEndDateAfter(
+           "AND us.endDate > :now " +
+           "ORDER BY us.endDate DESC")
+    List<UserSubscription> findActiveSubscriptionsByUserId(
             @Param("userId") Long userId,
             @Param("status") SubscriptionStatus status,
             @Param("now") LocalDateTime now);
@@ -42,6 +43,7 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
             @Param("status") SubscriptionStatus status);
 
     default Optional<UserSubscription> findActiveSubscriptionByUserId(Long userId) {
-        return findFirstByUserIdAndStatusAndEndDateAfter(userId, SubscriptionStatus.ACTIVE, LocalDateTime.now());
+        List<UserSubscription> results = findActiveSubscriptionsByUserId(userId, SubscriptionStatus.ACTIVE, LocalDateTime.now());
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 }

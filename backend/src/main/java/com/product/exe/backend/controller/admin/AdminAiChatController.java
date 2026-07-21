@@ -119,6 +119,27 @@ public class AdminAiChatController {
         return ResponseEntity.ok(ApiResponse.success("Tải danh sách phiên trò chuyện thành công!", response));
     }
 
+    @PostMapping("/sessions/start")
+    public ResponseEntity<ApiResponse<AdminChatSessionResponse>> startSupportSession(@RequestBody Map<String, Long> body) {
+        Long userId = body.get("userId");
+        if (userId == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Vui lòng cung cấp userId"));
+        }
+        
+        ChatSession session = aiChatService.createSession(userId, "Hỗ trợ trực tiếp", ChatSessionType.SUPPORT);
+        
+        Long adminId = getCurrentUserId();
+        if (adminId != null && session.getAssignedTo() == null) {
+            com.product.exe.backend.entity.User admin = userRepository.findById(adminId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản admin"));
+            session.setAssignedTo(admin);
+            session = chatSessionRepository.save(session);
+            broadcastSessionUpdate(session);
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("Bắt đầu cuộc hội thoại thành công!", mapToResponse(session)));
+    }
+
     @GetMapping("/sessions/{sessionId}/messages")
     public ResponseEntity<ApiResponse<List<ChatMessage>>> getSessionMessages(@PathVariable(name = "sessionId") Long sessionId) {
         List<ChatMessage> messages = chatMessageRepository.findAllBySessionIdOrderByCreatedAtAsc(sessionId);

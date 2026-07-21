@@ -10,20 +10,21 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     long countByRole(Role role);
-    java.util.List<User> findByRoleAndIsActive(Role role, Boolean isActive);
+    List<User> findByRoleAndIsActive(Role role, Boolean isActive);
 
     @Query("SELECT u FROM User u " +
             "LEFT JOIN u.customer c " +
             "LEFT JOIN u.admin a " +
             "WHERE (:search IS NULL OR u.email LIKE %:search% OR " +
-            "       (u.role = 'CUSTOMER' AND c.fullName LIKE %:search%) OR " +
-            "       (u.role = 'ADMIN' AND a.fullName LIKE %:search%)) " +
+            "       (u.role = com.product.exe.backend.enums.Role.CUSTOMER AND c.fullName LIKE %:search%) OR " +
+            "       (u.role = com.product.exe.backend.enums.Role.ADMIN AND a.fullName LIKE %:search%)) " +
             "AND (:role IS NULL OR u.role = :role) " +
             "AND (:isActive IS NULL OR u.isActive = :isActive)")
     Page<User> findAllUsersWithFilter(

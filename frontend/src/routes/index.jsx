@@ -26,6 +26,8 @@ const OAuth2RedirectPage = lazy(() => import('../pages/auth/OAuth2RedirectPage')
 const DashboardPage = lazy(() => import('../pages/admin/dashboard/DashboardPage'));
 const AdminQuizListPage = lazy(() => import('../pages/admin/quizzes/QuizListPage'));
 const CreateQuizPage = lazy(() => import('../pages/admin/quizzes/CreateQuizPage'));
+const QuizAnalyticsPage = lazy(() => import('../pages/admin/quiz-analytics/QuizAnalyticsPage'));
+const QuizAttemptDetailPage = lazy(() => import('../pages/admin/quiz-analytics/QuizAttemptDetailPage'));
 const AdminArticleListPage = lazy(() => import('../pages/admin/articles/ArticleListPage'));
 const CreateArticlePage = lazy(() => import('../pages/admin/articles/CreateArticlePage'));
 const AdminManagerAccountPage = lazy(() => import('../pages/admin/accounts/AdminManagerAccountPage'));
@@ -80,6 +82,8 @@ export const router = createBrowserRouter([
           { path: 'quizzes', element: <Suspended element={<AdminQuizListPage />} /> },
           { path: 'quizzes/create', element: <Suspended element={<CreateQuizPage />} /> },
           { path: 'quizzes/edit/:id', element: <Suspended element={<CreateQuizPage />} /> },
+          { path: 'quizzes/attempts', element: <Suspended element={<QuizAnalyticsPage />} /> },
+          { path: 'quizzes/attempts/:id', element: <Suspended element={<QuizAttemptDetailPage />} /> },
           { path: 'articles', element: <Suspended element={<AdminArticleListPage />} /> },
           { path: 'articles/create', element: <Suspended element={<CreateArticlePage />} /> },
           { path: 'articles/edit/:id', element: <Suspended element={<CreateArticlePage />} /> },

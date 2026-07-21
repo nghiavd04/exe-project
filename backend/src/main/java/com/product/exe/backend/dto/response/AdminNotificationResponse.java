@@ -1,5 +1,6 @@
 package com.product.exe.backend.dto.response;
 
+import com.product.exe.backend.enums.NotificationType;
 import com.product.exe.backend.enums.SubscriptionTier;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,6 @@ public class AdminNotificationResponse {
     private String content;
     private String targetEmail;
     private SubscriptionTier targetPlanTier;
-    private com.product.exe.backend.enums.NotificationType type;
+    private NotificationType type;
     private LocalDateTime createdAt;
 }

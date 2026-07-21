@@ -40,4 +40,5 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> 
     );
 
     long countByCreatedAtAfter(LocalDateTime date);
+    long countBySessionTypeAndCreatedAtAfter(ChatSessionType sessionType, LocalDateTime date);
 }

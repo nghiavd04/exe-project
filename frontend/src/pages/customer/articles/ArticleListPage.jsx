@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Eye } from 'lucide-react';
 import { articleApi } from '../../../apis/customerApi';
 import AppState from '../../../components/AppState';
 import { PageSection, PageHeader } from '../../../components/PageSection';
@@ -142,7 +142,11 @@ const ArticleListPage = () => {
                     </div>
                     <div className="article-content">
                       <div className="article-meta">
-                        <span>{new Date(article.publishedAt).toLocaleDateString('vi-VN')}</span>
+                        <span className="article-date">{new Date(article.publishedAt).toLocaleDateString('vi-VN')}</span>
+                        <span className="article-views">
+                          <Eye size={16} />
+                          <span>{article.viewCount !== undefined ? article.viewCount : 0} lượt xem</span>
+                        </span>
                       </div>
                       <h2 title={article.title}>{truncateTitle(article.title)}</h2>
                       <div className="read-more-link">

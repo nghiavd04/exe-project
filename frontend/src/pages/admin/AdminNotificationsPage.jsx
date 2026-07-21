@@ -8,6 +8,11 @@ import toast from 'react-hot-toast';
 import AdminSendNotificationModal from './contact/AdminSendNotificationModal';
 import AdminSendEmailModal from './contact/AdminSendEmailModal';
 
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+};
+
 export default function AdminNotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +83,16 @@ export default function AdminNotificationsPage() {
 
   return (
     <div className="admin-page">
+      <style>{`
+        .notification-content-cell a {
+          color: #2563eb !important;
+          text-decoration: underline !important;
+          font-weight: 600;
+        }
+        .notification-content-cell a:hover {
+          color: #1d4ed8 !important;
+        }
+      `}</style>
       <div className="account-breadcrumb">
         <Link to="/admin">ADMIN</Link>
         <ChevronRight size={14} style={{ opacity: 0.5 }} />
@@ -199,14 +214,26 @@ export default function AdminNotificationsPage() {
               <tr key={notif.id} className="contact-row" style={{ cursor: 'default' }}>
                 <td style={{ color: 'var(--muted)' }}>{page * pageSize + index + 1}</td>
                 <td>
-                  <div style={{ fontWeight: '600', color: 'var(--text)' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--text)', wordBreak: 'break-word' }}>
                     {notif.title}
                   </div>
                 </td>
                 <td>
                   <div 
-                    style={{ color: 'var(--text-light)', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}
+                    className="notification-content-cell"
+                    style={{ 
+                      color: 'var(--text-light)', 
+                      fontSize: '0.9rem', 
+                      whiteSpace: 'pre-wrap',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      wordBreak: 'break-word'
+                    }}
                     dangerouslySetInnerHTML={{ __html: notif.content }}
+                    title={stripHtml(notif.content)}
                   />
                 </td>
                 <td>

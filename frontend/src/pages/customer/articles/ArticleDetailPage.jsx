@@ -81,6 +81,13 @@ const ArticleDetailPage = () => {
     }
   };
 
+  const truncateTitle = (text, maxChars = 45) => {
+    if (!text || text.length <= maxChars) return text;
+    const trimmed = text.slice(0, maxChars);
+    const lastSpace = trimmed.lastIndexOf(' ');
+    return (lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed) + '...';
+  };
+
   if (loading) {
     return (
       <PageSection className="article-detail-state" width="narrow">
@@ -166,7 +173,7 @@ const ArticleDetailPage = () => {
               {relatedArticles.map(item => (
                 <Link to={`/bai-viet/${item.slug}`} className="related-card" key={item.id}>
                   <img src={item.thumbnailUrl || 'https://via.placeholder.com/300x200'} alt={item.title} />
-                  <h4>{item.title}</h4>
+                  <h4 title={item.title}>{truncateTitle(item.title)}</h4>
                 </Link>
               ))}
             </div>

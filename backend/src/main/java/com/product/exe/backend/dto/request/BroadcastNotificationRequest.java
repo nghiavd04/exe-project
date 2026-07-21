@@ -1,5 +1,6 @@
 package com.product.exe.backend.dto.request;
 
+import com.product.exe.backend.enums.NotificationType;
 import com.product.exe.backend.enums.SubscriptionTier;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,5 +21,5 @@ public class BroadcastNotificationRequest {
 
     private Boolean sendEmail = false;
 
-    private com.product.exe.backend.enums.NotificationType type;
+    private NotificationType type;
 }
